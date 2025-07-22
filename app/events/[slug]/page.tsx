@@ -27,7 +27,7 @@ const getEventData = (slug: string) => {
     venue: "Toyota Center",
     city: "Houston, TX",
     capacity: "18,500",
-    ticketPrice: "From $45",
+    ticketPrice: "From $50",
     posterImage: "/placeholder.svg?height=800&width=600&text=Houston+Showdown+Poster",
     heroVideo: "/videos/events-hero.mp4",
     description:
