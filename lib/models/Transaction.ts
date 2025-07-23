@@ -2,17 +2,39 @@ import mongoose, { Schema, Document } from 'mongoose';
 
 export interface ITransaction extends Document {
   _id: mongoose.Types.ObjectId;
-  type: 'ticket' | 'merch';
+  type: 'ticket' | 'merch' | 'mixed'; // Added 'mixed' for transactions with both tickets and merch
 
-  // References based on type
-  ticketTier?: mongoose.Types.ObjectId; // Only for ticket transactions
-  merch?: mongoose.Types.ObjectId; // Only for merch transactions
-  event?: mongoose.Types.ObjectId; // Only for ticket transactions
+  // Event reference (for ticket transactions or mixed transactions with tickets)
+  event?: mongoose.Types.ObjectId;
+
+  // Items arrays - support multiple items per transaction
+  ticketItems?: Array<{
+    ticketTier: mongoose.Types.ObjectId;
+    tierName: string; // Store name for easy access
+    quantity: number;
+    // Individual ticket tracking
+    tickets: Array<{
+      ticketNumber: string;
+      isUsed: boolean;
+      usedAt?: Date;
+    }>;
+  }>;
+
+  merchItems?: Array<{
+    merch: mongoose.Types.ObjectId;
+    productName: string; // Store name for easy access
+    productId: string; // Store product ID for reference
+    quantity: number;
+    // Variant information (size, color, etc.)
+    selectedVariants?: Array<{
+      name: string; // e.g., "Size", "Color"
+      value: string; // e.g., "Large", "Red"
+    }>;
+  }>;
 
   // Stripe information
   stripeSessionId: string;
   stripePaymentIntentId?: string;
-  stripePriceId: string;
 
   // Customer information
   customerDetails: {
@@ -29,24 +51,23 @@ export interface ITransaction extends Document {
     };
   };
 
-  // Transaction details
-  quantity: number;
-  unitPrice: number;
-  totalAmount: number;
-  currency: string;
+  // Transaction summary
+  summary: {
+    totalItems: number; // Total count of all items
+    totalTickets: number; // Total ticket count
+    totalMerch: number; // Total merch count
+    subtotal: number; // Sum of all item subtotals
+    taxes: number; // Tax amount in cents
+    fees: number; // Processing fees in cents
+    totalAmount: number; // Final total amount in cents
+    currency: string;
+  };
 
   // Transaction status
   status: 'pending' | 'confirmed' | 'cancelled' | 'refunded';
   purchaseDate: Date;
 
-  // For tickets - individual ticket tracking
-  tickets?: Array<{
-    ticketNumber: string;
-    isUsed: boolean;
-    usedAt?: Date;
-  }>;
-
-  // For merch - shipping information
+  // For merch - shipping information (only if transaction contains merch)
   shipping?: {
     address: {
       line1: string;
@@ -63,14 +84,13 @@ export interface ITransaction extends Document {
     deliveredAt?: Date;
   };
 
-  // Metadata for transaction details
+  // Enhanced metadata
   metadata: {
-    itemName: string;
-    itemDescription?: string;
-    eventTitle?: string; // Only for tickets
-    eventDate?: string; // Only for tickets
-    eventVenue?: string; // Only for tickets
-    category?: string; // Only for merch
+    eventTitle?: string; // For ticket transactions
+    eventDate?: string; // For ticket transactions
+    eventVenue?: string; // For ticket transactions
+    orderNotes?: string; // Customer notes
+    source: 'web' | 'mobile' | 'admin' | 'pos'; // Where the order came from
   };
 
   createdAt: Date;
@@ -81,32 +101,90 @@ const TransactionSchema: Schema = new Schema(
   {
     type: {
       type: String,
-      enum: ['ticket', 'merch'],
+      enum: ['ticket', 'merch', 'mixed'],
       required: true,
     },
 
-    // Conditional references based on type
-    ticketTier: {
-      type: Schema.Types.ObjectId,
-      ref: 'TicketTier',
-      required: function (this: ITransaction) {
-        return this.type === 'ticket';
-      },
-    },
-    merch: {
-      type: Schema.Types.ObjectId,
-      ref: 'Merch',
-      required: function (this: ITransaction) {
-        return this.type === 'merch';
-      },
-    },
+    // Event reference
     event: {
       type: Schema.Types.ObjectId,
       ref: 'Event',
       required: function (this: ITransaction) {
-        return this.type === 'ticket';
+        return this.type === 'ticket' || this.type === 'mixed';
       },
     },
+
+    // Ticket items array
+    ticketItems: [
+      {
+        ticketTier: {
+          type: Schema.Types.ObjectId,
+          ref: 'TicketTier',
+          required: true,
+        },
+        tierName: {
+          type: String,
+          required: true,
+        },
+        quantity: {
+          type: Number,
+          required: true,
+          min: 1,
+        },
+        tickets: [
+          {
+            ticketNumber: {
+              type: String,
+              unique: true,
+              sparse: true,
+            },
+            isUsed: {
+              type: Boolean,
+              default: false,
+            },
+            usedAt: {
+              type: Date,
+            },
+          },
+        ],
+      },
+    ],
+
+    // Merch items array
+    merchItems: [
+      {
+        merch: {
+          type: Schema.Types.ObjectId,
+          ref: 'Merch',
+          required: true,
+        },
+        productName: {
+          type: String,
+          required: true,
+        },
+        productId: {
+          type: String,
+          required: true,
+        },
+        quantity: {
+          type: Number,
+          required: true,
+          min: 1,
+        },
+        selectedVariants: [
+          {
+            name: {
+              type: String,
+              required: true,
+            },
+            value: {
+              type: String,
+              required: true,
+            },
+          },
+        ],
+      },
+    ],
 
     // Stripe information
     stripeSessionId: {
@@ -116,10 +194,6 @@ const TransactionSchema: Schema = new Schema(
     },
     stripePaymentIntentId: {
       type: String,
-    },
-    stripePriceId: {
-      type: String,
-      required: true,
     },
 
     // Customer information
@@ -145,24 +219,41 @@ const TransactionSchema: Schema = new Schema(
       },
     },
 
-    // Transaction details
-    quantity: {
-      type: Number,
-      required: true,
-      min: 1,
-    },
-    unitPrice: {
-      type: Number,
-      required: true,
-    },
-    totalAmount: {
-      type: Number,
-      required: true,
-    },
-    currency: {
-      type: String,
-      required: true,
-      default: 'USD',
+    // Transaction summary
+    summary: {
+      totalItems: {
+        type: Number,
+        required: true,
+      },
+      totalTickets: {
+        type: Number,
+        default: 0,
+      },
+      totalMerch: {
+        type: Number,
+        default: 0,
+      },
+      subtotal: {
+        type: Number,
+        required: true,
+      },
+      taxes: {
+        type: Number,
+        default: 0,
+      },
+      fees: {
+        type: Number,
+        default: 0,
+      },
+      totalAmount: {
+        type: Number,
+        required: true,
+      },
+      currency: {
+        type: String,
+        required: true,
+        default: 'USD',
+      },
     },
 
     // Transaction status
@@ -177,25 +268,7 @@ const TransactionSchema: Schema = new Schema(
       default: Date.now,
     },
 
-    // For tickets only
-    tickets: [
-      {
-        ticketNumber: {
-          type: String,
-          unique: true,
-          sparse: true, // Allows null values while maintaining uniqueness
-        },
-        isUsed: {
-          type: Boolean,
-          default: false,
-        },
-        usedAt: {
-          type: Date,
-        },
-      },
-    ],
-
-    // For merch only
+    // For merch - shipping information
     shipping: {
       address: {
         line1: String,
@@ -216,17 +289,17 @@ const TransactionSchema: Schema = new Schema(
       deliveredAt: Date,
     },
 
-    // Metadata
+    // Enhanced metadata
     metadata: {
-      itemName: {
-        type: String,
-        required: true,
-      },
-      itemDescription: String,
       eventTitle: String,
       eventDate: String,
       eventVenue: String,
-      category: String,
+      orderNotes: String,
+      source: {
+        type: String,
+        enum: ['web', 'mobile', 'admin', 'pos'],
+        default: 'web',
+      },
     },
   },
   {
@@ -241,30 +314,79 @@ TransactionSchema.index({ stripeSessionId: 1 });
 TransactionSchema.index({ 'customerDetails.email': 1 });
 TransactionSchema.index({ purchaseDate: 1 });
 TransactionSchema.index({ event: 1 }); // For ticket queries
-TransactionSchema.index({ ticketTier: 1 }); // For ticket tier analytics
-TransactionSchema.index({ merch: 1 }); // For merch analytics
+TransactionSchema.index({ 'ticketItems.ticketTier': 1 }); // For ticket tier analytics
+TransactionSchema.index({ 'merchItems.merch': 1 }); // For merch analytics
+TransactionSchema.index({ 'summary.totalAmount': 1 }); // For revenue analytics
+TransactionSchema.index({ 'metadata.source': 1 }); // For source tracking
 
-// Pre-save middleware to generate ticket numbers for ticket transactions
+// Pre-save middleware to generate ticket numbers and calculate totals
 TransactionSchema.pre('save', async function (this: ITransaction, next) {
+  // Generate ticket numbers for new ticket transactions
   if (
-    this.type === 'ticket' &&
+    (this.type === 'ticket' || this.type === 'mixed') &&
     this.isNew &&
-    (!this.tickets || this.tickets.length === 0)
+    this.ticketItems &&
+    this.ticketItems.length > 0
   ) {
-    // Generate ticket numbers for new ticket transactions
-    const ticketNumbers = [];
-    for (let i = 0; i < this.quantity; i++) {
-      const ticketNumber = `TCS-${Date.now()}-${Math.random()
-        .toString(36)
-        .substr(2, 9)
-        .toUpperCase()}`;
-      ticketNumbers.push({
-        ticketNumber,
-        isUsed: false,
-      });
+    for (const ticketItem of this.ticketItems) {
+      if (!ticketItem.tickets || ticketItem.tickets.length === 0) {
+        const ticketNumbers = [];
+        for (let i = 0; i < ticketItem.quantity; i++) {
+          const ticketNumber = `TCS-${Date.now()}-${Math.random()
+            .toString(36)
+            .substr(2, 9)
+            .toUpperCase()}`;
+          ticketNumbers.push({
+            ticketNumber,
+            isUsed: false,
+          });
+        }
+        ticketItem.tickets = ticketNumbers;
+      }
     }
-    this.tickets = ticketNumbers;
   }
+
+  // Calculate transaction summary counts (prices will be calculated dynamically)
+  if (this.isNew || this.isModified(['ticketItems', 'merchItems'])) {
+    let totalItems = 0;
+    let totalTickets = 0;
+    let totalMerch = 0;
+
+    // Calculate ticket totals
+    if (this.ticketItems) {
+      for (const item of this.ticketItems) {
+        totalTickets += item.quantity;
+        totalItems += item.quantity;
+      }
+    }
+
+    // Calculate merch totals
+    if (this.merchItems) {
+      for (const item of this.merchItems) {
+        totalMerch += item.quantity;
+        totalItems += item.quantity;
+      }
+    }
+
+    // Update summary (prices will be set manually when creating transaction)
+    if (!this.summary) {
+      this.summary = {
+        totalItems,
+        totalTickets,
+        totalMerch,
+        subtotal: 0,
+        taxes: 0,
+        fees: 0,
+        totalAmount: 0,
+        currency: 'USD',
+      };
+    } else {
+      this.summary.totalItems = totalItems;
+      this.summary.totalTickets = totalTickets;
+      this.summary.totalMerch = totalMerch;
+    }
+  }
+
   next();
 });
 
