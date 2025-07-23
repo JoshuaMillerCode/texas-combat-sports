@@ -92,6 +92,13 @@ const EventSchema: Schema = new Schema(
         ref: 'TicketTier',
       },
     ],
+    isLive: {
+      type: Boolean,
+      default: false,
+    },
+    youtubeId: {
+      type: String,
+    },
   },
   {
     timestamps: true,

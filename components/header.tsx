@@ -14,6 +14,7 @@ export default function Header() {
     { href: "/about", label: "About" },
     { href: "/events", label: "Events" },
     { href: "/fighters", label: "Fighters" },
+    { href: "/streaming", label: "Streaming" },
     { href: "/merch", label: "Merch" },
     { href: "/gallery", label: "Gallery" },
     { href: "/contact", label: "Contact" },
@@ -22,51 +23,108 @@ export default function Header() {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-sm border-b border-red-900/30">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
-          <Link href="/" className="text-2xl font-bold text-red-600">
+        <div className="flex items-center h-16">
+          {/* Logo */}
+          <Link href="/" className="text-2xl font-bold text-red-600 flex-shrink-0 mr-8">
             TCS
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="text-white hover:text-red-500 transition-colors font-medium"
-              >
-                {item.label}
-              </Link>
-            ))}
-            <div className="flex items-center space-x-4">
-              <CartIcon />
-              <Button className="bg-red-600 hover:bg-red-700 text-white">Buy Tickets</Button>
+          {/* Desktop Navigation - Left aligned next to logo */}
+          <nav className="hidden xl:flex items-center flex-1">
+            <div className="flex items-center space-x-6">
+              {navItems.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="text-white hover:text-red-500 transition-colors font-medium whitespace-nowrap"
+                >
+                  {item.label}
+                </Link>
+              ))}
             </div>
           </nav>
 
-          {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center space-x-4">
+          {/* Tablet Navigation - Left aligned with fewer items */}
+          <nav className="hidden lg:flex xl:hidden items-center flex-1">
+            <div className="flex items-center space-x-4">
+              {navItems.slice(0, 6).map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="text-white hover:text-red-500 transition-colors font-medium text-sm whitespace-nowrap"
+                >
+                  {item.label}
+                </Link>
+              ))}
+              <button 
+                className="text-white hover:text-red-500 transition-colors font-medium text-sm"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+              >
+                More
+              </button>
+            </div>
+          </nav>
+
+          {/* Right side actions */}
+          <div className="hidden lg:flex items-center space-x-3 flex-shrink-0 ml-auto">
             <CartIcon />
-            <button className="text-white" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+            <Button size="sm" className="bg-red-600 hover:bg-red-700 text-white font-bold px-4">
+              Buy Tickets
+            </Button>
+          </div>
+
+          {/* Mobile Menu Button */}
+          <div className="lg:hidden flex items-center space-x-3 flex-shrink-0 ml-auto">
+            <CartIcon />
+            <button className="text-white p-1" onClick={() => setIsMenuOpen(!isMenuOpen)}>
               {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
         </div>
 
-        {/* Mobile Navigation */}
+        {/* Mobile/Tablet Dropdown Navigation */}
         {isMenuOpen && (
-          <nav className="md:hidden py-4 border-t border-red-900/30">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="block py-2 text-white hover:text-red-500 transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                {item.label}
-              </Link>
-            ))}
-            <Button className="w-full mt-4 bg-red-600 hover:bg-red-700 text-white">Buy Tickets</Button>
+          <nav className="lg:hidden py-4 border-t border-red-900/30 bg-black/95">
+            <div className="flex flex-col items-center space-y-3">
+              {navItems.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="text-white hover:text-red-500 transition-colors font-medium text-center py-1"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {item.label}
+                </Link>
+              ))}
+              <div className="pt-3 border-t border-red-900/30 w-full max-w-xs">
+                <Button 
+                  className="w-full bg-red-600 hover:bg-red-700 text-white font-bold"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Buy Tickets
+                </Button>
+              </div>
+            </div>
+          </nav>
+        )}
+
+        {/* Tablet "More" items dropdown */}
+        {isMenuOpen && (
+          <nav className="hidden lg:flex xl:hidden py-4 border-t border-red-900/30 bg-black/95">
+            <div className="flex justify-center w-full">
+              <div className="flex items-center space-x-6">
+                {navItems.slice(6).map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="text-white hover:text-red-500 transition-colors font-medium"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
           </nav>
         )}
       </div>

@@ -141,7 +141,7 @@ export default function MerchandisePage() {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 pb-20">
+      <div className="container mx-auto px-4 pb-20 pt-2">
         {/* Category Filter */}
         <RevealAnimation delay={0.2}>
           <div className="flex flex-wrap justify-center gap-4 mb-12">
