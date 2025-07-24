@@ -2,7 +2,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 
 export interface ITransaction extends Document {
   _id: mongoose.Types.ObjectId;
-  type: 'ticket' | 'merch' | 'mixed'; // Added 'mixed' for transactions with both tickets and merch
+  type: 'event_tickets' | 'merchandise' | 'mixed'; // Added 'mixed' for transactions with both tickets and merch
 
   // Event reference (for ticket transactions or mixed transactions with tickets)
   event?: mongoose.Types.ObjectId;
@@ -90,7 +90,7 @@ export interface ITransaction extends Document {
     eventDate?: string; // For ticket transactions
     eventVenue?: string; // For ticket transactions
     orderNotes?: string; // Customer notes
-    source: 'web' | 'mobile' | 'admin' | 'pos'; // Where the order came from
+    source?: 'web' | 'mobile' | 'admin' | 'pos'; // Where the order came from
   };
 
   createdAt: Date;
@@ -101,7 +101,7 @@ const TransactionSchema: Schema = new Schema(
   {
     type: {
       type: String,
-      enum: ['ticket', 'merch', 'mixed'],
+      enum: ['event_tickets', 'merchandise', 'mixed'],
       required: true,
     },
 
@@ -110,7 +110,7 @@ const TransactionSchema: Schema = new Schema(
       type: Schema.Types.ObjectId,
       ref: 'Event',
       required: function (this: ITransaction) {
-        return this.type === 'ticket' || this.type === 'mixed';
+        return this.type === 'event_tickets' || this.type === 'mixed';
       },
     },
 
@@ -323,7 +323,7 @@ TransactionSchema.index({ 'metadata.source': 1 }); // For source tracking
 TransactionSchema.pre('save', async function (this: ITransaction, next) {
   // Generate ticket numbers for new ticket transactions
   if (
-    (this.type === 'ticket' || this.type === 'mixed') &&
+    (this.type === 'event_tickets' || this.type === 'mixed') &&
     this.isNew &&
     this.ticketItems &&
     this.ticketItems.length > 0

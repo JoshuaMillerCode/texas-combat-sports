@@ -731,4 +731,16 @@ export class TransactionService {
       totalItems: totalTickets + totalMerch,
     };
   }
+
+  static async formatTicketItems(ticketData: any) {
+    const ticketItems = JSON.parse(ticketData);
+    const formattedTicketItems = ticketItems.map((item: any) => {
+      return {
+        ticketTier: item.tierId,
+        tierName: item.tierName,
+        quantity: item.quantity,
+      };
+    });
+    return formattedTicketItems;
+  }
 }

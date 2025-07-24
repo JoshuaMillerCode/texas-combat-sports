@@ -81,6 +81,7 @@ export default function TicketPurchaseModal({
         .map(([tierId, quantity]) => {
           const tier = ticketTiers.find((t) => t.id === tierId)!
           return {
+            tierId,
             tierName: tier.name,
             quantity,
             price: tier.price,
@@ -160,7 +161,7 @@ export default function TicketPurchaseModal({
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 20 }}
             transition={{ duration: 0.3 }}
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e: React.MouseEvent<HTMLDivElement>) => e.stopPropagation()}
           >
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-red-900/30">
