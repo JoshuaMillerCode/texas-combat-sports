@@ -76,6 +76,7 @@ export async function POST(req: NextRequest) {
         eventDate: body.eventDate,
         eventVenue: body.eventVenue,
         ticketData: JSON.stringify(body.tickets),
+        order_type: 'event_tickets',
       },
       customer_email: body.customerEmail,
       billing_address_collection: 'required',

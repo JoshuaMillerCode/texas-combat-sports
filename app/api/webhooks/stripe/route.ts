@@ -3,6 +3,7 @@ import { type NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { TransactionService } from '@/lib/services/transaction.service';
 import { MerchService } from '@/lib/services/merch.service';
+import mongoose from 'mongoose';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2025-06-30.basil',
@@ -98,8 +99,66 @@ export async function POST(req: NextRequest) {
             amount: session.amount_total,
           });
 
+          console.log('Session metadata:', session.metadata);
+
+          const ticketItems = await TransactionService.formatTicketItems(
+            session.metadata?.ticketData
+          );
+
+          const transaction = await TransactionService.createTransaction({
+            type: orderType,
+            event: session.metadata?.eventId
+              ? new mongoose.Types.ObjectId(session.metadata.eventId)
+              : undefined,
+            stripeSessionId: session.id,
+            stripePaymentIntentId:
+              (session.payment_intent as string) || undefined,
+            customerDetails: {
+              email: session.customer_details?.email || '',
+              name: session.customer_details?.name || '',
+              phone: session.customer_details?.phone || undefined,
+              address: session.customer_details?.address
+                ? {
+                    line1: session.customer_details.address.line1 || '',
+                    line2: session.customer_details.address.line2 || undefined,
+                    city: session.customer_details.address.city || '',
+                    state: session.customer_details.address.state || '',
+                    postal_code:
+                      session.customer_details.address.postal_code || '',
+                    country: session.customer_details.address.country || '',
+                  }
+                : undefined,
+            },
+            status: 'confirmed',
+            purchaseDate: new Date(),
+            summary: {
+              totalItems:
+                ticketItems?.reduce(
+                  (sum: number, item: any) => sum + item.quantity,
+                  0
+                ) || 0,
+              totalTickets:
+                ticketItems?.reduce(
+                  (sum: number, item: any) => sum + item.quantity,
+                  0
+                ) || 0,
+              totalMerch: 0,
+              subtotal: session.amount_subtotal || 0,
+              taxes: session.total_details?.amount_tax || 0,
+              fees: 0, // Stripe fees aren't directly available in session
+              totalAmount: session.amount_total || 0,
+              currency: (session.currency || 'usd').toUpperCase(),
+            },
+            metadata: {
+              eventTitle: session.metadata?.eventTitle || '',
+              eventDate: session.metadata?.eventDate || '',
+              eventVenue: session.metadata?.eventVenue || '',
+            },
+            ticketItems: ticketItems,
+          });
+          console.log('Transaction created:', transaction);
           // Here you would typically:
-          // 1. Save ticket order to database
+          // 1. Save ticket order to database [DONE]
           // 2. Generate ticket PDFs
           // 3. Send tickets via email
           // 4. Update event capacity
@@ -110,6 +169,11 @@ export async function POST(req: NextRequest) {
       case 'payment_intent.payment_failed':
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
         console.log('Payment failed:', paymentIntent.id);
+        break;
+
+      case 'charge.updated':
+        const charge = event.data.object as Stripe.Charge;
+        console.log('Charge updated:', charge.id);
         break;
 
       default:

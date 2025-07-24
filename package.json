@@ -6,7 +6,11 @@
     "build": "next build",
     "dev": "next dev",
     "lint": "next lint",
-    "start": "next start"
+    "start": "next start",
+    "db:helper": "tsx lib/db-helper.ts",
+    "db:seed": "tsx lib/db-helper.ts seed",
+    "db:test-connection": "tsx lib/db-helper.ts test-connection",
+    "db:setup-complete-event": "tsx lib/setup-complete-event.ts"
   },
   "dependencies": {
     "@emotion/is-prop-valid": "latest",
@@ -68,8 +72,10 @@
     "@types/node": "^22",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "dotenv": "^17.2.0",
     "postcss": "^8.5",
     "tailwindcss": "^3.4.17",
+    "tsx": "^4.20.3",
     "typescript": "^5"
   }
 }

@@ -17,7 +17,7 @@ import type { TicketTier } from "@/types/stripe"
 // Mock data - in a real app, this would come from your API/database
 const getEventData = (slug: string) => {
   return {
-    id: "houston-showdown-2024",
+    id: "68806a45b57aa1dace00ba26",
     slug: "houston-showdown-2024",
     title: "Houston Showdown",
     subtitle: "Championship Night",
@@ -112,47 +112,23 @@ const getEventData = (slug: string) => {
     ],
     ticketTiers: [
       {
-        id: "general",
+        id: "68806a46b57aa1dace00ba31",
         name: "General Admission",
-        price: 45,
+        price: 50,
         currency: "USD",
         features: ["Upper Level Seating", "Event Program"],
-        stripePriceId: "price_1Rml4CP4zC66HIIg7mEWSXI9", // Replace with actual Stripe Price ID
+        stripePriceId: "price_1RnuUeP4zC66HIIggPWaR9Zb", // Replace with actual Stripe Price ID
         maxQuantity: 8,
       },
       {
-        id: "premium",
-        name: "Premium",
-        price: 125,
-        currency: "USD",
-        features: ["Lower Level Seating", "VIP Entrance", "Event Program", "Commemorative T-Shirt"],
-        stripePriceId: "price_1234567891", // Replace with actual Stripe Price ID
-        maxQuantity: 6,
-      },
-      {
-        id: "ringside",
-        name: "Ringside",
-        price: 350,
+        id: "68806a45b57aa1dace00ba2b",
+        name: "VIP",
+        price: 250,
         currency: "USD",
         features: ["Ringside Seating", "VIP Lounge Access", "Meet & Greet", "Premium Merchandise Package"],
-        stripePriceId: "price_1234567892", // Replace with actual Stripe Price ID
-        maxQuantity: 4,
-      },
-      {
-        id: "vip",
-        name: "VIP Experience",
-        price: 750,
-        currency: "USD",
-        features: [
-          "Front Row Seating",
-          "Backstage Access",
-          "Fighter Meet & Greet",
-          "Premium Bar Access",
-          "Exclusive Merchandise",
-        ],
-        stripePriceId: "price_1234567893", // Replace with actual Stripe Price ID
-        maxQuantity: 2,
-      },
+        stripePriceId: "price_1RnW41P4zC66HIIgsC2DeYtI", // Replace with actual Stripe Price ID
+        maxQuantity: 6,
+      }
     ] as TicketTier[],
   }
 }

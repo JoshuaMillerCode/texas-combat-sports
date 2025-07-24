@@ -1,3 +1,13 @@
+// Load environment variables if running outside of Next.js
+if (typeof window === 'undefined' && !process.env.MONGODB_URI) {
+  try {
+    const { config } = require('dotenv');
+    config({ path: '.env.local' });
+  } catch (error) {
+    // dotenv might not be available in production
+  }
+}
+
 import mongoose from 'mongoose';
 
 declare global {
