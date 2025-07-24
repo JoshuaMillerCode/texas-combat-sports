@@ -10,7 +10,7 @@ const ACCESS_TOKEN_EXPIRES_IN = '15m';
 const REFRESH_TOKEN_EXPIRES_IN = '7d';
 
 interface LoginRequest {
-  username: string;
+  email: string;
   password: string;
 }
 
@@ -19,10 +19,10 @@ export async function POST(request: NextRequest) {
     await dbConnect();
 
     const body: LoginRequest = await request.json();
-    const { username, password } = body;
+    const { email, password } = body;
 
     // Validate input
-    if (!username || !password) {
+    if (!email || !password) {
       return NextResponse.json(
         { error: 'Username and password are required' },
         { status: 400 }
@@ -31,11 +31,18 @@ export async function POST(request: NextRequest) {
 
     // Find user by username or email
     const user = await User.findOne({
-      $or: [{ username }, { email: username }],
+      email,
       isActive: true,
     });
 
     if (!user) {
+      return NextResponse.json(
+        { error: 'Invalid credentials' },
+        { status: 401 }
+      );
+    }
+
+    if (user.role !== 'admin') {
       return NextResponse.json(
         { error: 'Invalid credentials' },
         { status: 401 }

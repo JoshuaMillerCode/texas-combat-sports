@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { MerchService } from '@/lib/services/merch.service';
+import { FightService } from '@/lib/services/fight.service';
 import {
   authenticateToken,
   requireAdmin,
@@ -9,28 +9,28 @@ import {
 export async function GET(req: NextRequest) {
   try {
     // Public endpoint - no auth required for GET
-    const merch = await MerchService.getAllMerch();
-    return NextResponse.json(merch);
+    const fights = await FightService.getAllFights();
+    return NextResponse.json(fights);
   } catch (error) {
-    return NextResponse.json({ error: 'Merch not found' }, { status: 404 });
+    return NextResponse.json({ error: 'Fights not found' }, { status: 404 });
   }
 }
 
 export async function POST(req: NextRequest) {
   try {
-    // Authenticate the request (only admins can create merch)
+    // Authenticate the request (only admins can create fights)
     const authUser = authenticateToken(req);
     if (!authUser || !requireAdmin(authUser)) {
       return createAuthErrorResponse('Admin access required', 403);
     }
 
-    const merchData = await req.json();
-    const merch = await MerchService.createMerch(merchData);
-    return NextResponse.json(merch, { status: 201 });
+    const fightData = await req.json();
+    const fight = await FightService.createFight(fightData);
+    return NextResponse.json(fight, { status: 201 });
   } catch (error) {
-    console.error('Create merch error:', error);
+    console.error('Create fight error:', error);
     return NextResponse.json(
-      { error: 'Failed to create merch' },
+      { error: 'Failed to create fight' },
       { status: 500 }
     );
   }
