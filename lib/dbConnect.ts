@@ -9,6 +9,7 @@ if (typeof window === 'undefined' && !process.env.MONGODB_URI) {
 }
 
 import mongoose from 'mongoose';
+import './models'; // Register all models
 
 declare global {
   var mongoose: any; // This must be a `var` and not a `let` / `const`

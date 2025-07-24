@@ -96,5 +96,7 @@ const FighterSchema: Schema = new Schema(
 FighterSchema.index({ name: 1 });
 FighterSchema.index({ nickname: 1 });
 
-export default mongoose.models.Fighter ||
-  mongoose.model<IFighter>('Fighter', FighterSchema);
+const Fighter =
+  mongoose.models.Fighter || mongoose.model<IFighter>('Fighter', FighterSchema);
+
+export default Fighter;

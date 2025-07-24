@@ -1,7 +1,6 @@
 import dbConnect from '@/lib/dbConnect';
-import TicketTier, { ITicketTier } from '@/lib/models/TicketTier';
-import Transaction from '@/lib/models/Transaction';
-import Event from '@/lib/models/Event';
+import { TicketTier, Transaction, Event } from '@/lib/models';
+import { ITicketTier } from '@/lib/models/TicketTier';
 import mongoose from 'mongoose';
 
 export class TicketTierService {

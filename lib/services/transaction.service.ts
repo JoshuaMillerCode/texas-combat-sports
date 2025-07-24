@@ -1,8 +1,6 @@
 import dbConnect from '@/lib/dbConnect';
-import Transaction, { ITransaction } from '@/lib/models/Transaction';
-import TicketTier from '@/lib/models/TicketTier';
-import Merch from '@/lib/models/Merch';
-import Event from '@/lib/models/Event';
+import { Transaction, TicketTier, Merch, Event } from '@/lib/models';
+import { ITransaction } from '@/lib/models/Transaction';
 import mongoose from 'mongoose';
 
 export class TransactionService {

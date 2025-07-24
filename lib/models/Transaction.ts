@@ -310,7 +310,7 @@ const TransactionSchema: Schema = new Schema(
 // Indexes for efficient queries
 TransactionSchema.index({ type: 1 });
 TransactionSchema.index({ status: 1 });
-TransactionSchema.index({ stripeSessionId: 1 });
+// stripeSessionId already has unique: true which creates an index
 TransactionSchema.index({ 'customerDetails.email': 1 });
 TransactionSchema.index({ purchaseDate: 1 });
 TransactionSchema.index({ event: 1 }); // For ticket queries
@@ -390,5 +390,8 @@ TransactionSchema.pre('save', async function (this: ITransaction, next) {
   next();
 });
 
-export default mongoose.models.Transaction ||
+const Transaction =
+  mongoose.models.Transaction ||
   mongoose.model<ITransaction>('Transaction', TransactionSchema);
+
+export default Transaction;

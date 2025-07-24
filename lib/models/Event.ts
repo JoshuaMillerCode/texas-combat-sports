@@ -107,7 +107,8 @@ const EventSchema: Schema = new Schema(
 
 // Index for efficient queries
 EventSchema.index({ date: 1 });
-EventSchema.index({ slug: 1 });
 
-export default mongoose.models.Event ||
-  mongoose.model<IEvent>('Event', EventSchema);
+const Event =
+  mongoose.models.Event || mongoose.model<IEvent>('Event', EventSchema);
+
+export default Event;

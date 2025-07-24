@@ -1,6 +1,6 @@
 import dbConnect from '@/lib/dbConnect';
-import Merch, { IMerch } from '@/lib/models/Merch';
-import Transaction from '@/lib/models/Transaction';
+import { Merch, Transaction } from '@/lib/models';
+import { IMerch } from '@/lib/models/Merch';
 import mongoose from 'mongoose';
 
 export class MerchService {

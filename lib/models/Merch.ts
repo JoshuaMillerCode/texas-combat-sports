@@ -11,7 +11,7 @@ export interface IMerch extends Document {
   images: string[]; // Support multiple images
   category: string;
   rating?: number;
-  isNew: boolean;
+  isNewArrival: boolean;
   isFeatured: boolean;
   isActive: boolean;
   inventory: {
@@ -85,7 +85,7 @@ const MerchSchema: Schema = new Schema(
       min: 0,
       max: 5,
     },
-    isNew: {
+    isNewArrival: {
       type: Boolean,
       default: false,
     },
@@ -179,7 +179,7 @@ const MerchSchema: Schema = new Schema(
 // Indexes for efficient queries
 MerchSchema.index({ category: 1 });
 MerchSchema.index({ isActive: 1 });
-MerchSchema.index({ isNew: 1 });
+MerchSchema.index({ isNewArrival: 1 });
 MerchSchema.index({ isFeatured: 1 });
 MerchSchema.index({ price: 1 });
 MerchSchema.index({ tags: 1 });
@@ -199,5 +199,7 @@ MerchSchema.virtual('soldQuantity', {
   match: { status: 'confirmed', type: 'merch' },
 });
 
-export default mongoose.models.Merch ||
-  mongoose.model<IMerch>('Merch', MerchSchema);
+const Merch =
+  mongoose.models.Merch || mongoose.model<IMerch>('Merch', MerchSchema);
+
+export default Merch;

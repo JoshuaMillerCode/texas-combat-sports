@@ -90,5 +90,8 @@ TicketTierSchema.virtual('soldQuantity', {
   match: { status: 'confirmed', type: 'ticket' },
 });
 
-export default mongoose.models.TicketTier ||
+const TicketTier =
+  mongoose.models.TicketTier ||
   mongoose.model<ITicketTier>('TicketTier', TicketTierSchema);
+
+export default TicketTier;

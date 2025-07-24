@@ -1,8 +1,6 @@
 import dbConnect from '@/lib/dbConnect';
-import Fight, { IFight } from '@/lib/models/Fight';
-import Fighter from '@/lib/models/Fighter';
-import Event from '@/lib/models/Event';
-import mongoose from 'mongoose';
+import { Fight, Fighter, Event } from '@/lib/models';
+import { IFight } from '@/lib/models/Fight';
 
 export class FightService {
   // Basic CRUD Operations

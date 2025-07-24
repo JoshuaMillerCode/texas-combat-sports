@@ -74,5 +74,7 @@ FightSchema.index({ event: 1 });
 FightSchema.index({ fighter1: 1, fighter2: 1 });
 FightSchema.index({ isMainEvent: 1 });
 
-export default mongoose.models.Fight ||
-  mongoose.model<IFight>('Fight', FightSchema);
+const Fight =
+  mongoose.models.Fight || mongoose.model<IFight>('Fight', FightSchema);
+
+export default Fight;
