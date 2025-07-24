@@ -7,9 +7,10 @@ import Fighter from './Fighter';
 import Merch from './Merch';
 import TicketTier from './TicketTier';
 import Transaction from './Transaction';
+import User from './User';
 
 // Export all models for easy access
-export { Event, Fight, Fighter, Merch, TicketTier, Transaction };
+export { Event, Fight, Fighter, Merch, TicketTier, Transaction, User };
 
 // Ensure all models are registered when this file is imported
 export const registerModels = () => {
