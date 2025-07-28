@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document } from 'mongoose';
+import { OrderIDGenerator } from '../utils/order-id-generator';
 
 export interface ITransaction extends Document {
   _id: mongoose.Types.ObjectId;
@@ -6,12 +7,14 @@ export interface ITransaction extends Document {
 
   // Event reference (for ticket transactions or mixed transactions with tickets)
   event?: mongoose.Types.ObjectId;
+  orderId: string;
 
   // Items arrays - support multiple items per transaction
   ticketItems?: Array<{
     ticketTier: mongoose.Types.ObjectId;
     tierName: string; // Store name for easy access
     quantity: number;
+    price: number;
     // Individual ticket tracking
     tickets: Array<{
       ticketNumber: string;
@@ -114,6 +117,13 @@ const TransactionSchema: Schema = new Schema(
       },
     },
 
+    orderId: {
+      type: String,
+      required: true,
+      unique: true,
+      index: true,
+    },
+
     // Ticket items array
     ticketItems: [
       {
@@ -130,6 +140,10 @@ const TransactionSchema: Schema = new Schema(
           type: Number,
           required: true,
           min: 1,
+        },
+        price: {
+          type: Number,
+          required: true,
         },
         tickets: [
           {
@@ -332,10 +346,7 @@ TransactionSchema.pre('save', async function (this: ITransaction, next) {
       if (!ticketItem.tickets || ticketItem.tickets.length === 0) {
         const ticketNumbers = [];
         for (let i = 0; i < ticketItem.quantity; i++) {
-          const ticketNumber = `TCS-${Date.now()}-${Math.random()
-            .toString(36)
-            .substr(2, 9)
-            .toUpperCase()}`;
+          const ticketNumber = OrderIDGenerator.generateTicketNumber();
           ticketNumbers.push({
             ticketNumber,
             isUsed: false,

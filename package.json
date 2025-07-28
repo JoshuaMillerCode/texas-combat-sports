@@ -10,7 +10,9 @@
     "db:helper": "tsx lib/db-helper.ts",
     "db:seed": "tsx lib/db-helper.ts seed",
     "db:test-connection": "tsx lib/db-helper.ts test-connection",
-    "db:setup-complete-event": "tsx lib/setup-complete-event.ts"
+    "db:setup-complete-event": "tsx lib/setup-complete-event.ts",
+    "test:tickets": "tsx lib/test-ticket-generation.ts",
+    "test:order-id-qr": "tsx lib/test-order-id-and-qr.ts"
   },
   "dependencies": {
     "@emotion/is-prop-valid": "latest",
@@ -52,6 +54,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "latest",
+    "crypto-js": "^4.2.0",
     "date-fns": "4.1.0",
     "embla-carousel-react": "latest",
     "framer-motion": "latest",
@@ -61,12 +64,15 @@
     "mongoose": "^8.16.4",
     "next": "14.2.16",
     "next-themes": "latest",
+    "pdf-lib": "^1.17.1",
+    "qrcode": "^1.5.4",
     "react": "^18",
     "react-day-picker": "latest",
     "react-dom": "^18",
     "react-hook-form": "latest",
     "react-resizable-panels": "latest",
     "recharts": "latest",
+    "resend": "^4.7.0",
     "sonner": "latest",
     "stripe": "latest",
     "tailwind-merge": "^2.5.5",
@@ -76,6 +82,8 @@
   },
   "devDependencies": {
     "@types/node": "^22",
+    "@types/crypto-js": "^4.2.2",
+    "@types/qrcode": "^1.5.5",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "dotenv": "^17.2.0",

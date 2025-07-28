@@ -1,6 +1,7 @@
 "use client"
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { usePathname } from 'next/navigation'
 
 interface User {
   id: string
@@ -29,6 +30,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null)
   const [accessToken, setAccessToken] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const pathname = usePathname()
 
   // Check for existing session on mount
   useEffect(() => {
@@ -97,16 +99,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }
 
-  // Auto-refresh token before it expires (every 10 minutes for 15-minute tokens)
+  // Auto-refresh token only on admin pages
   useEffect(() => {
-    if (accessToken) {
+    if (accessToken && pathname?.startsWith('/admin')) {
       const interval = setInterval(() => {
         refreshToken()
       }, 10 * 60 * 1000) // 10 minutes
 
       return () => clearInterval(interval)
     }
-  }, [accessToken])
+  }, [accessToken, pathname])
 
   const value: AuthContextType = {
     user,

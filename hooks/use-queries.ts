@@ -35,6 +35,35 @@ async function apiRequest(
   return response.json();
 }
 
+// ==================== TRANSACTIONS ====================
+
+export function useTransactionQuery(sessionId: string) {
+  return useQuery({
+    queryKey: ['transaction', sessionId],
+    queryFn: () =>
+      apiRequest(`/api/checkout/transaction/${sessionId}`, {}, null),
+    enabled: !!sessionId,
+  });
+}
+
+export function useDownloadTicketMutation() {
+  return useMutation({
+    mutationFn: async (orderId: string) => {
+      const response = await fetch(`/api/tickets/${orderId}/download`);
+
+      if (!response.ok) {
+        const error = await response
+          .json()
+          .catch(() => ({ error: 'Download failed' }));
+        throw new Error(error.error || `HTTP ${response.status}`);
+      }
+
+      // Return the blob for download handling
+      return response.blob();
+    },
+  });
+}
+
 // ==================== EVENTS ====================
 
 export function useEventsQuery() {
