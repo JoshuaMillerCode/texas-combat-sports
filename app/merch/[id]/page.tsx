@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
@@ -89,6 +89,11 @@ export default function ProductPage() {
   const params = useParams()
   const router = useRouter()
   const { addToCart } = useCart()
+
+  useEffect(() => {
+    // Redirect to home page immediately
+    router.replace("/")
+  }, [router])
 
   const product = getProductById(params.id as string)
 

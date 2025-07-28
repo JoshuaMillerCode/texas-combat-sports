@@ -15,7 +15,7 @@ export default function Header() {
     { href: "/events", label: "Events" },
     { href: "/fighters", label: "Fighters" },
     { href: "/streaming", label: "Streaming" },
-    { href: "/merch", label: "Merch" },
+    // { href: "/merch", label: "Merch" },
     { href: "/gallery", label: "Gallery" },
     { href: "/contact", label: "Contact" },
   ]
@@ -67,19 +67,19 @@ export default function Header() {
 
           {/* Right side actions */}
           <div className="hidden lg:flex items-center space-x-3 flex-shrink-0 ml-auto">
-            <CartIcon />
+            {/* <CartIcon /> */}
             <Button size="sm" className="bg-red-600 hover:bg-red-700 text-white font-bold px-4">
               Buy Tickets
             </Button>
           </div>
 
           {/* Mobile Menu Button */}
-          <div className="lg:hidden flex items-center space-x-3 flex-shrink-0 ml-auto">
+          {/* <div className="lg:hidden flex items-center space-x-3 flex-shrink-0 ml-auto">
             <CartIcon />
             <button className="text-white p-1" onClick={() => setIsMenuOpen(!isMenuOpen)}>
               {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
-          </div>
+          </div> */}
         </div>
 
         {/* Mobile/Tablet Dropdown Navigation */}

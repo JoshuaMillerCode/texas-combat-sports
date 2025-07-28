@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import RevealAnimation from "@/components/reveal-animation"
 import { ShoppingCart, Eye, Star } from "lucide-react"
 import { useCart } from "@/contexts/cart-context"
+import { useRouter } from "next/navigation"
 
 interface MerchandiseItem {
   id: string
@@ -104,6 +105,12 @@ const categories = ["All", "Apparel", "Equipment", "Accessories"]
 export default function MerchandisePage() {
   const [selectedCategory, setSelectedCategory] = useState("All")
   const { addToCart } = useCart()
+  const router = useRouter()
+
+  useEffect(() => {
+    // Redirect to home page immediately
+    router.replace("/")
+  }, [router])
 
   const filteredItems =
     selectedCategory === "All"

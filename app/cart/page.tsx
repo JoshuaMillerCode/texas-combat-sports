@@ -1,16 +1,23 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import RevealAnimation from "@/components/reveal-animation"
 import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft } from "lucide-react"
 import { useCart } from "@/contexts/cart-context"
+import { useRouter } from "next/navigation"
 
 export default function CartPage() {
   const { state, updateQuantity, removeFromCart, clearCart } = useCart()
   const [isCheckingOut, setIsCheckingOut] = useState(false)
+  const router = useRouter()
+
+  useEffect(() => {
+    // Redirect to home page immediately
+    router.replace("/")
+  }, [router])
 
   const handleQuantityChange = (itemId: string, newQuantity: number) => {
     if (newQuantity <= 0) {
