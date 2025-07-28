@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import RevealAnimation from "@/components/reveal-animation"
 import { CheckCircle, Download, Mail, Calendar, MapPin, Clock } from "lucide-react"
 import { formatAmountForDisplay } from "@/lib/stripe"
+import { useTransactionQuery, useDownloadTicketMutation } from "@/hooks/use-queries"
 
 interface CheckoutSession {
   id: string
@@ -39,7 +40,11 @@ export default function CheckoutSuccessPage() {
   const searchParams = useSearchParams()
   const sessionId = searchParams.get("session_id")
 
+  const [orderId, setOrderId] = useState<string | null>(null)
   const [session, setSession] = useState<CheckoutSession | null>(null)
+  const { data: transaction, isLoading: isTransactionLoading } = useTransactionQuery(sessionId || "")
+  const downloadTicketMutation = useDownloadTicketMutation()
+
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -71,7 +76,6 @@ export default function CheckoutSuccessPage() {
 
           throw new Error(errorMessage)
         }
-
         const sessionData = await response.json()
         setSession(sessionData)
       } catch (err) {
@@ -85,6 +89,34 @@ export default function CheckoutSuccessPage() {
 
     fetchSession()
   }, [sessionId])
+
+  useEffect(() => {
+    setOrderId(transaction?.transaction?.orderId || null)
+  }, [transaction])
+
+  const handleDownloadTickets = async () => {
+    if (!orderId) {
+      console.error('No order ID available')
+      return
+    }
+
+    try {
+      const blob = await downloadTicketMutation.mutateAsync(orderId)
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `ticket-${orderId}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+    } catch (error) {
+      console.error('Error downloading tickets:', error)
+      // You could show a toast notification here
+    }
+  }
 
   if (loading) {
     return (
@@ -259,9 +291,13 @@ export default function CheckoutSuccessPage() {
 
                 {/* Action Buttons */}
                 <div className="space-y-4">
-                  <Button className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3">
+                  <Button 
+                    className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3"
+                    onClick={handleDownloadTickets}
+                    disabled={!orderId || isTransactionLoading || downloadTicketMutation.isPending}
+                  >
                     <Download className="w-5 h-5 mr-2" />
-                    Download Tickets
+                    {downloadTicketMutation.isPending ? 'Downloading...' : 'Download Tickets'}
                   </Button>
                   <Link href="/events" className="block">
                     <Button
@@ -294,7 +330,11 @@ export default function CheckoutSuccessPage() {
                   <ul className="space-y-1">
                     <li>• Email: support@texascombatsport.com</li>
                     <li>• Phone: (713) 555-FIGHT</li>
-                    <li>• Order ID: {session.id}</li>
+                    {isTransactionLoading ? (
+                      <li>• Order ID: Loading...</li>
+                    ) : (
+                      <li>• Order ID: {orderId}</li>
+                    )}
                   </ul>
                 </div>
               </div>

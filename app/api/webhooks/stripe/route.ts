@@ -3,6 +3,10 @@ import { type NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { TransactionService } from '@/lib/services/transaction.service';
 import { MerchService } from '@/lib/services/merch.service';
+import { EmailService } from '@/lib/services/email.service';
+import { TicketGenerator } from '@/lib/utils/ticket-generator';
+import { EventService } from '@/lib/services/event.service';
+import { OrderIDGenerator } from '@/lib/utils/order-id-generator';
 import mongoose from 'mongoose';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -105,11 +109,14 @@ export async function POST(req: NextRequest) {
             session.metadata?.ticketData
           );
 
+          const orderId = OrderIDGenerator.generateOrderID();
+
           const transaction = await TransactionService.createTransaction({
             type: orderType,
             event: session.metadata?.eventId
               ? new mongoose.Types.ObjectId(session.metadata.eventId)
               : undefined,
+            orderId: orderId,
             stripeSessionId: session.id,
             stripePaymentIntentId:
               (session.payment_intent as string) || undefined,
@@ -157,11 +164,51 @@ export async function POST(req: NextRequest) {
             ticketItems: ticketItems,
           });
           console.log('Transaction created:', transaction);
-          // Here you would typically:
-          // 1. Save ticket order to database [DONE]
-          // 2. Generate ticket PDFs
-          // 3. Send tickets via email
-          // 4. Update event capacity
+
+          // Generate and send tickets via email
+          try {
+            const event = await EventService.getEventById(
+              session.metadata?.eventId || ''
+            );
+            if (event) {
+              // Generate ticket PDFs
+              const tickets = await TicketGenerator.generateMultipleTickets(
+                transaction,
+                event,
+                { includeQRCode: true }
+              );
+
+              // Send email with tickets
+              if (tickets.length > 0) {
+                const emailSent = await EmailService.sendTicketConfirmation({
+                  transaction,
+                  event,
+                  tickets,
+                });
+
+                if (emailSent) {
+                  console.log('Ticket email sent successfully');
+                } else {
+                  console.error('Failed to send ticket email');
+                  // Send fallback email without attachments
+                  await EmailService.sendSimpleConfirmation(transaction, event);
+                }
+              }
+            }
+          } catch (error) {
+            console.error('Error generating/sending tickets:', error);
+            // Send fallback email
+            try {
+              const event = await EventService.getEventById(
+                session.metadata?.eventId || ''
+              );
+              if (event) {
+                await EmailService.sendSimpleConfirmation(transaction, event);
+              }
+            } catch (fallbackError) {
+              console.error('Failed to send fallback email:', fallbackError);
+            }
+          }
         }
 
         break;

@@ -27,7 +27,7 @@ const getEventData = (slug: string) => {
     venue: "Toyota Center",
     city: "Houston, TX",
     capacity: "18,500",
-    ticketPrice: "From $50",
+    ticketPrice: "From $40",
     posterImage: "/placeholder.svg?height=800&width=600&text=Houston+Showdown+Poster",
     heroVideo: "/videos/events-hero.mp4",
     description:
@@ -114,19 +114,19 @@ const getEventData = (slug: string) => {
       {
         id: "68806a46b57aa1dace00ba31",
         name: "General Admission",
-        price: 50,
+        price: 40,
         currency: "USD",
         features: ["Upper Level Seating", "Event Program"],
-        stripePriceId: "price_1RnuUeP4zC66HIIggPWaR9Zb", // Replace with actual Stripe Price ID
+        stripePriceId: "price_1RoU8OIjQHXVCThOG0Dn6Ezs", // Replace with actual Stripe Price ID
         maxQuantity: 8,
       },
       {
         id: "68806a45b57aa1dace00ba2b",
         name: "VIP",
-        price: 250,
+        price: 120,
         currency: "USD",
         features: ["Ringside Seating", "VIP Lounge Access", "Meet & Greet", "Premium Merchandise Package"],
-        stripePriceId: "price_1RnW41P4zC66HIIgsC2DeYtI", // Replace with actual Stripe Price ID
+        stripePriceId: "price_1RoU8oIjQHXVCThOwcWxTYi9", // Replace with actual Stripe Price ID
         maxQuantity: 6,
       }
     ] as TicketTier[],

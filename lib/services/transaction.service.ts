@@ -1,7 +1,6 @@
 import dbConnect from '@/lib/dbConnect';
-import { Transaction, TicketTier, Merch, Event } from '@/lib/models';
+import { Transaction, TicketTier, Merch } from '@/lib/models';
 import { ITransaction } from '@/lib/models/Transaction';
-import mongoose from 'mongoose';
 
 export class TransactionService {
   // Basic CRUD Operations
@@ -25,10 +24,7 @@ export class TransactionService {
     sessionId: string
   ): Promise<ITransaction | null> {
     await dbConnect();
-    return await Transaction.findOne({ stripeSessionId: sessionId })
-      .populate('ticketItems.ticketTier')
-      .populate('merchItems.merch')
-      .populate('event');
+    return await Transaction.findOne({ stripeSessionId: sessionId }, 'orderId');
   }
 
   static async getAllTransactions(): Promise<ITransaction[]> {
@@ -265,7 +261,7 @@ export class TransactionService {
     return await Transaction.findOneAndUpdate(
       {
         _id: transactionId,
-        $or: [{ type: 'ticket' }, { type: 'mixed' }],
+        type: 'event_tickets',
         'ticketItems.tickets.ticketNumber': ticketNumber,
         'ticketItems.tickets.isUsed': false,
       },
@@ -736,9 +732,84 @@ export class TransactionService {
       return {
         ticketTier: item.tierId,
         tierName: item.tierName,
+        price: item.price,
         quantity: item.quantity,
       };
     });
     return formattedTicketItems;
+  }
+
+  // Find transaction by ticket ID (Stripe session ID or payment intent ID)
+  static async findTransactionByOrderId(
+    orderId: string
+  ): Promise<ITransaction | null> {
+    await dbConnect();
+    return await Transaction.findOne({
+      orderId: orderId,
+    })
+      .populate('ticketItems.ticketTier')
+      .populate('event');
+  }
+
+  // Mark a specific ticket as used
+  static async markTicketAsUsed(
+    ticketId: string
+  ): Promise<ITransaction | null> {
+    await dbConnect();
+
+    // Find the transaction first
+    const transaction = await Transaction.findOne({
+      $or: [{ stripeSessionId: ticketId }, { stripePaymentIntentId: ticketId }],
+    });
+
+    if (!transaction) {
+      return null;
+    }
+
+    // Mark all tickets in the transaction as used
+    const updateData: any = {};
+    if (transaction.ticketItems) {
+      transaction.ticketItems.forEach((item: any, itemIndex: number) => {
+        if (item.tickets) {
+          item.tickets.forEach((ticket: any, ticketIndex: number) => {
+            updateData[
+              `ticketItems.${itemIndex}.tickets.${ticketIndex}.isUsed`
+            ] = true;
+            updateData[
+              `ticketItems.${itemIndex}.tickets.${ticketIndex}.usedAt`
+            ] = new Date();
+          });
+        }
+      });
+    }
+
+    return await Transaction.findByIdAndUpdate(
+      transaction._id,
+      { $set: updateData },
+      { new: true }
+    )
+      .populate('ticketItems.ticketTier')
+      .populate('merchItems.merch')
+      .populate('event');
+  }
+
+  // Check if a ticket is used
+  static async isTicketUsed(ticketNumber: string): Promise<boolean> {
+    await dbConnect();
+    const transaction = await Transaction.findOne({
+      'ticketItems.tickets.ticketNumber': ticketNumber,
+    });
+    if (!transaction) return false;
+
+    // Find the specific ticket within the nested structure
+    for (const ticketItem of transaction.ticketItems || []) {
+      for (const ticket of ticketItem.tickets || []) {
+        if (ticket.ticketNumber === ticketNumber) {
+          return ticket.isUsed;
+        }
+      }
+    }
+
+    return false;
   }
 }
