@@ -34,7 +34,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // Check for existing session on mount
   useEffect(() => {
-    refreshToken().finally(() => setIsLoading(false))
+    if (pathname?.startsWith('/admin')) {
+      refreshToken().finally(() => setIsLoading(false))
+    } else {
+      setIsLoading(false)
+    }
   }, [])
 
   const login = async (email: string, password: string) => {

@@ -6,6 +6,8 @@ export interface IEvent extends Document {
   title: string;
   subtitle: string;
   date: Date;
+  isPastEvent: Boolean;
+  isActive: Boolean;
   location: string;
   address: string;
   venue: string;
@@ -40,8 +42,9 @@ const EventSchema: Schema = new Schema(
     },
     date: {
       type: Date,
-      required: true,
     },
+    isPastEvent: Boolean,
+    isActive: Boolean,
     location: {
       type: String,
       required: true,
