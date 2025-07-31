@@ -26,7 +26,15 @@ export function ViewEventModal({ event }: ViewEventModalProps) {
           <div>
             <Label className="text-gray-400 text-sm">Date & Time</Label>
             <p className="text-white font-medium">
-              {event.date ? new Date(event.date).toLocaleString() : 'N/A'}
+              {event.date ? new Date(event.date).toLocaleString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+              }) : 'N/A'}
             </p>
           </div>
           <div>
