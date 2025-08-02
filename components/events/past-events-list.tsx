@@ -2,12 +2,13 @@
 import { useEventsQuery } from "@/hooks/use-queries"
 import Image from "next/image"
 import { Calendar, Clock, MapPin } from "lucide-react"
+import LoadingBoxing from "@/components/ui/loading-boxing"
 
 export default function PastEventsList() {
   const { data: events, isLoading, error } = useEventsQuery()
   const pastEvents = events?.filter((event: any) => event.isPastEvent) || []
 
-  if (isLoading) return <div className="py-20 text-center text-white">Loading events...</div>
+  if (isLoading) return <LoadingBoxing text="Loading Events..." size="md" />
   if (error) return <div className="py-20 text-center text-red-500">Error loading events: {error.message}</div>
 
   return (

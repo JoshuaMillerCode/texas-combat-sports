@@ -5,12 +5,21 @@ import {
   requireAdmin,
   createAuthErrorResponse,
 } from '@/lib/middleware/auth';
+import { isValidObjectId } from 'mongoose';
 
 export async function GET(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
+    if (!isValidObjectId(params.id)) {
+      const event = await EventService.getEventBySlug(params.id);
+      if (!event) {
+        throw new Error();
+      }
+      return NextResponse.json(event);
+    }
+
     // Public endpoint - no auth required for GET
     const event = await EventService.getEventById(params.id);
     if (!event) {

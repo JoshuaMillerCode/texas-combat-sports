@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useRef } from "react"
-import { motion, useScroll, useTransform, useSpring } from "framer-motion"
+import { motion, useScroll, useTransform } from "framer-motion"
 
 interface HeroParallaxProps {
   children: React.ReactNode
@@ -26,31 +26,36 @@ export default function HeroParallax({
     offset: ["start start", "end start"],
   })
 
-  // Smooth spring for better performance
-  const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 100,
-    damping: 30,
-    restDelta: 0.001,
-  })
-
-  // Parallax transforms
-  const backgroundY = useTransform(smoothProgress, [0, 1], ["0%", "50%"])
-  const contentY = useTransform(smoothProgress, [0, 1], ["0%", "25%"])
-  const contentOpacity = useTransform(smoothProgress, [0, 0.5, 1], [1, 0.8, 0.3])
-  const contentScale = useTransform(smoothProgress, [0, 1], [1, 0.95])
+  // Simplified transforms for better performance
+  const backgroundY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"])
+  const contentY = useTransform(scrollYProgress, [0, 1], ["0%", "15%"])
+  const contentOpacity = useTransform(scrollYProgress, [0, 0.8, 1], [1, 0.9, 0.6])
 
   return (
     <div ref={ref} className={`relative overflow-hidden ${className}`} style={{ height }}>
       {/* Background Layer */}
-      <motion.div className="absolute inset-0 will-change-transform" style={{ y: backgroundY }}>
+      <motion.div 
+        className="absolute inset-0 will-change-transform" 
+        style={{ y: backgroundY }}
+      >
         {backgroundVideo ? (
-          <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover scale-110">
+          <video 
+            autoPlay 
+            muted 
+            loop 
+            playsInline 
+            className="absolute inset-0 w-full h-full object-cover scale-110"
+            style={{ transform: 'translateZ(0)' }} // Force GPU acceleration
+          >
             <source src={backgroundVideo} type="video/mp4" />
           </video>
         ) : backgroundImage ? (
           <div
             className="absolute inset-0 bg-cover bg-center bg-no-repeat scale-110"
-            style={{ backgroundImage: `url(${backgroundImage})` }}
+            style={{ 
+              backgroundImage: `url(${backgroundImage})`,
+              transform: 'translateZ(0)' // Force GPU acceleration
+            }}
           />
         ) : null}
 
@@ -64,7 +69,7 @@ export default function HeroParallax({
         style={{
           y: contentY,
           opacity: contentOpacity,
-          scale: contentScale,
+          transform: 'translateZ(0)', // Force GPU acceleration
         }}
       >
         {children}

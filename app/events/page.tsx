@@ -1,5 +1,3 @@
-import { useEventsQuery } from "@/hooks/use-queries"
-import { useRouter } from "next/navigation"
 import PastEventsList from "@/components/events/past-events-list"
 import UpcomingEventsList from "@/components/events/upcoming-events-list"
 
