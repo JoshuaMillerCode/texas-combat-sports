@@ -17,7 +17,7 @@ export default function EventDetailClient({ params }: { params: { slug: string }
   if (error) return <div className="py-20 text-center text-red-500">Error loading event: {error.message}</div>
 
   return (
-    <div className="min-h-screen pt-16">
+    <div className="min-h-screen pt-10">
       <EventHero event={event} onOpenTicketModal={() => setIsTicketModalOpen(true)} />
       <MainEvent mainEventFight={event.mainEventFight} />
       <Undercard fights={event.fights} />
@@ -27,7 +27,7 @@ export default function EventDetailClient({ params }: { params: { slug: string }
       <TicketPurchaseModal
         isOpen={isTicketModalOpen}
         onClose={() => setIsTicketModalOpen(false)}
-        eventId={event.id}
+        eventId={event._id}
         eventTitle={event.title}
         eventDate={event.date}
         eventVenue={event.venue}

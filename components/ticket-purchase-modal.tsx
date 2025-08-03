@@ -6,8 +6,27 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { X, Plus, Minus, CreditCard, Shield, Clock } from "lucide-react"
-import type { TicketTier, CheckoutSessionData } from "@/types/stripe"
+import type { CheckoutSessionData } from "@/types/stripe"
 import { formatAmountForDisplay } from "@/lib/stripe"
+
+// Updated interface to match the TicketTier model
+interface TicketTier {
+  _id: string
+  event: string
+  tierId: string
+  name: string
+  description?: string
+  price: number
+  currency: string
+  features: string[]
+  stripePriceId: string
+  maxQuantity: number
+  availableQuantity: number
+  isActive: boolean
+  sortOrder: number
+  createdAt: string
+  updatedAt: string
+}
 
 interface TicketPurchaseModalProps {
   isOpen: boolean
@@ -33,11 +52,18 @@ export default function TicketPurchaseModal({
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // Filter active ticket tiers and sort by sortOrder
+  const activeTicketTiers = ticketTiers
+    .filter(tier => tier.isActive)
+    .sort((a, b) => a.sortOrder - b.sortOrder)
+
   const updateTicketQuantity = (tierId: string, quantity: number) => {
-    const tier = ticketTiers.find((t) => t.id === tierId)
+    const tier = activeTicketTiers.find((t) => t._id === tierId)
     if (!tier) return
 
-    const newQuantity = Math.max(0, Math.min(quantity, tier.maxQuantity))
+    // Check against both maxQuantity and availableQuantity
+    const maxAllowed = Math.min(tier.maxQuantity, tier.availableQuantity)
+    const newQuantity = Math.max(0, Math.min(quantity, maxAllowed))
 
     setSelectedTickets((prev) => ({
       ...prev,
@@ -47,7 +73,7 @@ export default function TicketPurchaseModal({
 
   const getTotalAmount = () => {
     return Object.entries(selectedTickets).reduce((total, [tierId, quantity]) => {
-      const tier = ticketTiers.find((t) => t.id === tierId)
+      const tier = activeTicketTiers.find((t) => t._id === tierId)
       return total + (tier ? tier.price * quantity : 0)
     }, 0)
   }
@@ -79,9 +105,9 @@ export default function TicketPurchaseModal({
       const tickets = Object.entries(selectedTickets)
         .filter(([_, quantity]) => quantity > 0)
         .map(([tierId, quantity]) => {
-          const tier = ticketTiers.find((t) => t.id === tierId)!
+          const tier = activeTicketTiers.find((t) => t._id === tierId)!
           return {
-            tierId,
+            tierId: tier._id,
             tierName: tier.name,
             quantity,
             price: tier.price,
@@ -212,56 +238,81 @@ export default function TicketPurchaseModal({
               <div className="space-y-4 mb-6">
                 <h3 className="text-xl font-bold text-white mb-4">Select Tickets</h3>
 
-                {ticketTiers.map((tier) => (
-                  <div
-                    key={tier.id}
-                    className="bg-black/50 border border-red-900/30 rounded-lg p-4 hover:border-red-600/50 transition-colors"
-                  >
-                    <div className="flex items-center justify-between mb-3">
-                      <div>
-                        <h4 className="text-lg font-bold text-white">{tier.name}</h4>
-                        <p className="text-2xl font-bold text-red-600">
-                          {formatAmountForDisplay(tier.price, tier.currency)}
-                        </p>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <button
-                          onClick={() => updateTicketQuantity(tier.id, (selectedTickets[tier.id] || 0) - 1)}
-                          disabled={!selectedTickets[tier.id]}
-                          className="w-8 h-8 rounded-full bg-red-600 text-white flex items-center justify-center hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                        >
-                          <Minus size={16} />
-                        </button>
-                        <span className="text-white font-bold w-8 text-center">{selectedTickets[tier.id] || 0}</span>
-                        <button
-                          onClick={() => updateTicketQuantity(tier.id, (selectedTickets[tier.id] || 0) + 1)}
-                          disabled={(selectedTickets[tier.id] || 0) >= tier.maxQuantity}
-                          className="w-8 h-8 rounded-full bg-red-600 text-white flex items-center justify-center hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                        >
-                          <Plus size={16} />
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2 mb-3">
-                      {tier.features.map((feature, index) => (
-                        <div key={index} className="text-gray-300 text-sm flex items-start">
-                          <span className="text-red-500 mr-2 mt-1">•</span>
-                          {feature}
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-400">Max {tier.maxQuantity} per order</span>
-                      {selectedTickets[tier.id] > 0 && (
-                        <Badge className="bg-red-600 text-white">
-                          Subtotal: {formatAmountForDisplay(tier.price * selectedTickets[tier.id], tier.currency)}
-                        </Badge>
-                      )}
-                    </div>
+                {activeTicketTiers.length === 0 ? (
+                  <div className="bg-black/50 border border-red-900/30 rounded-lg p-6 text-center">
+                    <p className="text-gray-400">No tickets are currently available for this event.</p>
                   </div>
-                ))}
+                ) : (
+                  activeTicketTiers.map((tier) => {
+                    const currentQuantity = selectedTickets[tier._id] || 0
+                    const maxAllowed = Math.min(tier.maxQuantity, tier.availableQuantity)
+                    const isSoldOut = tier.availableQuantity === 0
+
+                    return (
+                      <div
+                        key={tier._id}
+                        className={`bg-black/50 border border-red-900/30 rounded-lg p-4 transition-colors ${
+                          isSoldOut ? 'opacity-50' : 'hover:border-red-600/50'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-3">
+                          <div>
+                            <h4 className="text-lg font-bold text-white">{tier.name}</h4>
+                            {tier.description && (
+                              <p className="text-gray-400 text-sm mb-2">{tier.description}</p>
+                            )}
+                            <p className="text-2xl font-bold text-red-600">
+                              {formatAmountForDisplay(tier.price / 100, tier.currency)}
+                            </p>
+                          </div>
+                          <div className="flex items-center space-x-3">
+                            <button
+                              onClick={() => updateTicketQuantity(tier._id, currentQuantity - 1)}
+                              disabled={!currentQuantity || isSoldOut}
+                              className="w-8 h-8 rounded-full bg-red-600 text-white flex items-center justify-center hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            >
+                              <Minus size={16} />
+                            </button>
+                            <span className="text-white font-bold w-8 text-center">{currentQuantity}</span>
+                            <button
+                              onClick={() => updateTicketQuantity(tier._id, currentQuantity + 1)}
+                              disabled={currentQuantity >= maxAllowed || isSoldOut}
+                              className="w-8 h-8 rounded-full bg-red-600 text-white flex items-center justify-center hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            >
+                              <Plus size={16} />
+                            </button>
+                          </div>
+                        </div>
+
+                        {tier.features && tier.features.length > 0 && (
+                          <div className="grid grid-cols-2 gap-2 mb-3">
+                            {tier.features.map((feature, index) => (
+                              <div key={index} className="text-gray-300 text-sm flex items-start">
+                                <span className="text-red-500 mr-2 mt-1">•</span>
+                                {feature}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-400">
+                            {isSoldOut ? (
+                              <span className="text-red-400 font-semibold">SOLD OUT</span>
+                            ) : (
+                              `${tier.availableQuantity} available`
+                            )}
+                          </span>
+                          {currentQuantity > 0 && (
+                            <Badge className="bg-red-600 text-white">
+                              Subtotal: {formatAmountForDisplay((tier.price * currentQuantity) / 100, tier.currency)}
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })
+                )}
               </div>
 
               {/* Order Summary */}
@@ -272,13 +323,13 @@ export default function TicketPurchaseModal({
                     {Object.entries(selectedTickets)
                       .filter(([_, quantity]) => quantity > 0)
                       .map(([tierId, quantity]) => {
-                        const tier = ticketTiers.find((t) => t.id === tierId)!
+                        const tier = activeTicketTiers.find((t) => t._id === tierId)!
                         return (
                           <div key={tierId} className="flex justify-between text-gray-300">
                             <span>
                               {tier.name} × {quantity}
                             </span>
-                            <span>{formatAmountForDisplay(tier.price * quantity, tier.currency)}</span>
+                            <span>{formatAmountForDisplay((tier.price * quantity) / 100, tier.currency)}</span>
                           </div>
                         )
                       })}
@@ -286,7 +337,7 @@ export default function TicketPurchaseModal({
                   <div className="border-t border-red-600/30 pt-3">
                     <div className="flex justify-between text-white font-bold text-lg">
                       <span>Total ({getTotalTickets()} tickets)</span>
-                      <span>{formatAmountForDisplay(getTotalAmount(), "USD")}</span>
+                      <span>{formatAmountForDisplay(getTotalAmount() / 100, "USD")}</span>
                     </div>
                   </div>
                 </div>
@@ -313,7 +364,7 @@ export default function TicketPurchaseModal({
               {/* Checkout Button */}
               <Button
                 onClick={handleCheckout}
-                disabled={isLoading || getTotalTickets() === 0 || !customerEmail}
+                disabled={isLoading || getTotalTickets() === 0 || !customerEmail || activeTicketTiers.length === 0}
                 className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 text-lg transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
               >
                 {isLoading ? (

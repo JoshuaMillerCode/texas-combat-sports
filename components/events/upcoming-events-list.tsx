@@ -77,7 +77,7 @@ export default function UpcomingEventsList() {
                       <Button
                         variant="outline"
                         className="border-red-600 text-red-600 hover:bg-red-600 hover:text-white font-bold"
-                        onClick={() => router.push(`/events/${event.slug}`)}
+                        onClick={() => router.push(`/events/${event.slug}#main-event`)}
                       >
                         Fight Card
                       </Button>

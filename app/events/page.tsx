@@ -3,7 +3,7 @@ import UpcomingEventsList from "@/components/events/upcoming-events-list"
 
 export default function EventsPage() {
   return (
-    <div className="min-h-screen pt-16">
+    <div className="min-h-screen pt-10">
       {/* Hero Section */}
       <section className="relative h-96 flex items-center justify-center overflow-hidden">
         <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover">

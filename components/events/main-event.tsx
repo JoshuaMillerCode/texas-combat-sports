@@ -36,7 +36,7 @@ export default function MainEvent({ mainEventFight }: MainEventProps) {
   }
 
   return (
-    <section className="py-12 lg:py-20 bg-gradient-to-b from-black to-gray-900 relative z-10">
+    <section id="main-event" className="py-12 lg:py-20 bg-gradient-to-b from-black to-gray-900 relative z-10">
       <div className="container mx-auto px-4">
         <RevealAnimation>
           <h2 className="text-4xl font-black text-center mb-4 text-white">
