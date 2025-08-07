@@ -18,9 +18,10 @@ export interface IVideo extends Document {
   associatedEvent?: mongoose.Types.ObjectId;
 
   // Video metadata
-  duration?: number; // in seconds
+  duration?: number; // in minutes
   viewCount: number;
   isPublic: boolean;
+  date?: Date; // Date when the video was recorded or event took place
 
   // Timestamps
   createdAt: Date;
@@ -82,6 +83,9 @@ const VideoSchema: Schema = new Schema(
       type: Boolean,
       default: true,
     },
+    date: {
+      type: Date,
+    },
   },
   {
     timestamps: true,
@@ -93,6 +97,7 @@ VideoSchema.index({ isLiveEvent: 1 });
 VideoSchema.index({ associatedEvent: 1 });
 VideoSchema.index({ isPublic: 1 });
 VideoSchema.index({ scheduledStartTime: 1 });
+VideoSchema.index({ date: -1 });
 VideoSchema.index({ createdAt: -1 });
 
 // Virtual for live status
