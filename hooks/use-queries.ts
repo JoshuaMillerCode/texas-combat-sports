@@ -7,6 +7,7 @@ import type { IFighter } from '@/lib/models/Fighter';
 import type { IFight } from '@/lib/models/Fight';
 import type { IMerch } from '@/lib/models/Merch';
 import type { ITicketTier } from '@/lib/models/TicketTier';
+import type { IVideo } from '@/lib/models/Video';
 
 // ==================== UTILITY FUNCTIONS ====================
 
@@ -539,6 +540,156 @@ export function useDeleteTicketTierMutation() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ticketTiers'] });
+    },
+  });
+}
+
+// ==================== VIDEOS ====================
+
+export function useVideosQuery(filters?: {
+  isPublic?: boolean;
+  isLiveEvent?: boolean;
+  associatedEvent?: string;
+}) {
+  const { accessToken } = useAuth();
+
+  return useQuery({
+    queryKey: ['videos', filters],
+    queryFn: () => {
+      const params = new URLSearchParams();
+      if (filters?.isPublic !== undefined) {
+        params.append('isPublic', filters.isPublic.toString());
+      }
+      if (filters?.isLiveEvent !== undefined) {
+        params.append('isLiveEvent', filters.isLiveEvent.toString());
+      }
+      if (filters?.associatedEvent) {
+        params.append('associatedEvent', filters.associatedEvent);
+      }
+
+      const url = params.toString()
+        ? `/api/videos?${params.toString()}`
+        : '/api/videos';
+      return apiRequest(url, {}, accessToken);
+    },
+    // Public query - no auth required
+  });
+}
+
+export function useVideoQuery(id: string) {
+  const { accessToken } = useAuth();
+
+  return useQuery({
+    queryKey: ['videos', id],
+    queryFn: () => apiRequest(`/api/videos/${id}`, {}, accessToken),
+    enabled: !!id, // Only requires valid ID, not auth
+  });
+}
+
+export function useLiveEventsQuery(upcoming: boolean = false) {
+  const { accessToken } = useAuth();
+
+  return useQuery({
+    queryKey: ['videos', 'live', { upcoming }],
+    queryFn: () => {
+      const url = upcoming
+        ? '/api/videos/live?upcoming=true'
+        : '/api/videos/live';
+      return apiRequest(url, {}, accessToken);
+    },
+    // Public query - no auth required
+  });
+}
+
+export function useIncrementViewCountMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => {
+      return apiRequest(
+        `/api/videos/${id}/view`,
+        {
+          method: 'POST',
+        },
+        null // No auth required
+      );
+    },
+    onSuccess: (_, variables) => {
+      // Invalidate the specific video query to refresh view count
+      queryClient.invalidateQueries({ queryKey: ['videos', variables] });
+    },
+  });
+}
+
+// ADMIN-ONLY MUTATIONS
+export function useCreateVideoMutation() {
+  const { accessToken, isAuthenticated } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (videoData: Partial<IVideo>) => {
+      if (!isAuthenticated || !accessToken) {
+        throw new Error('Admin authentication required');
+      }
+      return apiRequest(
+        '/api/videos',
+        {
+          method: 'POST',
+          body: JSON.stringify(videoData),
+        },
+        accessToken
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['videos'] });
+    },
+  });
+}
+
+export function useUpdateVideoMutation() {
+  const { accessToken, isAuthenticated } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, ...videoData }: Partial<IVideo> & { id: string }) => {
+      if (!isAuthenticated || !accessToken) {
+        throw new Error('Admin authentication required');
+      }
+      return apiRequest(
+        `/api/videos/${id}`,
+        {
+          method: 'PUT',
+          body: JSON.stringify(videoData),
+        },
+        accessToken
+      );
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['videos'] });
+      queryClient.invalidateQueries({ queryKey: ['videos', variables.id] });
+    },
+  });
+}
+
+export function useDeleteVideoMutation() {
+  const { accessToken, isAuthenticated } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => {
+      if (!isAuthenticated || !accessToken) {
+        throw new Error('Admin authentication required');
+      }
+      return apiRequest(
+        `/api/videos/${id}`,
+        {
+          method: 'DELETE',
+        },
+        accessToken
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['videos'] });
     },
   });
 }
