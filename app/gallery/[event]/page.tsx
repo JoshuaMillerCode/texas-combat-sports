@@ -5,6 +5,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { useGalleryImagesQuery, type GalleryImage } from "@/hooks/use-queries"
 import ImageViewer from "@/components/image-viewer"
+import LoadingBoxing from "@/components/ui/loading-boxing"
 
 function toOptimized(url: string) {
   // Since API now provides WebP, just add responsive sizing
@@ -83,7 +84,7 @@ export default function EventGalleryPage({ params }: { params: { event: string }
         )}
 
         {isLoading && allImages.length === 0 ? (
-          <div className="text-center text-white">Loading images...</div>
+          <LoadingBoxing />
         ) : (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">

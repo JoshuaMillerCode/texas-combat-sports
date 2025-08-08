@@ -3,6 +3,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { useGalleryEventsQuery, useRandomImagesQuery } from "@/hooks/use-queries"
+import LoadingBoxing from "@/components/ui/loading-boxing"
 
 export default function GalleryPage() {
   const { data: events = [], isLoading, error } = useGalleryEventsQuery()
@@ -11,9 +12,7 @@ export default function GalleryPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen pt-16 bg-gradient-to-b from-black to-gray-900">
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center text-white">Loading events...</div>
-        </div>
+        <LoadingBoxing text="Loading Gallery..." size="lg" />
       </div>
     )
   }
@@ -22,7 +21,7 @@ export default function GalleryPage() {
     return (
       <div className="min-h-screen pt-16 bg-gradient-to-b from-black to-gray-900">
         <div className="container mx-auto px-4 py-8">
-          <div className="text-center text-red-400">Error loading events</div>
+          <div className="text-center text-red-400">Error loading gallery</div>
         </div>
       </div>
     )
