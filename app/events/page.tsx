@@ -1,7 +1,34 @@
+"use client"
+
+import { useEventsQuery } from "@/hooks/use-queries"
 import PastEventsList from "@/components/events/past-events-list"
 import UpcomingEventsList from "@/components/events/upcoming-events-list"
+import LoadingBoxing from "@/components/ui/loading-boxing"
 
 export default function EventsPage() {
+  const { data: events, isLoading, error } = useEventsQuery()
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen pt-10 bg-gradient-to-b from-black to-gray-900">
+        <LoadingBoxing text="Loading Events..." size="lg" />
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen pt-10 bg-gradient-to-b from-black to-gray-900">
+        <div className="flex items-center justify-center h-screen">
+          <div className="text-center text-red-500">
+            <h1 className="text-2xl font-bold mb-2">Error loading events</h1>
+            <p>{error.message}</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen pt-10">
       {/* Hero Section */}
@@ -19,8 +46,8 @@ export default function EventsPage() {
         </div>
       </section>
 
-      <UpcomingEventsList />
-      <PastEventsList />
+      <UpcomingEventsList events={events} />
+      <PastEventsList events={events} />
     </div>
   )
 }

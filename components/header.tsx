@@ -74,12 +74,14 @@ export default function Header() {
           </div>
 
           {/* Mobile Menu Button */}
-          {/* <div className="lg:hidden flex items-center space-x-3 flex-shrink-0 ml-auto">
-            <CartIcon />
+          <div className="lg:hidden flex items-center space-x-3 flex-shrink-0 ml-auto">
+            <Button size="sm" className="bg-red-600 hover:bg-red-700 text-white font-bold px-4">
+              Buy Tickets
+            </Button>
             <button className="text-white p-1" onClick={() => setIsMenuOpen(!isMenuOpen)}>
               {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
-          </div> */}
+          </div>
         </div>
 
         {/* Mobile/Tablet Dropdown Navigation */}
@@ -96,14 +98,6 @@ export default function Header() {
                   {item.label}
                 </Link>
               ))}
-              <div className="pt-3 border-t border-red-900/30 w-full max-w-xs">
-                <Button 
-                  className="w-full bg-red-600 hover:bg-red-700 text-white font-bold"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Buy Tickets
-                </Button>
-              </div>
             </div>
           </nav>
         )}

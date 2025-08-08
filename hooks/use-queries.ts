@@ -36,6 +36,90 @@ async function apiRequest(
   return response.json();
 }
 
+// ==================== GALLERY ====================
+
+export type GalleryImage = {
+  id: string;
+  publicId: string;
+  secureUrl: string;
+  width: number;
+  height: number;
+  format: string;
+};
+
+export type GalleryEvent = {
+  name: string;
+  thumbnail?: { url: string };
+};
+
+export type RandomImage = {
+  id: string;
+  url: string;
+  width: number;
+  height: number;
+};
+
+export function useGalleryEventsQuery() {
+  return useQuery({
+    queryKey: ['gallery', 'events'],
+    queryFn: async () => {
+      const response = await fetch('/api/gallery/events');
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || `HTTP ${response.status}`);
+      }
+
+      return response.json() as Promise<GalleryEvent[]>;
+    },
+    // Public query - no auth required
+  });
+}
+
+export function useGalleryImagesQuery(folder: string, nextCursor?: string) {
+  return useQuery({
+    queryKey: ['gallery', 'images', folder], // Remove nextCursor from query key
+    queryFn: async () => {
+      const params = new URLSearchParams({ folder });
+      if (nextCursor) params.set('nextCursor', nextCursor);
+
+      const response = await fetch(`/api/images?${params.toString()}`);
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || `HTTP ${response.status}`);
+      }
+
+      return response.json() as Promise<{
+        resources: GalleryImage[];
+        nextCursor?: string;
+      }>;
+    },
+    enabled: !!folder,
+    // Disable automatic refetching to prevent infinite loops
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    // Public query - no auth required
+  });
+}
+
+export function useRandomImagesQuery() {
+  return useQuery({
+    queryKey: ['gallery', 'random-images'],
+    queryFn: async () => {
+      const response = await fetch('/api/gallery/random-images');
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || `HTTP ${response.status}`);
+      }
+
+      return response.json() as Promise<RandomImage[]>;
+    },
+    // Cache for 5 minutes to avoid too many requests
+    staleTime: 5 * 60 * 1000,
+    // Public query - no auth required
+  });
+}
+
 // ==================== TRANSACTIONS ====================
 
 export function useTransactionQuery(sessionId: string) {

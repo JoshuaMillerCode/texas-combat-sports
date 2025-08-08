@@ -1,19 +1,17 @@
 "use client"
-import { useEventsQuery } from "@/hooks/use-queries"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { Calendar, Clock, MapPin, DollarSign } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import CountdownTimer from "@/components/countdown-timer"
-import LoadingBoxing from "@/components/ui/loading-boxing"
 
-export default function UpcomingEventsList() {
-  const { data: events, isLoading, error } = useEventsQuery()
+interface UpcomingEventsListProps {
+  events: any[]
+}
+
+export default function UpcomingEventsList({ events }: UpcomingEventsListProps) {
   const router = useRouter()
   const upcomingEvents = events?.filter((event: any) => !event.isPastEvent && event.isActive) || []
-
-  if (isLoading) return <LoadingBoxing text="Loading Events..." size="md" />
-  if (error) return <div className="py-20 text-center text-red-500">Error loading events: {error.message}</div>
 
   return (
     <section className="py-20 bg-gradient-to-b from-black to-gray-900">
