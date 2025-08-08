@@ -67,6 +67,7 @@ export default function EventsSection({ searchTerm }: { searchTerm: string }) {
                 <EditEventForm 
                   event={selectedEvent} 
                   onSubmit={(data) => {
+                    console.log('data:', data)
                     const updateData = { ...data, id: selectedEvent._id }
                     updateEvent(updateData)
                     setIsEditDialogOpen(false)

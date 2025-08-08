@@ -9,6 +9,13 @@ import {
 export async function GET(req: NextRequest) {
   try {
     // Public endpoint - no auth required for GET
+    if (req.nextUrl.searchParams.get('isPastEvent') === 'true') {
+      const events = await EventService.getPastEvents();
+      return NextResponse.json(events);
+    } else if (req.nextUrl.searchParams.get('isActive') === 'true') {
+      const events = await EventService.getUpcomingEvents();
+      return NextResponse.json(events);
+    }
     const events = await EventService.getAllEvents();
     return NextResponse.json(events);
   } catch (error) {

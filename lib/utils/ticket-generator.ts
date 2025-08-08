@@ -1,5 +1,6 @@
 import { PDFDocument, rgb, StandardFonts, PDFFont } from 'pdf-lib';
 import QRCode from 'qrcode';
+import { formatAmountForDisplay } from '@/lib/stripe';
 
 export interface TicketData {
   ticketId: string;
@@ -349,7 +350,7 @@ export class TicketGenerator {
       color,
     });
 
-    page.drawText(`$${ticketData.price}`, {
+    page.drawText(`${ticketData.price}`, {
       x: rightX,
       y: startY - 120,
       size: 16,
@@ -558,7 +559,7 @@ export class TicketGenerator {
           eventVenue: event.venue,
           ticketTier: ticketItem.tierName,
           ticketNumber: ticket.ticketNumber,
-          price: ticketItem.price,
+          price: formatAmountForDisplay(ticketItem.price / 100, 'USD'),
           transactionId:
             transaction._id?.toString() || transaction.orderId || '',
         };

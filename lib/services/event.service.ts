@@ -67,7 +67,7 @@ export class EventService {
   static async getUpcomingEvents(): Promise<IEvent[]> {
     await dbConnect();
     const now = new Date();
-    return await Event.find({ date: { $gte: now } })
+    return await Event.find({ isActive: true })
       .populate('fights')
       .populate('ticketTiers')
       .sort({ date: 1 });
@@ -76,7 +76,7 @@ export class EventService {
   static async getPastEvents(): Promise<IEvent[]> {
     await dbConnect();
     const now = new Date();
-    return await Event.find({ date: { $lt: now } })
+    return await Event.find({ isPastEvent: true })
       .populate('fights')
       .populate('ticketTiers')
       .sort({ date: -1 });

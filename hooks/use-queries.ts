@@ -77,6 +77,31 @@ export function useEventsQuery() {
   });
 }
 
+export function useUpcomingEventsQuery() {
+  const { accessToken } = useAuth();
+
+  return useQuery({
+    queryKey: ['events', 'upcoming'],
+    queryFn: () =>
+      apiRequest(
+        '/api/events?isActive=true&isPastEvent=false',
+        {},
+        accessToken
+      ),
+    // Public query - no auth required
+  });
+}
+
+export function usePastEventsQuery() {
+  const { accessToken } = useAuth();
+
+  return useQuery({
+    queryKey: ['events', 'past'],
+    queryFn: () => apiRequest('/api/events?isPastEvent=true', {}, accessToken),
+    // Public query - no auth required
+  });
+}
+
 export function useEventQuery(id: string) {
   const { accessToken } = useAuth();
 

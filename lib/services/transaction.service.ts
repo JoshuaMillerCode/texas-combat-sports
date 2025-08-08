@@ -1,6 +1,7 @@
 import dbConnect from '@/lib/dbConnect';
 import { Transaction, TicketTier, Merch } from '@/lib/models';
 import { ITransaction } from '@/lib/models/Transaction';
+import mongoose from 'mongoose';
 
 export class TransactionService {
   // Basic CRUD Operations
@@ -730,7 +731,7 @@ export class TransactionService {
     const ticketItems = JSON.parse(ticketData);
     const formattedTicketItems = ticketItems.map((item: any) => {
       return {
-        ticketTier: item.tierId,
+        ticketTier: new mongoose.Types.ObjectId(item.tierId),
         tierName: item.tierName,
         price: item.price,
         quantity: item.quantity,

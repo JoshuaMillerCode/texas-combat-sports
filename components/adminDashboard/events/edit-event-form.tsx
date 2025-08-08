@@ -22,7 +22,7 @@ export function EditEventForm({ event, onSubmit, isLoading, onClose }: EditEvent
     slug: event.slug || '',
     title: event.title || '',
     subtitle: event.subtitle || '',
-    date: event.date ? new Date(event.date).toISOString().slice(0, 16) : '',
+    date: event.date ? new Date(event.date).toLocaleString('sv-SE').slice(0, 16) : '',
     isPastEvent: event.isPastEvent || false,
     isActive: event.isActive !== undefined ? event.isActive : true,
     location: event.location || '',
