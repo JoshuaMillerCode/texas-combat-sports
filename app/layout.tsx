@@ -4,9 +4,9 @@ import { Inter } from "next/font/google"
 import "./globals.css"
 import Header from "@/components/header"
 import Footer from "@/components/footer"
-import { CartProvider } from "@/contexts/cart-context"
 import { QueryProvider } from "@/contexts/query-context"
 import { AuthProvider } from "@/contexts/auth-context"
+import { CurrentEventProvider } from "@/contexts/current-event-context"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -26,11 +26,11 @@ export default function RootLayout({
       <body className={`${inter.className} bg-black text-white overflow-x-hidden`}>
         <QueryProvider>
           <AuthProvider>
-            <CartProvider>
+            <CurrentEventProvider>
               <Header />
               <main>{children}</main>
               <Footer />
-            </CartProvider>
+            </CurrentEventProvider>
           </AuthProvider>
         </QueryProvider>
       </body>
