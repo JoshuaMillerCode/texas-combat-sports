@@ -46,13 +46,10 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    console.log('Fetching images for folder:', folder);
-
     const url = `https://api.cloudinary.com/v1_1/${cloudName}/resources/search`;
 
     // Use precise folder search
     const expression = `folder:${folder} AND resource_type:image`;
-    console.log('Search expression:', expression);
 
     const body: Record<string, unknown> = {
       expression,
@@ -79,7 +76,6 @@ export async function GET(request: NextRequest) {
 
     if (!response.ok) {
       const text = await response.text();
-      console.error('Cloudinary search failed:', text);
       return NextResponse.json(
         { error: `Cloudinary error: ${text}` },
         { status: response.status }
@@ -90,13 +86,6 @@ export async function GET(request: NextRequest) {
       resources: CloudinarySearchResource[];
       next_cursor?: string;
     } = await response.json();
-
-    console.log(
-      `Found ${data.resources?.length || 0} images for folder: ${folder}`
-    );
-    data.resources?.forEach((img, index) => {
-      console.log(`  ${index + 1}. ${img.public_id}`);
-    });
 
     const resources = (data.resources || []).map((r) => ({
       id: r.asset_id,
@@ -115,7 +104,6 @@ export async function GET(request: NextRequest) {
       nextCursor: data.next_cursor,
     });
   } catch (error: any) {
-    console.error('Error in images API:', error);
     return NextResponse.json(
       { error: error?.message || 'Internal server error' },
       { status: 500 }

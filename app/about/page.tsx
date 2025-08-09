@@ -58,15 +58,15 @@ export default function AboutPage() {
   return (
     <div className="min-h-screen pt-16">
       {/* Hero Section */}
-      <HeroParallax backgroundVideo="/videos/about-hero.mp4" height="60vh">
+      <HeroParallax backgroundImage="https://res.cloudinary.com/dujmomznj/image/upload/f_webp,q_auto/v1754612339/59-DSC05643_ime0qx.jpg" height="60vh">
         <div className="text-center">
           <RevealAnimation>
-            <h1 className="text-6xl font-black text-white mb-4">
-              ABOUT <span className="text-red-600">TCS</span>
+            <h1 className="text-6xl font-black text-white mb-4 drop-shadow-2xl">
+              ABOUT <span className="text-red-600 drop-shadow-2xl">TCS</span>
             </h1>
           </RevealAnimation>
           <RevealAnimation delay={0.2}>
-            <p className="text-xl text-gray-300">The Heart of Houston Combat Sports</p>
+            <p className="text-xl text-gray-300 drop-shadow-lg">The Heart of Houston Combat Sports</p>
           </RevealAnimation>
         </div>
       </HeroParallax>
@@ -99,10 +99,10 @@ export default function AboutPage() {
             <RevealAnimation direction="right" delay={0.2}>
               <ScrollTriggeredAnimation scaleRange={[0.8, 1]} className="relative h-96">
                 <Image
-                  src="/placeholder.svg?height=400&width=600"
+                  src="https://res.cloudinary.com/dujmomznj/image/upload/e_improve,e_sharpen,f_auto,q_auto/v1753627714/txcs-logo_wb9qnx.jpg"
                   alt="Texas Combat Sport History"
                   fill
-                  className="object-cover rounded-lg"
+                  className="object-contain rounded-lg"
                 />
               </ScrollTriggeredAnimation>
             </RevealAnimation>
@@ -111,7 +111,12 @@ export default function AboutPage() {
       </SmoothParallax>
 
       {/* What Sets Us Apart */}
-      <SmoothParallax className="py-20 bg-gradient-to-b from-gray-900 to-black" speed={0.4}>
+      <SmoothParallax 
+        className="py-20" 
+        backgroundImage="https://res.cloudinary.com/dujmomznj/image/upload/f_webp,q_auto/v1754612278/202-IMG_2552_ve2via.jpg"
+        speed={0.4}
+        overlayOpacity={0.75}
+      >
         <div className="container mx-auto px-4">
           <RevealAnimation>
             <h2 className="text-4xl font-black text-center mb-16 text-white">
@@ -119,21 +124,19 @@ export default function AboutPage() {
             </h2>
           </RevealAnimation>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <StaggeredReveal staggerDelay={0.15}>
-              {features.map((feature, index) => (
-                <div key={index} className="text-center group">
-                  <ScrollTriggeredAnimation
-                    scaleRange={[0.5, 1]}
-                    className="bg-red-600/20 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-red-600/30 transition-all duration-500 hover:scale-110"
-                  >
-                    {feature.icon}
-                  </ScrollTriggeredAnimation>
-                  <h3 className="text-xl font-bold text-white mb-4">{feature.title}</h3>
-                  <p className="text-gray-400">{feature.description}</p>
-                </div>
-              ))}
-            </StaggeredReveal>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {features.map((feature, index) => (
+              <div key={index} className="text-center group">
+                <ScrollTriggeredAnimation
+                  scaleRange={[0.5, 1]}
+                  className="bg-red-600/20 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-red-600/30 transition-all duration-500 hover:scale-110"
+                >
+                  {feature.icon}
+                </ScrollTriggeredAnimation>
+                <h3 className="text-xl font-bold text-white mb-4">{feature.title}</h3>
+                <p className="text-gray-400">{feature.description}</p>
+              </div>
+            ))}
           </div>
         </div>
       </SmoothParallax>
@@ -144,9 +147,9 @@ export default function AboutPage() {
       {/* Evolution Timeline */}
       <SmoothParallax
         className="py-20"
-        backgroundImage="/placeholder.svg?height=800&width=1920"
+        backgroundImage="https://res.cloudinary.com/dujmomznj/image/upload/f_webp,q_auto/v1754612318/157-DSC07636_vuhcsq.jpg"
         speed={0.5}
-        overlayOpacity={0.85}
+        overlayOpacity={0.6}
       >
         <div className="container mx-auto px-4">
           <RevealAnimation>

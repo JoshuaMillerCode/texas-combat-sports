@@ -10,8 +10,10 @@ import CountdownTimer from "@/components/countdown-timer"
 import { useUpcomingEventsQuery } from "@/hooks/use-queries"
 import { format } from "date-fns"
 import type { IEvent } from "@/lib/models/Event"
+import { useRouter } from "next/navigation"
 
 export default function UpcomingEventsSection() {
+  const router = useRouter()
   const { data: upcomingEvents, isLoading: isLoadingUpcoming } = useUpcomingEventsQuery()
 
   return (
@@ -48,12 +50,15 @@ export default function UpcomingEventsSection() {
                     scaleRange={[0.95, 1]}
                     className="bg-black/50 border border-red-900/30 rounded-lg overflow-hidden group hover:border-red-600/50 transition-all duration-500 hover:scale-105"
                   >
-                    <div className="relative h-64">
+                    <div 
+                      className="relative h-[600px] hover:cursor-pointer"
+                      onClick={() => router.push(`/events/${event.slug}`)}
+                    >
                       <Image
                         src={event.posterImage || "/placeholder.svg"}
                         alt={event.title}
                         fill
-                        className="object-cover transition-transform duration-700 group-hover:scale-110"
+                        className="object-cover"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
                       <div className="absolute bottom-4 left-4">
@@ -70,7 +75,10 @@ export default function UpcomingEventsSection() {
                     </div>
                     <div className="p-6">
                       {event.date && <CountdownTimer targetDate={event.date.toString()} />}
-                      <Button className="w-full mt-4 bg-red-600 hover:bg-red-700 text-white font-bold transition-all duration-300 hover:scale-105">
+                      <Button 
+                      className="w-full mt-4 bg-red-600 hover:bg-red-700 text-white font-bold transition-all duration-300 hover:scale-105"
+                      onClick={() => router.push(`/events/${event.slug}`)}
+                      >
                         Get Tickets
                       </Button>
                     </div>

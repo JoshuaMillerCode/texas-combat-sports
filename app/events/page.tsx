@@ -34,15 +34,14 @@ export default function EventsPage() {
       {/* Hero Section */}
       <section className="relative h-96 flex items-center justify-center overflow-hidden">
         <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover">
-          <source src="/videos/events-hero.mp4" type="video/mp4" />
-          <source src="/videos/events-hero.webm" type="video/webm" />
+          <source src="https://res.cloudinary.com/dujmomznj/video/upload/v1754756997/0809_vaxbkh.mov" type="video/mp4" />
         </video>
         <div className="absolute inset-0 bg-black/70" />
         <div className="relative z-10 text-center">
-          <h1 className="text-6xl font-black text-white mb-4">
-            FIGHT <span className="text-red-600">EVENTS</span>
+          <h1 className="text-6xl font-black text-white mb-4 drop-shadow-2xl">
+            FIGHT <span className="text-red-600 drop-shadow-2xl">EVENTS</span>
           </h1>
-          <p className="text-xl text-gray-300">Where Champions Are Made</p>
+          <p className="text-xl text-gray-300 drop-shadow-lg">Where Champions Are Made</p>
         </div>
       </section>
 

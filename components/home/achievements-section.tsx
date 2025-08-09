@@ -31,12 +31,15 @@ export default function AchievementsSection() {
   return (
     <section className="py-20 bg-gradient-to-b from-black to-gray-900">
       <div className="container mx-auto px-4">
-        <StaggeredReveal staggerDelay={0.15}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
           {achievements.map((achievement, index) => (
             <div key={index} className="text-center group">
               <ScrollTriggeredAnimation
                 scaleRange={[0.8, 1]}
                 opacityRange={[0, 1]}
+                yRange={[50, 0]}
+                startOffset="0.8"
+                endOffset="0.2"
                 className="transition-transform duration-300 hover:scale-110"
               >
                 <div className="flex justify-center mb-4">{achievement.icon}</div>
@@ -45,7 +48,7 @@ export default function AchievementsSection() {
               </ScrollTriggeredAnimation>
             </div>
           ))}
-        </StaggeredReveal>
+        </div>
       </div>
     </section>
   )

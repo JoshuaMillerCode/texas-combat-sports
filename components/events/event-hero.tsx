@@ -116,7 +116,7 @@ export default function EventHero({ event, onOpenTicketModal }: EventHeroProps) 
                       src={event.posterImage || "/placeholder.svg"}
                       alt={`${event.title} Poster`}
                       fill
-                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                      className="object-contain transition-transform duration-700 group-hover:scale-105"
                       priority
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />

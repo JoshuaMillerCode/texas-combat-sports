@@ -14,7 +14,6 @@ export async function GET() {
     const apiSecret = process.env.CLOUDINARY_API_SECRET;
 
     if (!cloudName || !apiKey || !apiSecret) {
-      console.error('Cloudinary credentials not configured');
       return NextResponse.json([] as RandomImage[]);
     }
 
@@ -31,18 +30,12 @@ export async function GET() {
     );
 
     if (!foldersRes.ok) {
-      console.error('Failed to fetch folders:', await foldersRes.text());
       return NextResponse.json([] as RandomImage[]);
     }
 
     const foldersData: { folders: { name: string; path: string }[] } =
       await foldersRes.json();
     const folders = foldersData.folders || [];
-
-    console.log(
-      'Found folders for random images:',
-      folders.map((f) => f.name)
-    );
 
     // 2) Fetch images from all folders
     const allImages: Array<{
@@ -54,8 +47,6 @@ export async function GET() {
 
     for (const folder of folders) {
       try {
-        console.log(`Fetching images from folder: ${folder.name}`);
-
         // Try multiple search strategies to handle Cloudinary indexing delays
         const searchStrategies = [
           `folder:events/${folder.name} AND resource_type:image`,
@@ -114,15 +105,12 @@ export async function GET() {
               }));
 
               allImages.push(...folderImages);
-              console.log(
-                `Added ${folderImages.length} images from ${folder.name}`
-              );
               break; // Found images for this folder, move to next
             }
           }
         }
       } catch (error) {
-        console.error(`Error fetching images from ${folder.name}:`, error);
+        // Silently continue to next folder
       }
     }
 
@@ -130,13 +118,8 @@ export async function GET() {
     const shuffled = allImages.sort(() => 0.5 - Math.random());
     const randomImages = shuffled.slice(0, 16);
 
-    console.log(
-      `Selected ${randomImages.length} random images from ${allImages.length} total images`
-    );
-
     return NextResponse.json(randomImages);
   } catch (error: any) {
-    console.error('Error fetching random images:', error);
     return NextResponse.json([] as RandomImage[]);
   }
 }

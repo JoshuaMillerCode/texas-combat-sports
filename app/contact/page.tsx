@@ -223,16 +223,20 @@ export default function ContactPage() {
     <div className="min-h-screen pt-16">
       {/* Hero Section */}
       <section className="relative h-96 flex items-center justify-center overflow-hidden">
-        <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover">
-          <source src="/videos/contact-hero.mp4" type="video/mp4" />
-          <source src="/videos/contact-hero.webm" type="video/webm" />
-        </video>
+        <div 
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{
+            backgroundImage: `url(https://res.cloudinary.com/dujmomznj/image/upload/f_webp,q_auto/v1754612275/207-IMG_2557_blblcb.jpg)`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        />
         <div className="absolute inset-0 bg-black/70" />
         <div className="relative z-10 text-center">
-          <h1 className="text-6xl font-black text-white mb-4">
-            CONTACT <span className="text-red-600">US</span>
+          <h1 className="text-6xl font-black text-white mb-4 drop-shadow-2xl">
+            CONTACT <span className="text-red-600 drop-shadow-2xl">US</span>
           </h1>
-          <p className="text-xl text-gray-300">Get in Touch with TCS</p>
+          <p className="text-xl text-gray-300 drop-shadow-lg">Get in Touch with TCS</p>
         </div>
       </section>
 

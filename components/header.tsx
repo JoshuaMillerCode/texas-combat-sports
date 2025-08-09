@@ -4,10 +4,13 @@ import { useState } from "react"
 import Link from "next/link"
 import { Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import CartIcon from "@/components/cart-icon"
+import { useCurrentEvent } from "@/contexts/current-event-context"
+import { useRouter } from "next/navigation"
 
 export default function Header() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { currentEvent } = useCurrentEvent();
+  const router = useRouter();
 
   const navItems = [
     { href: "/", label: "Home" },
@@ -26,7 +29,7 @@ export default function Header() {
         <div className="flex items-center h-16">
           {/* Logo */}
           <Link href="/" className="text-2xl font-bold text-red-600 flex-shrink-0 mr-8">
-            TCS
+            TXCS
           </Link>
 
           {/* Desktop Navigation - Left aligned next to logo */}
@@ -68,14 +71,30 @@ export default function Header() {
           {/* Right side actions */}
           <div className="hidden lg:flex items-center space-x-3 flex-shrink-0 ml-auto">
             {/* <CartIcon /> */}
-            <Button size="sm" className="bg-red-600 hover:bg-red-700 text-white font-bold px-4">
+            <Button 
+              size="sm" 
+              className="bg-red-600 hover:bg-red-700 text-white font-bold px-4"
+              onClick={() => {
+                if (currentEvent) {
+                  router.push(`/events/${currentEvent.slug}`);
+                }
+              }}
+            >
               Buy Tickets
             </Button>
           </div>
 
           {/* Mobile Menu Button */}
           <div className="lg:hidden flex items-center space-x-3 flex-shrink-0 ml-auto">
-            <Button size="sm" className="bg-red-600 hover:bg-red-700 text-white font-bold px-4">
+            <Button 
+              size="sm" 
+              className="bg-red-600 hover:bg-red-700 text-white font-bold px-4"
+              onClick={() => {
+                if (currentEvent) {
+                  router.push(`/events/${currentEvent.slug}`);
+                }
+              }}
+            >
               Buy Tickets
             </Button>
             <button className="text-white p-1" onClick={() => setIsMenuOpen(!isMenuOpen)}>
