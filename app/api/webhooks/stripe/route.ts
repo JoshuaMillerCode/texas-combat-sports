@@ -163,7 +163,6 @@ export async function POST(req: NextRequest) {
             },
             ticketItems: ticketItems,
           });
-          console.log('Transaction created:', transaction);
 
           // Generate and send tickets via email
           try {

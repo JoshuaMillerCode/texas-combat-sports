@@ -1,6 +1,9 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2025-06-30.basil',
 });
@@ -9,7 +12,6 @@ export async function GET(req: NextRequest) {
   try {
     // Validate Stripe configuration
     if (!process.env.STRIPE_SECRET_KEY) {
-      console.error('STRIPE_SECRET_KEY is not configured');
       return NextResponse.json(
         { error: 'Payment system configuration error' },
         { status: 500 }
@@ -40,8 +42,6 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(session);
   } catch (error) {
-    console.error('Error retrieving session:', error);
-
     if (error instanceof Stripe.errors.StripeError) {
       const statusCode = error.statusCode || 500;
       const message = error.message || 'Failed to retrieve session';

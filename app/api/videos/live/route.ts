@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { VideoService } from '@/lib/services/video.service';
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
@@ -15,7 +18,6 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(videos);
   } catch (error) {
-    console.error('Error fetching live events:', error);
     return NextResponse.json(
       { error: 'Failed to fetch live events' },
       { status: 500 }
