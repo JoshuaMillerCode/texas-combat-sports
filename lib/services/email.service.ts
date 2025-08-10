@@ -77,11 +77,13 @@ export class EmailService {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
+      timeZone: 'America/Chicago', // Central Time Zone for Texas
     });
 
     const eventTime = new Date(event.date).toLocaleTimeString('en-US', {
       hour: '2-digit',
       minute: '2-digit',
+      timeZone: 'America/Chicago', // Central Time Zone for Texas
     });
 
     return `
@@ -118,7 +120,7 @@ export class EmailService {
               <h3>Event Details</h3>
               <p><strong>Event:</strong> ${event.title}</p>
               <p><strong>Date:</strong> ${eventDate}</p>
-              <p><strong>Time:</strong> ${eventTime}</p>
+              <p><strong>Time:</strong> ${eventTime} (Central Time)</p>
               <p><strong>Venue:</strong> ${event.venue}</p>
               <p><strong>Address:</strong> ${event.address}</p>
             </div>
@@ -171,6 +173,7 @@ export class EmailService {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
+      timeZone: 'America/Chicago', // Central Time Zone for Texas
     });
 
     return `

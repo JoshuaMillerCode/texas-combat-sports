@@ -217,6 +217,37 @@ export async function POST(req: NextRequest) {
         console.log('Payment failed:', paymentIntent.id);
         break;
 
+      case 'payment_intent.succeeded':
+        const succeededPaymentIntent = event.data
+          .object as Stripe.PaymentIntent;
+        console.log('Payment succeeded:', succeededPaymentIntent.id);
+        // Update transaction status if needed
+        break;
+
+      case 'payment_intent.canceled':
+        const canceledPaymentIntent = event.data.object as Stripe.PaymentIntent;
+        console.log('Payment canceled:', canceledPaymentIntent.id);
+        // Update transaction status to canceled
+        break;
+
+      case 'charge.refunded':
+        const refundedCharge = event.data.object as Stripe.Charge;
+        console.log('Charge refunded:', refundedCharge.id);
+        // Handle refund - update transaction status and potentially void tickets
+        break;
+
+      case 'charge.dispute.created':
+        const dispute = event.data.object as Stripe.Dispute;
+        console.log('Charge disputed:', dispute.id);
+        // Handle chargeback - flag transaction for review
+        break;
+
+      case 'charge.dispute.closed':
+        const closedDispute = event.data.object as Stripe.Dispute;
+        console.log('Dispute closed:', closedDispute.id);
+        // Handle resolved dispute
+        break;
+
       case 'charge.updated':
         const charge = event.data.object as Stripe.Charge;
         console.log('Charge updated:', charge.id);

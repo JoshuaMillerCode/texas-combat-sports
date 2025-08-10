@@ -231,7 +231,7 @@ export class TicketGenerator {
     // Event details in a structured layout
     const detailsY = height - 180;
     const labelX = 40;
-    const valueX = 200;
+    const valueX = 120; // Moved closer to labels
 
     // Date
     page.drawText('DATE:', {
@@ -259,7 +259,7 @@ export class TicketGenerator {
       color,
     });
 
-    page.drawText(ticketData.eventTime, {
+    page.drawText(`${ticketData.eventTime} (Central Time)`, {
       x: valueX,
       y: detailsY - 25,
       size: 12,
@@ -550,10 +550,12 @@ export class TicketGenerator {
             year: 'numeric',
             month: 'long',
             day: 'numeric',
+            timeZone: 'America/Chicago', // Central Time Zone for Texas
           }),
           eventTime: event.date.toLocaleTimeString('en-US', {
             hour: '2-digit',
             minute: '2-digit',
+            timeZone: 'America/Chicago', // Central Time Zone for Texas
           }),
           eventLocation: event.address,
           eventVenue: event.venue,
