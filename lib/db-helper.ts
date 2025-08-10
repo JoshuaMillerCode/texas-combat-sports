@@ -24,6 +24,7 @@ import { FightService } from './services/fight.service';
 import { MerchService } from './services/merch.service';
 import { TicketTierService } from './services/ticketTier.service';
 import { TransactionService } from './services/transaction.service';
+import { UserService } from './services/user.service';
 
 // Export individual services for granular access
 export {
@@ -33,6 +34,7 @@ export {
   MerchService,
   TicketTierService,
   TransactionService,
+  UserService,
 };
 
 /**
@@ -50,6 +52,7 @@ export const db = {
   merch: MerchService,
   ticketTiers: TicketTierService,
   transactions: TransactionService,
+  users: UserService,
 
   // Utility methods
   async disconnect() {
@@ -246,6 +249,72 @@ if (require.main === module) {
           await setupCompleteEvent();
           break;
 
+        case 'create-admin-user':
+          const readline = require('readline');
+          const rl = readline.createInterface({
+            input: process.stdin,
+            output: process.stdout,
+          });
+
+          const question = (query: string): Promise<string> => {
+            return new Promise((resolve) => {
+              rl.question(query, resolve);
+            });
+          };
+
+          try {
+            console.log('👤 Creating a new admin user...');
+            console.log('=====================================');
+
+            const username = await question('Username: ');
+            const email = await question('Email: ');
+            const password = await question('Password (min 8 characters): ');
+
+            if (password.length < 8) {
+              throw new Error('Password must be at least 8 characters long');
+            }
+
+            const user = await db.users.createUser({
+              username,
+              email,
+              password,
+              role: 'admin',
+              isActive: true,
+            });
+
+            console.log('✅ Admin user created successfully!');
+            console.log('User ID:', user._id);
+            console.log('Username:', user.username);
+            console.log('Email:', user.email);
+            console.log('Role:', user.role);
+            console.log('Status:', user.isActive ? 'Active' : 'Inactive');
+          } catch (error) {
+            console.error('❌ Error creating admin user:', error);
+          } finally {
+            rl.close();
+          }
+          break;
+
+        case 'list-users':
+          try {
+            const users = await db.users.getAllUsers();
+            console.log('👥 All Users:');
+            console.log('=============');
+            users.forEach((user, index) => {
+              console.log(`${index + 1}. ${user.username} (${user.email})`);
+              console.log(
+                `   Role: ${user.role} | Status: ${
+                  user.isActive ? 'Active' : 'Inactive'
+                }`
+              );
+              console.log(`   Created: ${user.createdAt.toLocaleDateString()}`);
+              console.log('');
+            });
+          } catch (error) {
+            console.error('❌ Error listing users:', error);
+          }
+          break;
+
         default:
           console.log('Available commands:');
           console.log(
@@ -260,6 +329,8 @@ if (require.main === module) {
           console.log(
             '  setup-complete-event    - Create a complete event with fighters, tiers, and fights'
           );
+          console.log('  create-admin-user       - Create a new admin user');
+          console.log('  list-users              - List all users');
           console.log('');
           console.log('Usage: npx ts-node lib/db-helper.ts <command>');
       }
