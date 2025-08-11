@@ -11,7 +11,8 @@ import {
   Sword, 
   ShoppingCart, 
   Ticket,
-  Loader2
+  Loader2,
+  QrCode
 } from "lucide-react"
 import { useAuth } from "@/contexts/auth-context"
 import EventsSection from "@/components/adminDashboard/events-section"
@@ -64,13 +65,23 @@ export default function AdminDashboardPage() {
             <h1 className="text-2xl font-bold text-white">Admin Dashboard</h1>
             <p className="text-gray-400">Texas Combat Sports Management</p>
           </div>
-          <Button 
-            onClick={handleLogout}
-            variant="outline" 
-            className="border-gray-700 text-gray-300 hover:bg-gray-800"
-          >
-            Logout
-          </Button>
+          <div className="flex items-center space-x-4">
+            <Button 
+              onClick={() => window.location.href = '/admin/ticket-scan'}
+              variant="outline" 
+              className="border-gray-700 text-gray-300 hover:bg-gray-800"
+            >
+              <QrCode className="h-4 w-4 mr-2" />
+              Ticket Scanner
+            </Button>
+            <Button 
+              onClick={handleLogout}
+              variant="outline" 
+              className="border-gray-700 text-gray-300 hover:bg-gray-800"
+            >
+              Logout
+            </Button>
+          </div>
         </div>
       </header>
 
