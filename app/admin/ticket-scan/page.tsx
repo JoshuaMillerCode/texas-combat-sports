@@ -16,6 +16,7 @@ export default function TicketScanPage() {
   const [isScanning, setIsScanning] = useState(false)
   const [scanResult, setScanResult] = useState<ScanResult | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
+  const [cameraError, setCameraError] = useState<string | null>(null)
   const scannerRef = useRef<Html5QrcodeScanner | null>(null)
   const { isAuthenticated, isLoading: authLoading } = useAuth()
 
@@ -39,21 +40,23 @@ export default function TicketScanPage() {
           "qr-reader",
           {
             fps: 10,
-            qrbox: { width: 250, height: 250 },
+            qrbox: { width: 300, height: 300 },
             aspectRatio: 1.0,
             supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA],
-            showTorchButtonIfSupported: true,
-            showZoomSliderIfSupported: true,
-            defaultZoomValueIfSupported: 2,
+            showTorchButtonIfSupported: false,
+            showZoomSliderIfSupported: false,
+            defaultZoomValueIfSupported: 1,
           },
-          false
+          /* verbose= */ false
         )
 
         try {
           scanner.render(onScanSuccess, onScanError)
           scannerRef.current = scanner
+          setCameraError(null)
         } catch (error) {
           console.error('Error initializing scanner:', error)
+          setCameraError('Failed to initialize camera. Please check permissions and try again.')
           setIsScanning(false)
         }
       }, 100)
@@ -62,7 +65,11 @@ export default function TicketScanPage() {
     } else {
       // Clean up scanner when not scanning
       if (scannerRef.current) {
-        scannerRef.current.clear()
+        try {
+          scannerRef.current.clear()
+        } catch (error) {
+          console.error('Error clearing scanner:', error)
+        }
         scannerRef.current = null
       }
     }
@@ -72,14 +79,51 @@ export default function TicketScanPage() {
   useEffect(() => {
     return () => {
       if (scannerRef.current) {
-        scannerRef.current.clear()
+        try {
+          scannerRef.current.clear()
+        } catch (error) {
+          console.error('Error clearing scanner on unmount:', error)
+        }
       }
     }
   }, [])
 
+  // Dynamic button styling after scanner loads
+  useEffect(() => {
+    if (isScanning) {
+      const timer = setTimeout(() => {
+        const qrReader = document.getElementById('qr-reader')
+        if (qrReader) {
+          // Find all interactive elements and ensure they're visible
+          const interactiveElements = qrReader.querySelectorAll('button, a, span[onclick], div[onclick], *[role="button"]')
+          interactiveElements.forEach((element) => {
+            const htmlElement = element as HTMLElement
+            // Apply consistent styling to ensure visibility
+            htmlElement.style.setProperty('background', '#3b82f6', 'important')
+            htmlElement.style.setProperty('color', 'white', 'important')
+            htmlElement.style.setProperty('border', '1px solid #2563eb', 'important')
+            htmlElement.style.setProperty('padding', '8px 16px', 'important')
+            htmlElement.style.setProperty('border-radius', '6px', 'important')
+            htmlElement.style.setProperty('margin', '4px', 'important')
+            htmlElement.style.setProperty('font-size', '14px', 'important')
+            htmlElement.style.setProperty('font-weight', '500', 'important')
+            htmlElement.style.setProperty('cursor', 'pointer', 'important')
+            htmlElement.style.setProperty('text-decoration', 'none', 'important')
+            htmlElement.style.setProperty('display', 'inline-block', 'important')
+            htmlElement.style.setProperty('visibility', 'visible', 'important')
+            htmlElement.style.setProperty('opacity', '1', 'important')
+          })
+        }
+      }, 500)
+
+      return () => clearTimeout(timer)
+    }
+  }, [isScanning])
+
   const startScanner = () => {
     setIsScanning(true)
     setScanResult(null)
+    setCameraError(null)
   }
 
   const stopScanner = () => {
@@ -149,10 +193,18 @@ export default function TicketScanPage() {
   const onScanError = (error: any) => {
     // Ignore errors during scanning - they're normal
     console.log('Scan error:', error)
+    
+    // Check for specific mobile camera errors
+    if (error && error.toString && error.toString().includes('toString')) {
+      console.error('Mobile camera error detected:', error)
+      setCameraError('Camera access error. Please refresh and try again.')
+      setIsScanning(false)
+    }
   }
 
   const handleScanAgain = () => {
     setScanResult(null)
+    setCameraError(null)
     startScanner()
   }
 
@@ -179,72 +231,70 @@ export default function TicketScanPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black">
-      {/* Custom CSS for html5-qrcode library */}
+      {/* Minimal CSS for html5-qrcode library */}
       <style jsx>{`
         #qr-reader {
-          background: white !important;
+          background: #f8f9fa !important;
           border-radius: 8px !important;
-          padding: 16px !important;
+          padding: 20px !important;
+          margin: 0 auto !important;
+          max-width: 400px !important;
         }
         
-        #qr-reader * {
-          color: black !important;
-        }
-        
+        /* Let the library handle its own buttons and styling */
         #qr-reader button {
           background: #3b82f6 !important;
           color: white !important;
-          border: none !important;
+          border: 1px solid #2563eb !important;
           padding: 8px 16px !important;
-          border-radius: 4px !important;
-          margin: 4px !important;
+          border-radius: 6px !important;
+          margin: 8px 4px !important;
+          font-size: 14px !important;
+          font-weight: 500 !important;
+          cursor: pointer !important;
+          min-height: 36px !important;
         }
         
         #qr-reader button:hover {
           background: #2563eb !important;
+          border-color: #1d4ed8 !important;
+        }
+        
+        /* Ensure all clickable elements are visible */
+        #qr-reader a,
+        #qr-reader span[onclick],
+        #qr-reader div[onclick],
+        #qr-reader *[role="button"] {
+          background: #3b82f6 !important;
+          color: white !important;
+          border: 1px solid #2563eb !important;
+          padding: 8px 16px !important;
+          border-radius: 6px !important;
+          margin: 4px !important;
+          font-size: 14px !important;
+          font-weight: 500 !important;
+          cursor: pointer !important;
+          text-decoration: none !important;
+          display: inline-block !important;
         }
         
         #qr-reader select {
-          background: white !important;
-          color: black !important;
-          border: 1px solid #d1d5db !important;
+          margin: 8px 0 !important;
           padding: 4px 8px !important;
-          border-radius: 4px !important;
+          font-size: 14px !important;
         }
         
-        #qr-reader__scan_region {
-          background: white !important;
+        /* Clean video styling */
+        #qr-reader video {
+          border-radius: 6px !important;
+          max-width: 100% !important;
         }
         
-        #qr-reader__scan_region video {
-          border-radius: 4px !important;
-        }
-        
-        #qr-reader__dashboard {
-          background: white !important;
-          color: black !important;
-        }
-        
-        #qr-reader__dashboard_section {
-          background: white !important;
-          color: black !important;
-        }
-        
-        #qr-reader__dashboard_section_swaplink {
-          color: #3b82f6 !important;
-        }
-        
-        #qr-reader__dashboard_section_swaplink:hover {
-          color: #2563eb !important;
-        }
-        
-        #qr-reader__status_span {
-          color: black !important;
-        }
-        
-        #qr-reader__camera_selection {
-          background: white !important;
-          color: black !important;
+        /* Simple text styling */
+        #qr-reader span,
+        #qr-reader div {
+          font-size: 14px !important;
+          line-height: 1.4 !important;
         }
       `}</style>
 
@@ -301,6 +351,21 @@ export default function TicketScanPage() {
                   Point the camera at the ticket's QR code
                 </p>
               </div>
+              
+              {/* Camera Error Display */}
+              {cameraError && (
+                <div className="bg-red-900/20 border border-red-600 rounded-lg p-4 text-center">
+                  <p className="text-red-400 mb-2">{cameraError}</p>
+                  <Button 
+                    onClick={handleScanAgain}
+                    size="sm"
+                    className="bg-red-600 hover:bg-red-700 text-white"
+                  >
+                    Try Again
+                  </Button>
+                </div>
+              )}
+              
               <div 
                 key={isScanning ? 'scanning' : 'not-scanning'}
                 id="qr-reader" 
