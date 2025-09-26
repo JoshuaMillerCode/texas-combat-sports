@@ -474,7 +474,7 @@ function SpotlightCard({ fighter, onClose }: SpotlightCardProps) {
       animate={{ scale: 1, opacity: 1, rotateX: 0 }}
       exit={{ scale: 0.8, opacity: 0, rotateX: 15 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
-      onClick={(e) => e.stopPropagation()}
+      onClick={(e: React.MouseEvent<HTMLDivElement>) => e.stopPropagation()}
     >
       {/* Close Button */}
       <button

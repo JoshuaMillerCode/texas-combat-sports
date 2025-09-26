@@ -83,12 +83,12 @@ const EventSchema: Schema = new Schema(
       type: Schema.Types.ObjectId,
       ref: 'Fight',
     },
-    fights: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: 'Fight',
-      },
-    ],
+    // fights: [
+    //   {
+    //     type: Schema.Types.ObjectId,
+    //     ref: 'Fight',
+    //   },
+    // ],
     ticketTiers: [
       {
         type: Schema.Types.ObjectId,
@@ -105,11 +105,20 @@ const EventSchema: Schema = new Schema(
   },
   {
     timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   }
 );
 
 // Index for efficient queries
 EventSchema.index({ date: 1 });
+
+EventSchema.virtual('fights', {
+  ref: 'Fight',
+  localField: '_id',
+  foreignField: 'event',
+  justOne: false,
+});
 
 const Event =
   mongoose.models.Event || mongoose.model<IEvent>('Event', EventSchema);

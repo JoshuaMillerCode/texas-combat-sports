@@ -10,7 +10,8 @@ interface UndercardProps {
 }
 
 export default function Undercard({ fights }: UndercardProps) {
-  if (!fights || fights.length === 0) {
+  const undercardFights = fights?.filter((f: any) => f.isMainEvent == false)
+  if (!undercardFights || undercardFights.length === 0) {
     return (
       <section className="py-20 bg-gradient-to-b from-gray-900 to-black">
         <div className="container mx-auto px-4">
@@ -44,7 +45,7 @@ export default function Undercard({ fights }: UndercardProps) {
         </RevealAnimation>
 
         <div className="max-w-4xl mx-auto space-y-8">
-          {fights.map((fight: any, index: number) => (
+          {undercardFights.map((fight: any, index: number) => (
             <RevealAnimation key={fight.id} delay={index * 0.1}>
               <ScrollTriggeredAnimation
                 scaleRange={[0.95, 1]}

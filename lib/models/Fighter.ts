@@ -59,6 +59,11 @@ const FighterSchema: Schema = new Schema(
     image: {
       type: String,
     },
+    featured: {
+      type: Boolean,
+      required: true,
+      default: false,
+    },
     stats: {
       knockouts: {
         type: Number,

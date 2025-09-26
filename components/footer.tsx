@@ -41,7 +41,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-8 pt-8 border-t border-red-900/30 text-center text-gray-400">
-          <p>&copy; {new Date().getFullYear()} Texas Combat Sport. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Texas Combat Sports. All rights reserved.</p>
         </div>
       </div>
     </footer>

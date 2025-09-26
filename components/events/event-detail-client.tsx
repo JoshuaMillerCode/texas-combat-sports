@@ -12,6 +12,7 @@ import { useEventQuery } from "@/hooks/use-queries"
 export default function EventDetailClient({ params }: { params: { slug: string } }) {
   const [isTicketModalOpen, setIsTicketModalOpen] = useState(false)
   const { data: event, isLoading, error } = useEventQuery(params.slug)
+  const mainEventFight = event?.fights.find((f: any) => f.isMainEvent)
 
   if (isLoading) return <LoadingBoxing text="Loading Event..." size="lg" />
   if (error) return <div className="py-20 text-center text-red-500">Error loading event: {error.message}</div>
@@ -19,7 +20,7 @@ export default function EventDetailClient({ params }: { params: { slug: string }
   return (
     <div className="min-h-screen pt-10">
       <EventHero event={event} onOpenTicketModal={() => setIsTicketModalOpen(true)} />
-      <MainEvent mainEventFight={event.mainEventFight} />
+      <MainEvent mainEventFight={mainEventFight} />
       <Undercard fights={event.fights} />
       <BottomBuy onOpenTicketModal={() => setIsTicketModalOpen(true)} />
 

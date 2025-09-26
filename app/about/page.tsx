@@ -99,7 +99,7 @@ export default function AboutPage() {
             <RevealAnimation direction="right" delay={0.2}>
               <ScrollTriggeredAnimation scaleRange={[0.8, 1]} className="relative h-96">
                 <Image
-                  src="https://res.cloudinary.com/dujmomznj/image/upload/e_improve,e_sharpen,f_auto,q_auto/v1753627714/txcs-logo_wb9qnx.jpg"
+                  src="https://res.cloudinary.com/dujmomznj/image/upload/f_webp,q_auto/v1755403315/txcs_logo_toiioe.png"
                   alt="Texas Combat Sport History"
                   fill
                   className="object-contain rounded-lg"
@@ -142,9 +142,9 @@ export default function AboutPage() {
       </SmoothParallax>
 
       {/* Meet the Team */}
-      <TeamSection />
+      {/* <TeamSection /> */}
 
-      {/* Evolution Timeline */}
+      {/* Evolution Timeline
       <SmoothParallax
         className="py-20"
         backgroundImage="https://res.cloudinary.com/dujmomznj/image/upload/f_webp,q_auto/v1754612318/157-DSC07636_vuhcsq.jpg"
@@ -179,7 +179,7 @@ export default function AboutPage() {
             </div>
           </div>
         </div>
-      </SmoothParallax>
+      </SmoothParallax> */}
     </div>
   )
 }

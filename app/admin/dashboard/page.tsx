@@ -115,10 +115,10 @@ export default function AdminDashboardPage() {
               <Sword className="h-4 w-4" />
               Fights
             </TabsTrigger>
-            <TabsTrigger value="merch" className="flex items-center gap-2 data-[state=active]:bg-red-600 data-[state=active]:text-white">
+            {/* <TabsTrigger value="merch" className="flex items-center gap-2 data-[state=active]:bg-red-600 data-[state=active]:text-white">
               <ShoppingCart className="h-4 w-4" />
               Merch
-            </TabsTrigger>
+            </TabsTrigger> */}
             <TabsTrigger value="tickets" className="flex items-center gap-2 data-[state=active]:bg-red-600 data-[state=active]:text-white">
               <Ticket className="h-4 w-4" />
               Tickets
@@ -141,9 +141,9 @@ export default function AdminDashboardPage() {
           </TabsContent>
 
           {/* Merch Tab */}
-          <TabsContent value="merch">
+          {/* <TabsContent value="merch">
             <MerchSection searchTerm={searchTerm} />
-          </TabsContent>
+          </TabsContent> */}
 
           {/* Ticket Tiers Tab */}
           <TabsContent value="tickets">

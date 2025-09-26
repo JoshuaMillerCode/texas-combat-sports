@@ -16,10 +16,10 @@ export default function HomePage() {
       <HeroSection />
       <AchievementsSection />
       <UpcomingEventsSection />
-      <FeaturedFightersSection />
-      <PastEventsSection />
+      {/* <FeaturedFightersSection /> */}
+      {/* <PastEventsSection /> */}
       <WhySection />
-      <NewsletterSection />
+      {/* <NewsletterSection /> */}
     </div>
   )
 }

@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Plus, Edit, Trash2, Eye, Loader2 } from "lucide-react"
 import { useFightersQuery, useCreateFighterMutation, useUpdateFighterMutation, useDeleteFighterMutation } from "@/hooks/use-queries"
 import { LoadingCard, ErrorCard } from "./loading-card"
@@ -22,6 +23,9 @@ export default function FightersSection({ searchTerm }: FightersSectionProps) {
   const { mutate: updateFighter, isPending: isUpdating } = useUpdateFighterMutation()
   const { mutate: deleteFighter, isPending: isDeleting } = useDeleteFighterMutation()
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
+  const [selectedFighter, setSelectedFighter] = useState<any>(null)
 
   if (isLoading) return <LoadingCard />
   if (error) return <ErrorCard />
@@ -59,6 +63,51 @@ export default function FightersSection({ searchTerm }: FightersSectionProps) {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Edit Fighter Dialog */}
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent className="bg-gray-900 border-gray-800 text-white max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+            <DialogHeader className="flex-shrink-0">
+              <DialogTitle>Edit Fighter</DialogTitle>
+              <DialogDescription className="text-gray-400">
+                Update the fighter details
+              </DialogDescription>
+            </DialogHeader>
+            <div className="overflow-y-auto flex-1 pr-2">
+              {selectedFighter && (
+                <EditFighterForm 
+                  fighter={selectedFighter} 
+                  onSubmit={(data) => {
+                    const updateData = { ...data, id: selectedFighter._id }
+                    updateFighter(updateData)
+                    setIsEditDialogOpen(false)
+                    setSelectedFighter(null)
+                  }} 
+                  isLoading={isUpdating} 
+                  onClose={() => {
+                    setIsEditDialogOpen(false)
+                    setSelectedFighter(null)
+                  }} 
+                />
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* View Fighter Dialog */}
+        <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+          <DialogContent className="bg-gray-900 border-gray-800 text-white max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+            <DialogHeader className="flex-shrink-0">
+              <DialogTitle>Fighter Details</DialogTitle>
+              <DialogDescription className="text-gray-400">
+                View fighter information
+              </DialogDescription>
+            </DialogHeader>
+            <div className="overflow-y-auto flex-1 pr-2">
+              {selectedFighter && <ViewFighterModal fighter={selectedFighter} />}
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Fighters Grid */}
@@ -67,17 +116,19 @@ export default function FightersSection({ searchTerm }: FightersSectionProps) {
           <Card key={fighter._id} className="bg-gray-800 border-gray-700 hover:bg-gray-750 transition-colors">
             <CardHeader>
               <CardTitle className="text-white">{fighter.name}</CardTitle>
-              <CardDescription className="text-gray-400">"{fighter.nickname}"</CardDescription>
+              <CardDescription className="text-gray-400">
+                {fighter.nickname && `"${fighter.nickname}"`}
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-300">Record:</span>
-                  <Badge variant="secondary" className="bg-green-900/30 text-green-400">{fighter.record}</Badge>
+                  <span className="text-gray-300">Weight Class:</span>
+                  <span className="text-white">{fighter.weightClass}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-300">Weight:</span>
-                  <span className="text-white">{fighter.weight}</span>
+                  <span className="text-gray-300">Record:</span>
+                  <span className="text-white">{fighter.record}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-300">Hometown:</span>
@@ -85,20 +136,37 @@ export default function FightersSection({ searchTerm }: FightersSectionProps) {
                 </div>
               </div>
               <div className="flex gap-2 mt-4">
-                <Button size="sm" variant="outline" className="border-gray-600 text-gray-300 hover:bg-gray-700">
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                  onClick={() => {
+                    setSelectedFighter(fighter)
+                    setIsViewDialogOpen(true)
+                  }}
+                >
                   <Eye className="h-4 w-4 mr-1" />
                   View
                 </Button>
-                <Button size="sm" variant="outline" className="border-gray-600 text-gray-300 hover:bg-gray-700">
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                  onClick={() => {
+                    setSelectedFighter(fighter)
+                    setIsEditDialogOpen(true)
+                  }}
+                >
                   <Edit className="h-4 w-4 mr-1" />
                   Edit
                 </Button>
                 <Button 
                   size="sm" 
                   variant="outline" 
-                  className="border-red-600 text-red-400 hover:bg-red-900/20" 
-                  onClick={() => deleteFighter(fighter._id)}
-                  disabled={isDeleting}
+                  className="border-red-600 text-red-400 hover:bg-red-900/20"
+                  onClick={() => {
+                    deleteFighter(fighter._id)
+                  }}
                 >
                   <Trash2 className="h-4 w-4 mr-1" />
                   Delete
@@ -123,6 +191,7 @@ function CreateFighterForm({ onSubmit, isLoading, onClose }: { onSubmit: (data: 
     weight: '',
     hometown: '',
     image: '',
+    featured: false,
     stats: {
       knockouts: '',
       submissions: '',
@@ -145,6 +214,7 @@ function CreateFighterForm({ onSubmit, isLoading, onClose }: { onSubmit: (data: 
       reach: formData.reach,
       weight: formData.weight,
       hometown: formData.hometown,
+      featured: formData.featured,
       stats: {
         knockouts: parseInt(formData.stats.knockouts) || 0,
         submissions: parseInt(formData.stats.submissions) || 0,
@@ -340,6 +410,16 @@ function CreateFighterForm({ onSubmit, isLoading, onClose }: { onSubmit: (data: 
         </div>
       </div>
 
+      <div className="flex items-center space-x-2">
+        <Checkbox
+          id="featured"
+          checked={formData.featured}
+          onCheckedChange={(checked: boolean) => setFormData(prev => ({ ...prev, featured: !!checked }))}
+          className="border-gray-600"
+        />
+        <Label htmlFor="featured" className="text-gray-300">Featured Fighter (display prominently on homepage)</Label>
+      </div>
+
       <div className="space-y-2">
         <Label htmlFor="achievements" className="text-gray-300">Achievements</Label>
         <Textarea
@@ -369,5 +449,366 @@ function CreateFighterForm({ onSubmit, isLoading, onClose }: { onSubmit: (data: 
         </Button>
       </div>
     </form>
+  )
+}
+
+function EditFighterForm({ fighter, onSubmit, isLoading, onClose }: { fighter: any, onSubmit: (data: any) => void, isLoading: boolean, onClose: () => void }) {
+  const [formData, setFormData] = useState({
+    name: fighter.name,
+    nickname: fighter.nickname,
+    record: fighter.record,
+    age: fighter.age,
+    height: fighter.height,
+    reach: fighter.reach,
+    weight: fighter.weight,
+    hometown: fighter.hometown,
+    image: fighter.image,
+    featured: fighter.featured || false,
+    stats: {
+      knockouts: fighter.stats.knockouts,
+      submissions: fighter.stats.submissions,
+      decisions: fighter.stats.decisions,
+      winStreak: fighter.stats.winStreak,
+    },
+    achievements: fighter.achievements.join('\n')
+  })
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    // Transform the data to match the schema
+    const submitData: any = {
+      name: formData.name,
+      nickname: formData.nickname,
+      record: formData.record,
+      age: parseInt(formData.age),
+      height: formData.height,
+      reach: formData.reach,
+      weight: formData.weight,
+      hometown: formData.hometown,
+      featured: formData.featured,
+      stats: {
+        knockouts: parseInt(formData.stats.knockouts) || 0,
+        submissions: parseInt(formData.stats.submissions) || 0,
+        decisions: parseInt(formData.stats.decisions) || 0,
+        winStreak: parseInt(formData.stats.winStreak) || 0,
+          },
+    achievements: formData.achievements
+      .split('\n')
+      .map((achievement: string) => achievement.trim())
+      .filter((achievement: string) => achievement.length > 0)
+  }
+    
+    // Only include image if it has a value
+    if (formData.image && formData.image.trim()) {
+      submitData.image = formData.image.trim()
+    }
+    
+    await onSubmit(submitData)
+    onClose()
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="name" className="text-gray-300">Full Name</Label>
+          <Input
+            id="name"
+            value={formData.name}
+            onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+            className="bg-gray-800 border-gray-700 text-white"
+            required
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="nickname" className="text-gray-300">Nickname</Label>
+          <Input
+            id="nickname"
+            value={formData.nickname}
+            onChange={(e) => setFormData(prev => ({ ...prev, nickname: e.target.value }))}
+            className="bg-gray-800 border-gray-700 text-white"
+            required
+          />
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-3 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="record" className="text-gray-300">Record (W-L-D)</Label>
+          <Input
+            id="record"
+            value={formData.record}
+            onChange={(e) => setFormData(prev => ({ ...prev, record: e.target.value }))}
+            className="bg-gray-800 border-gray-700 text-white"
+            placeholder="15-2-0"
+            required
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="age" className="text-gray-300">Age</Label>
+          <Input
+            id="age"
+            type="number"
+            value={formData.age}
+            onChange={(e) => setFormData(prev => ({ ...prev, age: e.target.value }))}
+            className="bg-gray-800 border-gray-700 text-white"
+            required
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="weight" className="text-gray-300">Weight</Label>
+          <Input
+            id="weight"
+            value={formData.weight}
+            onChange={(e) => setFormData(prev => ({ ...prev, weight: e.target.value }))}
+            className="bg-gray-800 border-gray-700 text-white"
+            placeholder="155 lbs"
+            required
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="height" className="text-gray-300">Height</Label>
+          <Input
+            id="height"
+            value={formData.height}
+            onChange={(e) => setFormData(prev => ({ ...prev, height: e.target.value }))}
+            className="bg-gray-800 border-gray-700 text-white"
+            placeholder="5'10&quot;"
+            required
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="reach" className="text-gray-300">Reach</Label>
+          <Input
+            id="reach"
+            value={formData.reach}
+            onChange={(e) => setFormData(prev => ({ ...prev, reach: e.target.value }))}
+            className="bg-gray-800 border-gray-700 text-white"
+            placeholder="72&quot;"
+            required
+          />
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="hometown" className="text-gray-300">Hometown</Label>
+        <Input
+          id="hometown"
+          value={formData.hometown}
+          onChange={(e) => setFormData(prev => ({ ...prev, hometown: e.target.value }))}
+          className="bg-gray-800 border-gray-700 text-white"
+          required
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="image" className="text-gray-300">Image URL (Optional)</Label>
+        <Input
+          id="image"
+          value={formData.image}
+          onChange={(e) => setFormData(prev => ({ ...prev, image: e.target.value }))}
+          className="bg-gray-800 border-gray-700 text-white"
+          placeholder="https://example.com/fighter-image.jpg"
+        />
+      </div>
+
+      <div className="space-y-4">
+        <Label className="text-gray-300 text-base font-medium">Fight Statistics</Label>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="knockouts" className="text-gray-300">Knockouts</Label>
+            <Input
+              id="knockouts"
+              type="number"
+              value={formData.stats.knockouts}
+              onChange={(e) => setFormData(prev => ({ 
+                ...prev, 
+                stats: { ...prev.stats, knockouts: e.target.value }
+              }))}
+              className="bg-gray-800 border-gray-700 text-white"
+              min="0"
+              placeholder="0"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="submissions" className="text-gray-300">Submissions</Label>
+            <Input
+              id="submissions"
+              type="number"
+              value={formData.stats.submissions}
+              onChange={(e) => setFormData(prev => ({ 
+                ...prev, 
+                stats: { ...prev.stats, submissions: e.target.value }
+              }))}
+              className="bg-gray-800 border-gray-700 text-white"
+              min="0"
+              placeholder="0"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="decisions" className="text-gray-300">Decisions</Label>
+            <Input
+              id="decisions"
+              type="number"
+              value={formData.stats.decisions}
+              onChange={(e) => setFormData(prev => ({ 
+                ...prev, 
+                stats: { ...prev.stats, decisions: e.target.value }
+              }))}
+              className="bg-gray-800 border-gray-700 text-white"
+              min="0"
+              placeholder="0"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="winStreak" className="text-gray-300">Win Streak</Label>
+            <Input
+              id="winStreak"
+              type="number"
+              value={formData.stats.winStreak}
+              onChange={(e) => setFormData(prev => ({ 
+                ...prev, 
+                stats: { ...prev.stats, winStreak: e.target.value }
+              }))}
+              className="bg-gray-800 border-gray-700 text-white"
+              min="0"
+              placeholder="0"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="flex items-center space-x-2">
+        <Checkbox
+          id="featured"
+          checked={formData.featured}
+          onCheckedChange={(checked: boolean) => setFormData(prev => ({ ...prev, featured: !!checked }))}
+          className="border-gray-600"
+        />
+        <Label htmlFor="featured" className="text-gray-300">Featured Fighter (display prominently on homepage)</Label>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="achievements" className="text-gray-300">Achievements</Label>
+        <Textarea
+          id="achievements"
+          value={formData.achievements}
+          onChange={(e) => setFormData(prev => ({ ...prev, achievements: e.target.value }))}
+          className="bg-gray-800 border-gray-700 text-white"
+          rows={4}
+          placeholder="Enter achievements, one per line&#10;Regional Champion&#10;Fighter of the Year 2023&#10;Knockout of the Night"
+        />
+        <p className="text-xs text-gray-500">Enter each achievement on a new line</p>
+      </div>
+
+      <div className="flex justify-end gap-2 pt-4">
+        <Button type="button" variant="outline" onClick={onClose} className="border-gray-600 text-gray-300">
+          Cancel
+        </Button>
+        <Button type="submit" disabled={isLoading} className="bg-red-600 hover:bg-red-700">
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Updating...
+            </>
+          ) : (
+            'Update Fighter'
+          )}
+        </Button>
+      </div>
+    </form>
+  )
+}
+
+function ViewFighterModal({ fighter }: { fighter: any }) {
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <h3 className="text-lg font-semibold text-white">Name:</h3>
+          <p className="text-gray-300">{fighter.name}</p>
+        </div>
+        <div>
+          <h3 className="text-lg font-semibold text-white">Nickname:</h3>
+          <p className="text-gray-300">"{fighter.nickname}"</p>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <h3 className="text-lg font-semibold text-white">Record:</h3>
+          <p className="text-gray-300">{fighter.record}</p>
+        </div>
+        <div>
+          <h3 className="text-lg font-semibold text-white">Age:</h3>
+          <p className="text-gray-300">{fighter.age}</p>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <h3 className="text-lg font-semibold text-white">Weight:</h3>
+          <p className="text-gray-300">{fighter.weight}</p>
+        </div>
+        <div>
+          <h3 className="text-lg font-semibold text-white">Height:</h3>
+          <p className="text-gray-300">{fighter.height}</p>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <h3 className="text-lg font-semibold text-white">Reach:</h3>
+          <p className="text-gray-300">{fighter.reach}</p>
+        </div>
+        <div>
+          <h3 className="text-lg font-semibold text-white">Hometown:</h3>
+          <p className="text-gray-300">{fighter.hometown}</p>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <h3 className="text-lg font-semibold text-white">Weight Class:</h3>
+          <p className="text-gray-300">{fighter.weightClass}</p>
+        </div>
+        <div>
+          <h3 className="text-lg font-semibold text-white">Win Streak:</h3>
+          <p className="text-gray-300">{fighter.stats.winStreak}</p>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <h3 className="text-lg font-semibold text-white">Featured:</h3>
+          <p className={`font-medium ${fighter.featured ? 'text-green-400' : 'text-gray-400'}`}>
+            {fighter.featured ? 'Yes (Featured on homepage)' : 'No'}
+          </p>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <h3 className="text-lg font-semibold text-white">Fight Statistics:</h3>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <p className="text-gray-300">Knockouts: {fighter.stats.knockouts}</p>
+          </div>
+          <div>
+            <p className="text-gray-300">Submissions: {fighter.stats.submissions}</p>
+          </div>
+          <div>
+            <p className="text-gray-300">Decisions: {fighter.stats.decisions}</p>
+          </div>
+        </div>
+      </div>
+      <div className="space-y-2">
+        <h3 className="text-lg font-semibold text-white">Achievements:</h3>
+        <ul className="list-disc list-inside text-gray-300">
+          {fighter.achievements.map((achievement: string, index: number) => (
+            <li key={index}>{achievement}</li>
+          ))}
+        </ul>
+      </div>
+    </div>
   )
 }
