@@ -4,6 +4,8 @@ import Image from "next/image"
 import { Calendar, Clock, MapPin, DollarSign } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import CountdownTimer from "@/components/countdown-timer"
+import { useTicketPurchase } from "@/hooks/use-ticket-purchase"
+import ComingSoonModal from "@/components/coming-soon-modal"
 
 interface UpcomingEventsListProps {
   events: any[]
@@ -11,6 +13,7 @@ interface UpcomingEventsListProps {
 
 export default function UpcomingEventsList({ events }: UpcomingEventsListProps) {
   const router = useRouter()
+  const { handleTicketPurchase, isComingSoonModalOpen, closeComingSoonModal } = useTicketPurchase()
   const upcomingEvents = events?.filter((event: any) => !event.isPastEvent && event.isActive) || []
 
   return (
@@ -68,7 +71,7 @@ export default function UpcomingEventsList({ events }: UpcomingEventsListProps) 
                     <div className="flex gap-4 mt-6">
                       <Button 
                         className="bg-red-600 hover:bg-red-700 text-white font-bold flex-1"
-                        onClick={() => router.push(`/events/${event.slug}`)}
+                        onClick={() => handleTicketPurchase(event.slug)}
                       >
                         Buy Tickets
                       </Button>
@@ -86,6 +89,10 @@ export default function UpcomingEventsList({ events }: UpcomingEventsListProps) 
             ))}
           </div>
         </div>
+        <ComingSoonModal
+          isOpen={isComingSoonModalOpen}
+          onClose={closeComingSoonModal}
+        />
       </section>
   )
 }

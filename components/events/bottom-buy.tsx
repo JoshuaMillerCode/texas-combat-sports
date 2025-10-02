@@ -2,12 +2,25 @@
 
 import { Button } from "@/components/ui/button"
 import RevealAnimation from "@/components/reveal-animation"
+import { useTicketPurchase } from "@/hooks/use-ticket-purchase"
+import { isFeatureEnabled } from "@/lib/feature-flags"
+import ComingSoonModal from "@/components/coming-soon-modal"
 
 interface BottomBuyProps {
   onOpenTicketModal: () => void
 }
 
 export default function BottomBuy({ onOpenTicketModal }: BottomBuyProps) {
+  const { handleTicketPurchase, isComingSoonModalOpen, closeComingSoonModal } = useTicketPurchase()
+
+  const handleGetTickets = () => {
+    if (isFeatureEnabled('TICKET_SALES_ENABLED')) {
+      onOpenTicketModal()
+    } else {
+      handleTicketPurchase()
+    }
+  }
+
   return (
     <section className="py-20 bg-gradient-to-b from-black to-gray-900">
       <div className="container mx-auto px-4 text-center">
@@ -20,13 +33,17 @@ export default function BottomBuy({ onOpenTicketModal }: BottomBuyProps) {
           </p>
           <Button
             size="lg"
-            onClick={onOpenTicketModal}
+            onClick={handleGetTickets}
             className="bg-red-600 hover:bg-red-700 text-white px-12 py-4 text-xl font-bold transition-all duration-300 hover:scale-105"
           >
             Get Your Tickets Now
           </Button>
         </RevealAnimation>
       </div>
+      <ComingSoonModal
+        isOpen={isComingSoonModalOpen}
+        onClose={closeComingSoonModal}
+      />
     </section>
   )
 } 
