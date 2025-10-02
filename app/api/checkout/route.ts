@@ -20,6 +20,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Validate organizer account configuration
+    if (!process.env.ORGANIZER_STRIPE_ACCOUNT_ID) {
+      console.error('ORGANIZER_STRIPE_ACCOUNT_ID is not configured');
+      return NextResponse.json(
+        { error: 'Organizer account configuration error' },
+        { status: 500 }
+      );
+    }
+
     // Parse and validate request body
     let body: CheckoutSessionData;
     try {
@@ -53,6 +62,33 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Fetch actual prices from Stripe API to ensure accuracy
+    const pricePromises = body.tickets.map(async (ticket) => {
+      try {
+        const stripePrice = await stripe.prices.retrieve(ticket.stripePriceId);
+        return {
+          priceId: ticket.stripePriceId,
+          quantity: ticket.quantity,
+          unitAmountCents: stripePrice.unit_amount || 0,
+          currency: stripePrice.currency,
+        };
+      } catch (error) {
+        console.error(`Failed to fetch price ${ticket.stripePriceId}:`, error);
+        throw new Error(`Invalid price ID: ${ticket.stripePriceId}`);
+      }
+    });
+
+    const fetchedPrices = await Promise.all(pricePromises);
+
+    // Validate all prices use the same currency
+    const currencies = [...new Set(fetchedPrices.map((p) => p.currency))];
+    if (currencies.length > 1) {
+      return NextResponse.json(
+        { error: 'All tickets must use the same currency' },
+        { status: 400 }
+      );
+    }
+
     // Create line items for Stripe
     const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] =
       body.tickets.map((ticket) => ({
@@ -60,13 +96,52 @@ export async function POST(req: NextRequest) {
         quantity: ticket.quantity,
       }));
 
+    // Calculate total amount from Stripe-fetched prices (already in cents)
+    let totalAmountInCents = 0;
+    for (const price of fetchedPrices) {
+      totalAmountInCents += price.unitAmountCents * price.quantity;
+    }
+
+    // Calculate 4% application fee (ensure it's an integer in cents)
+    const applicationFeeAmount = Math.round(totalAmountInCents * 0.04);
+
+    // Calculate the amount that will be transferred to organizer
+    const transferAmountCents = totalAmountInCents - applicationFeeAmount;
+
+    // Debug logging
+    console.log('=== Checkout Debug Info ===');
+    console.log('Fetched Prices:', fetchedPrices);
+    console.log('Total Amount (USD):', totalAmountInCents / 100);
+    console.log('Total Amount (cents):', totalAmountInCents);
+    console.log('Application Fee (4% in cents):', applicationFeeAmount);
+    console.log('Application Fee (USD):', applicationFeeAmount / 100);
+    console.log('Organizer receives (cents):', transferAmountCents);
+    console.log('Organizer receives (USD):', transferAmountCents / 100);
+    console.log(
+      'Organizer Account ID:',
+      process.env.ORGANIZER_STRIPE_ACCOUNT_ID
+    );
+    console.log('============================');
+
+    // Validate Connect account ID format (should start with 'acct_')
+    if (!process.env.ORGANIZER_STRIPE_ACCOUNT_ID.startsWith('acct_')) {
+      console.error(
+        'Invalid ORGANIZER_STRIPE_ACCOUNT_ID format:',
+        process.env.ORGANIZER_STRIPE_ACCOUNT_ID
+      );
+      return NextResponse.json(
+        { error: 'Invalid organizer account configuration' },
+        { status: 500 }
+      );
+    }
+
     // Get the origin for redirect URLs
     const origin =
       req.nextUrl.origin ||
       process.env.NEXT_PUBLIC_DOMAIN ||
       'http://localhost:3000';
 
-    // Create checkout session
+    // Create checkout session with Stripe Connect
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       allow_promotion_codes: true,
@@ -81,6 +156,7 @@ export async function POST(req: NextRequest) {
         eventVenue: body.eventVenue,
         ticketData: JSON.stringify(body.tickets),
         order_type: 'event_tickets',
+        total_amount: totalAmountInCents.toString(),
       },
       customer_email: body.customerEmail,
       billing_address_collection: 'required',
@@ -97,6 +173,23 @@ export async function POST(req: NextRequest) {
         },
       },
       expires_at: Math.floor(Date.now() / 1000) + 30 * 60, // 30 minutes
+      payment_intent_data: {
+        application_fee_amount: applicationFeeAmount,
+        on_behalf_of: process.env.ORGANIZER_STRIPE_ACCOUNT_ID,
+        transfer_data: {
+          destination: process.env.ORGANIZER_STRIPE_ACCOUNT_ID,
+        },
+      },
+    });
+
+    console.log('✅ Checkout session created with application fee:', {
+      sessionId: session.id,
+      totalAmountCents: totalAmountInCents,
+      totalAmountUSD: totalAmountInCents / 100,
+      applicationFeeAmount,
+      applicationFeeUSD: applicationFeeAmount / 100,
+      transferAmountCents,
+      transferAmountUSD: transferAmountCents / 100,
     });
 
     // Return successful response
