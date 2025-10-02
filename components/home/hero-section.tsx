@@ -9,6 +9,7 @@ import { useTicketPurchase } from "@/hooks/use-ticket-purchase"
 import ComingSoonModal from "@/components/coming-soon-modal"
 
 export default function HeroSection() {
+  const router = useRouter();
   const { currentEvent } = useCurrentEvent();
   const { handleTicketPurchase, isComingSoonModalOpen, closeComingSoonModal } = useTicketPurchase();
 
