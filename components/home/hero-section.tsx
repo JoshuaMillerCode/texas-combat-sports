@@ -1,6 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
+import Image from "next/image"
 import HeroParallax from "@/components/hero-parallax"
 import RevealAnimation from "@/components/reveal-animation"
 import { useCurrentEvent } from "@/contexts/current-event-context"
@@ -16,6 +17,17 @@ export default function HeroSection() {
   return (
     <HeroParallax backgroundVideo="https://res.cloudinary.com/dujmomznj/video/upload/v1754756997/0809_vaxbkh.mov" className="relative">
       <div className="text-center px-4 max-w-6xl mx-auto relative z-10">
+        <RevealAnimation delay={0.1}>
+          <div className="flex justify-center mb-6">
+            <Image 
+              src="https://res.cloudinary.com/dujmomznj/image/upload/f_webp/v1759384197/helmet-removebg-preview_syokop.png"
+              alt="Texas Combat Sports Logo"
+              width={150}
+              height={150}
+              className="object-contain drop-shadow-2xl"
+            />
+          </div>
+        </RevealAnimation>
         <RevealAnimation delay={0.2}>
           <h1 className="text-6xl md:text-8xl font-black mb-6 text-white drop-shadow-2xl">
             TEXAS

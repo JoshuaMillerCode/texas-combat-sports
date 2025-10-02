@@ -13,7 +13,10 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "Texas Combat Sport - Real Fights. Real Houston.",
   description: "Houston-based combat sports promotion company putting on high-intensity boxing events.",
-    generator: 'v0.dev'
+  generator: 'v0.dev',
+  icons: {
+    icon: 'https://res.cloudinary.com/dujmomznj/image/upload/f_webp/v1755476673/helmet_ouwsr5.jpg',
+  }
 }
 
 export default function RootLayout({

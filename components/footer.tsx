@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 import { Instagram, Youtube, Facebook } from "lucide-react"
 
 // Simple TikTok SVG icon
@@ -19,8 +20,17 @@ export default function Footer() {
     <footer className="bg-black border-t border-red-900/30 py-8">
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row justify-between items-center">
-          <div className="mb-4 md:mb-0">
-            <h3 className="text-2xl font-bold text-red-600 mb-2">Texas Combat Sport</h3>
+          <div className="mb-4 md:mb-0 flex flex-col items-center md:items-start">
+            <div className="flex items-center gap-3 mb-2">
+              <Image 
+                src="https://res.cloudinary.com/dujmomznj/image/upload/f_webp/v1755476673/helmet_ouwsr5.jpg"
+                alt="Texas Combat Sports Logo"
+                width={40}
+                height={40}
+                className="object-contain"
+              />
+              <h3 className="text-2xl font-bold text-red-600">Texas Combat Sport</h3>
+            </div>
             <p className="text-gray-400">Real Fights. Real Houston.</p>
           </div>
 

@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { Menu, X, Instagram, Youtube, Facebook } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useCurrentEvent } from "@/contexts/current-event-context"
@@ -41,8 +42,15 @@ export default function Header() {
       <div className="container mx-auto px-4">
         <div className="flex items-center h-16">
           {/* Logo */}
-          <Link href="/" className="text-2xl font-bold text-red-600 flex-shrink-0 mr-8">
-            TXCS
+          <Link href="/" className="flex items-center gap-3 flex-shrink-0 mr-8">
+            <Image 
+              src="https://res.cloudinary.com/dujmomznj/image/upload/f_webp/v1755476673/helmet_ouwsr5.jpg"
+              alt="Texas Combat Sports Logo"
+              width={40}
+              height={40}
+              className="object-contain"
+            />
+            <span className="text-2xl font-bold text-red-600">TXCS</span>
           </Link>
 
           {/* Desktop Navigation - Left aligned next to logo */}
