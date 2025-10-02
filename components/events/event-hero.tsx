@@ -6,6 +6,9 @@ import { Badge } from "@/components/ui/badge"
 import CountdownTimer from "@/components/countdown-timer"
 import { Calendar, MapPin, Clock, Users, ArrowLeft } from "lucide-react"
 import Link from "next/link"
+import { useTicketPurchase } from "@/hooks/use-ticket-purchase"
+import { isFeatureEnabled } from "@/lib/feature-flags"
+import ComingSoonModal from "@/components/coming-soon-modal"
 
 interface EventHeroProps {
   event: any
@@ -13,6 +16,16 @@ interface EventHeroProps {
 }
 
 export default function EventHero({ event, onOpenTicketModal }: EventHeroProps) {
+  const { handleTicketPurchase, isComingSoonModalOpen, closeComingSoonModal } = useTicketPurchase()
+
+  const handleBuyTickets = () => {
+    if (isFeatureEnabled('TICKET_SALES_ENABLED')) {
+      onOpenTicketModal()
+    } else {
+      handleTicketPurchase()
+    }
+  }
+
   return (
     <div className="relative">
       {/* Desktop Layout (>= lg) */}
@@ -94,7 +107,7 @@ export default function EventHero({ event, onOpenTicketModal }: EventHeroProps) 
                   <div className="flex flex-col sm:flex-row gap-4">
                     <Button
                       size="lg"
-                      onClick={onOpenTicketModal}
+                      onClick={handleBuyTickets}
                       className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 text-lg font-bold transition-all duration-300 hover:scale-105"
                     >
                       Buy Tickets Now
@@ -221,7 +234,7 @@ export default function EventHero({ event, onOpenTicketModal }: EventHeroProps) 
                 <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
                   <Button
                     size="lg"
-                    onClick={onOpenTicketModal}
+                    onClick={handleBuyTickets}
                     className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 text-lg font-bold transition-all duration-300 hover:scale-105 shadow-2xl"
                   >
                     Buy Tickets Now
@@ -249,6 +262,10 @@ export default function EventHero({ event, onOpenTicketModal }: EventHeroProps) 
           </div>
         </div>
       </div>
+      <ComingSoonModal
+        isOpen={isComingSoonModalOpen}
+        onClose={closeComingSoonModal}
+      />
     </div>
   )
 } 

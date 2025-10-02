@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import { isFeatureEnabled } from '@/lib/feature-flags';
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
@@ -10,6 +11,14 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export async function GET(req: NextRequest) {
   try {
+    // Check if ticket sales are enabled
+    if (!isFeatureEnabled('TICKET_SALES_ENABLED')) {
+      return NextResponse.json(
+        { error: 'Ticket sales are currently disabled' },
+        { status: 503 }
+      );
+    }
+
     // Validate Stripe configuration
     if (!process.env.STRIPE_SECRET_KEY) {
       return NextResponse.json(

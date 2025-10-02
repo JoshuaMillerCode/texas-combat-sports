@@ -5,10 +5,12 @@ import HeroParallax from "@/components/hero-parallax"
 import RevealAnimation from "@/components/reveal-animation"
 import { useCurrentEvent } from "@/contexts/current-event-context"
 import { useRouter } from "next/navigation"
+import { useTicketPurchase } from "@/hooks/use-ticket-purchase"
+import ComingSoonModal from "@/components/coming-soon-modal"
 
 export default function HeroSection() {
   const { currentEvent } = useCurrentEvent();
-  const router = useRouter();
+  const { handleTicketPurchase, isComingSoonModalOpen, closeComingSoonModal } = useTicketPurchase();
 
   return (
     <HeroParallax backgroundVideo="https://res.cloudinary.com/dujmomznj/video/upload/v1754756997/0809_vaxbkh.mov" className="relative">
@@ -30,11 +32,7 @@ export default function HeroSection() {
             <Button
               size="lg"
               className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 text-lg font-bold transition-all duration-300 hover:scale-105 shadow-lg"
-              onClick={() => {
-                if (currentEvent) {
-                  router.push(`/events/${currentEvent.slug}`);
-                }
-              }}
+              onClick={() => handleTicketPurchase(currentEvent?.slug)}
             > 
               Buy Tickets
             </Button>
@@ -53,6 +51,10 @@ export default function HeroSection() {
           </div>
         </RevealAnimation>
       </div>
+      <ComingSoonModal
+        isOpen={isComingSoonModalOpen}
+        onClose={closeComingSoonModal}
+      />
     </HeroParallax>
   )
 } 
