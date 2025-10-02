@@ -8,9 +8,10 @@ import { Trophy, Zap } from "lucide-react"
 
 interface MainEventProps {
   mainEventFight?: any
+  isPastEvent: boolean
 }
 
-export default function MainEvent({ mainEventFight }: MainEventProps) {
+export default function MainEvent({ mainEventFight, isPastEvent }: MainEventProps) {
   if (!mainEventFight) {
     return (
       <section className="py-12 lg:py-20 bg-gradient-to-b from-black to-gray-900 relative z-10">
@@ -22,9 +23,9 @@ export default function MainEvent({ mainEventFight }: MainEventProps) {
               </h2>
               <div className="max-w-2xl mx-auto">
                 <div className="bg-black/50 border border-red-900/30 rounded-lg p-12">
-                  <h3 className="text-3xl font-bold text-white mb-4">Coming Soon</h3>
+                  <h3 className="text-3xl font-bold text-white mb-4">{isPastEvent ? "Information Not Available" : "Coming Soon"}</h3>
                   <p className="text-gray-300 text-lg">
-                    The main event fight card is being finalized. Check back soon for the announcement of our featured fighters!
+                    {isPastEvent ? "The main event fight card is not available." : "The main event fight card is being finalized. Check back soon for the announcement of our featured fighters!"}
                   </p>
                 </div>
               </div>

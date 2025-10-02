@@ -20,9 +20,9 @@ export default function EventDetailClient({ params }: { params: { slug: string }
   return (
     <div className="min-h-screen pt-10">
       <EventHero event={event} onOpenTicketModal={() => setIsTicketModalOpen(true)} />
-      <MainEvent mainEventFight={mainEventFight} />
-      <Undercard fights={event.fights} />
-      <BottomBuy onOpenTicketModal={() => setIsTicketModalOpen(true)} />
+      <MainEvent mainEventFight={mainEventFight} isPastEvent={event.isPastEvent} />
+      <Undercard fights={event.fights} isPastEvent={event.isPastEvent} />
+      <BottomBuy onOpenTicketModal={() => setIsTicketModalOpen(true)} isActive={event.isActive} />
 
       {/* Ticket Purchase Modal */}
       <TicketPurchaseModal

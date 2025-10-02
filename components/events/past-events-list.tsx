@@ -1,6 +1,27 @@
 "use client"
 import Image from "next/image"
 import { Calendar, Clock, MapPin } from "lucide-react"
+import { useRouter } from "next/navigation"
+
+const DEFAULT_EVENT_IMAGES = [
+  "https://res.cloudinary.com/dujmomznj/image/upload/f_webp/v1759378172/scene-from-olympic-games-tournament-with-athletes-competing_23-2151471034_rumfsk.avif",
+  "https://res.cloudinary.com/dujmomznj/image/upload/f_webp/v1759378718/download_1_qbznu9.jpg",
+  "https://res.cloudinary.com/dujmomznj/image/upload/f_webp/v1759378718/download_xayqnn.jpg",
+  "https://res.cloudinary.com/dujmomznj/image/upload/f_webp/v1759378718/images_paqp96.jpg",
+]
+
+const getRandomEventImage = (seed?: string) => {
+  if (seed) {
+    // Use seed for consistent image selection per event
+    let hash = 0
+    for (let i = 0; i < seed.length; i++) {
+      hash = ((hash << 5) - hash) + seed.charCodeAt(i)
+      hash = hash & hash
+    }
+    return DEFAULT_EVENT_IMAGES[Math.abs(hash) % DEFAULT_EVENT_IMAGES.length]
+  }
+  return DEFAULT_EVENT_IMAGES[Math.floor(Math.random() * DEFAULT_EVENT_IMAGES.length)]
+}
 
 interface PastEventsListProps {
   events: any[]
@@ -8,7 +29,8 @@ interface PastEventsListProps {
 
 export default function PastEventsList({ events }: PastEventsListProps) {
   const pastEvents = events?.filter((event: any) => event.isPastEvent).reverse() || []
-
+  const router = useRouter()
+  
   return (
     <section className="py-20 bg-gradient-to-b from-gray-900 to-black">
         <div className="container mx-auto px-4">
@@ -19,11 +41,12 @@ export default function PastEventsList({ events }: PastEventsListProps) {
             {pastEvents.map((event: any) => (
               <div
                 key={event._id}
-                className="bg-black/50 border border-red-900/30 rounded-lg overflow-hidden group hover:border-red-600/50 transition-all duration-300"
+                className="bg-black/50 border border-red-900/30 rounded-lg overflow-hidden group hover:border-red-600/50 transition-all duration-300 cursor-pointer"
+                onClick={() => router.push(`/events/${event.slug}`)}
               >
                 <div className="relative h-64">
                   <Image
-                    src={event.image || "/placeholder.svg"}
+                    src={event.posterImage || getRandomEventImage(event._id || event.slug)}
                     alt={event.title}
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-300"

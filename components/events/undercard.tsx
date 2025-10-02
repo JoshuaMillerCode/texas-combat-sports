@@ -7,9 +7,10 @@ import ScrollTriggeredAnimation from "@/components/scroll-triggered-animation"
 
 interface UndercardProps {
   fights?: any[]
+  isPastEvent: boolean
 }
 
-export default function Undercard({ fights }: UndercardProps) {
+export default function Undercard({ fights, isPastEvent }: UndercardProps) {
   const undercardFights = fights?.filter((f: any) => f.isMainEvent == false)
   if (!undercardFights || undercardFights.length === 0) {
     return (
@@ -22,9 +23,9 @@ export default function Undercard({ fights }: UndercardProps) {
               </h2>
               <div className="max-w-2xl mx-auto">
                 <div className="bg-black/50 border border-red-900/30 rounded-lg p-12">
-                  <h3 className="text-3xl font-bold text-white mb-4">Coming Soon</h3>
+                  <h3 className="text-3xl font-bold text-white mb-4">{isPastEvent ? "Information Not Available" : "Coming Soon"}</h3>
                   <p className="text-gray-300 text-lg">
-                    The complete fight card is being assembled. We're working on bringing you the most exciting matchups!
+                    {isPastEvent ? "The complete fight card is not available." : "The complete fight card is being assembled. We're working on bringing you the most exciting matchups!"}
                   </p>
                 </div>
               </div>

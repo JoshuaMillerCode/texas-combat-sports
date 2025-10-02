@@ -10,6 +10,26 @@ import { useTicketPurchase } from "@/hooks/use-ticket-purchase"
 import { isFeatureEnabled } from "@/lib/feature-flags"
 import ComingSoonModal from "@/components/coming-soon-modal"
 
+const DEFAULT_EVENT_IMAGES = [
+  "https://res.cloudinary.com/dujmomznj/image/upload/f_webp/v1759378172/scene-from-olympic-games-tournament-with-athletes-competing_23-2151471034_rumfsk.avif",
+  "https://res.cloudinary.com/dujmomznj/image/upload/f_webp/v1759378718/download_1_qbznu9.jpg",
+  "https://res.cloudinary.com/dujmomznj/image/upload/f_webp/v1759378718/download_xayqnn.jpg",
+  "https://res.cloudinary.com/dujmomznj/image/upload/f_webp/v1759378718/images_paqp96.jpg",
+]
+
+const getRandomEventImage = (seed?: string) => {
+  if (seed) {
+    // Use seed for consistent image selection per event
+    let hash = 0
+    for (let i = 0; i < seed.length; i++) {
+      hash = ((hash << 5) - hash) + seed.charCodeAt(i)
+      hash = hash & hash
+    }
+    return DEFAULT_EVENT_IMAGES[Math.abs(hash) % DEFAULT_EVENT_IMAGES.length]
+  }
+  return DEFAULT_EVENT_IMAGES[Math.floor(Math.random() * DEFAULT_EVENT_IMAGES.length)]
+}
+
 interface EventHeroProps {
   event: any
   onOpenTicketModal: () => void
@@ -100,25 +120,34 @@ export default function EventHero({ event, onOpenTicketModal }: EventHeroProps) 
                     </div>
                   </div>
 
-                  <div className="mb-8">
-                    <CountdownTimer targetDate={event.date} />
-                  </div>
-
+                  {
+                    event.isActive ? (
+                      <div className="mb-8">
+                        <CountdownTimer targetDate={event.date} />
+                      </div>
+                    ) : ""
+                  }
+                  
                   <div className="flex flex-col sm:flex-row gap-4">
-                    <Button
-                      size="lg"
-                      onClick={handleBuyTickets}
-                      className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 text-lg font-bold transition-all duration-300 hover:scale-105"
-                    >
-                      Buy Tickets Now
-                    </Button>
-                    <Button
+                    {
+                      event.isActive ? (
+                        <Button
+                          size="lg"
+                          onClick={handleBuyTickets}
+                          className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 text-lg font-bold transition-all duration-300 hover:scale-105"
+                        >
+                          Buy Tickets Now
+                        </Button>
+                      ) : ""
+                    }
+                    
+                    {/* <Button
                       size="lg"
                       variant="outline"
                       className="border-red-600 text-red-600 hover:bg-red-600 hover:text-white px-8 py-4 text-lg font-bold transition-all duration-300 hover:scale-105 bg-transparent"
                     >
                       Share Event
-                    </Button>
+                    </Button> */}
                   </div>
                 </div>
 
@@ -126,7 +155,7 @@ export default function EventHero({ event, onOpenTicketModal }: EventHeroProps) 
                 <div className="relative h-96 xl:h-[600px] group">
                   <div className="relative h-full rounded-lg overflow-hidden">
                     <Image
-                      src={event.posterImage || "/placeholder.svg"}
+                      src={event.posterImage || getRandomEventImage(event._id || event.slug)}
                       alt={`${event.title} Poster`}
                       fill
                       className="object-contain transition-transform duration-700 group-hover:scale-105"
@@ -151,7 +180,7 @@ export default function EventHero({ event, onOpenTicketModal }: EventHeroProps) 
       <div
         className="lg:hidden relative min-h-screen bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage: `url(${event.posterImage || "/placeholder.svg?height=800&width=600&text=Houston+Showdown+Poster"})`,
+          backgroundImage: `url(${event.posterImage || getRandomEventImage(event._id || event.slug)})`,
         }}
       >
         {/* Dark overlay for text readability */}

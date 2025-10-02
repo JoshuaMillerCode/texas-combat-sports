@@ -13,6 +13,7 @@ export async function GET(
 ) {
   try {
     if (!isValidObjectId(params.id)) {
+      console.log('searching by slug', params.id);
       const event = await EventService.getEventBySlug(params.id);
       if (!event) {
         throw new Error();

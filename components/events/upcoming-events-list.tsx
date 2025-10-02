@@ -7,6 +7,26 @@ import CountdownTimer from "@/components/countdown-timer"
 import { useTicketPurchase } from "@/hooks/use-ticket-purchase"
 import ComingSoonModal from "@/components/coming-soon-modal"
 
+const DEFAULT_EVENT_IMAGES = [
+  "https://res.cloudinary.com/dujmomznj/image/upload/f_webp/v1759378172/scene-from-olympic-games-tournament-with-athletes-competing_23-2151471034_rumfsk.avif",
+  "https://res.cloudinary.com/dujmomznj/image/upload/f_webp/v1759378718/download_1_qbznu9.jpg",
+  "https://res.cloudinary.com/dujmomznj/image/upload/f_webp/v1759378718/download_xayqnn.jpg",
+  "https://res.cloudinary.com/dujmomznj/image/upload/f_webp/v1759378718/images_paqp96.jpg",
+]
+
+const getRandomEventImage = (seed?: string) => {
+  if (seed) {
+    // Use seed for consistent image selection per event
+    let hash = 0
+    for (let i = 0; i < seed.length; i++) {
+      hash = ((hash << 5) - hash) + seed.charCodeAt(i)
+      hash = hash & hash
+    }
+    return DEFAULT_EVENT_IMAGES[Math.abs(hash) % DEFAULT_EVENT_IMAGES.length]
+  }
+  return DEFAULT_EVENT_IMAGES[Math.floor(Math.random() * DEFAULT_EVENT_IMAGES.length)]
+}
+
 interface UpcomingEventsListProps {
   events: any[]
 }
@@ -27,7 +47,7 @@ export default function UpcomingEventsList({ events }: UpcomingEventsListProps) 
               <div key={event._id} className="bg-black/50 border border-red-900/30 rounded-lg overflow-hidden">
                 <div className="grid lg:grid-cols-2 gap-8">
                   <div className="relative h-80 lg:h-auto">
-                    <Image src={event.posterImage || "/placeholder.svg"} alt={event.title} fill className="object-contain" />
+                    <Image src={event.posterImage || getRandomEventImage(event._id || event.slug)} alt={event.title} fill className="object-contain" />
                   </div>
                   <div className="p-8">
                     <h3 className="text-3xl font-bold text-white mb-4">{event.title}</h3>

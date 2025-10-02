@@ -8,6 +8,26 @@ import { usePastEventsQuery } from "@/hooks/use-queries"
 import { format } from "date-fns"
 import type { IEvent } from "@/lib/models/Event"
 
+const DEFAULT_EVENT_IMAGES = [
+  "https://res.cloudinary.com/dujmomznj/image/upload/f_webp/v1759378172/scene-from-olympic-games-tournament-with-athletes-competing_23-2151471034_rumfsk.avif",
+  "https://res.cloudinary.com/dujmomznj/image/upload/f_webp/v1759378718/download_1_qbznu9.jpg",
+  "https://res.cloudinary.com/dujmomznj/image/upload/f_webp/v1759378718/download_xayqnn.jpg",
+  "https://res.cloudinary.com/dujmomznj/image/upload/f_webp/v1759378718/images_paqp96.jpg",
+]
+
+const getRandomEventImage = (seed?: string) => {
+  if (seed) {
+    // Use seed for consistent image selection per event
+    let hash = 0
+    for (let i = 0; i < seed.length; i++) {
+      hash = ((hash << 5) - hash) + seed.charCodeAt(i)
+      hash = hash & hash
+    }
+    return DEFAULT_EVENT_IMAGES[Math.abs(hash) % DEFAULT_EVENT_IMAGES.length]
+  }
+  return DEFAULT_EVENT_IMAGES[Math.floor(Math.random() * DEFAULT_EVENT_IMAGES.length)]
+}
+
 export default function PastEventsSection() {
   const { data: pastEvents, isLoading: isLoadingPast } = usePastEventsQuery()
 
@@ -36,7 +56,7 @@ export default function PastEventsSection() {
                   className="relative h-64 group overflow-hidden rounded-lg cursor-pointer"
                 >
                   <Image
-                    src={event.posterImage || `/placeholder.svg?height=300&width=300`}
+                    src={event.posterImage || getRandomEventImage(event._id?.toString() || event.slug)}
                     alt={event.title}
                     fill
                     className="object-cover transition-transform duration-700 group-hover:scale-125"
