@@ -8,7 +8,7 @@ export default function AchievementsSection() {
   const achievements = [
     {
       icon: <Trophy className="w-8 h-8 text-red-500" />,
-      number: "7",
+      number: "6",
       label: "Events Hosted",
     },
     {
