@@ -39,6 +39,16 @@ export interface ITransaction extends Document {
   stripeSessionId: string;
   stripePaymentIntentId?: string;
 
+  // Service fee transfer information (for 4% developer fee)
+  serviceAccountTransfer?: {
+    transferId: string; // Stripe Transfer ID
+    amount: number; // Amount transferred in cents
+    status: 'pending' | 'completed' | 'reversed' | 'failed';
+    createdAt: Date;
+    reversedAt?: Date;
+    reversalId?: string; // Transfer Reversal ID if reversed
+  };
+
   // Customer information
   customerDetails: {
     email: string;
@@ -208,6 +218,29 @@ const TransactionSchema: Schema = new Schema(
     },
     stripePaymentIntentId: {
       type: String,
+    },
+
+    // Service fee transfer information
+    serviceAccountTransfer: {
+      transferId: {
+        type: String,
+      },
+      amount: {
+        type: Number,
+      },
+      status: {
+        type: String,
+        enum: ['pending', 'completed', 'reversed', 'failed'],
+      },
+      createdAt: {
+        type: Date,
+      },
+      reversedAt: {
+        type: Date,
+      },
+      reversalId: {
+        type: String,
+      },
     },
 
     // Customer information

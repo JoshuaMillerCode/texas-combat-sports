@@ -409,7 +409,7 @@ function EditTicketTierForm({ tier, onSubmit, isLoading, onClose }: { tier: any,
     event: tier.event?._id || '',
     name: tier.name || '',
     description: tier.description || '',
-    price: tier.price || '',
+    price: tier.price ? (tier.price / 100).toFixed(2) : '', // Convert cents to dollars for display
     quantity: tier.quantity || '',
     features: Array.isArray(tier.features) ? tier.features.join('\n') : '',
     isActive: tier.isActive !== undefined ? tier.isActive : true
@@ -423,7 +423,7 @@ function EditTicketTierForm({ tier, onSubmit, isLoading, onClose }: { tier: any,
       event: formData.event,
       name: formData.name,
       description: formData.description,
-      price: parseInt(formData.price),
+      price: Math.round(parseFloat(formData.price) * 100), // Convert dollars to cents
       quantity: parseInt(formData.quantity),
       features: formData.features
         .split('\n')
@@ -466,13 +466,15 @@ function EditTicketTierForm({ tier, onSubmit, isLoading, onClose }: { tier: any,
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="price" className="text-gray-300">Price (in cents)</Label>
+          <Label htmlFor="price" className="text-gray-300">Price ($)</Label>
           <Input
             id="price"
             type="number"
+            step="0.01"
             value={formData.price}
             onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
             className="bg-gray-800 border-gray-700 text-white"
+            placeholder="50.00"
             required
           />
         </div>

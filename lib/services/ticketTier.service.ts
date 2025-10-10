@@ -39,7 +39,24 @@ export class TicketTierService {
     updateData: Partial<ITicketTier>
   ): Promise<ITicketTier | null> {
     await dbConnect();
-    return await TicketTier.findByIdAndUpdate(id, updateData, {
+
+    // Sanitize update data - remove empty strings and undefined values
+    const sanitizedData: any = {};
+    Object.keys(updateData).forEach((key) => {
+      const value = updateData[key as keyof ITicketTier];
+      // Skip empty strings, undefined, and null values
+      if (value !== '' && value !== undefined && value !== null) {
+        sanitizedData[key] = value;
+      }
+    });
+
+    // Don't allow changing the event field via update (it's a core relationship)
+    // If you need to move a tier to a different event, delete and recreate
+    if ('event' in sanitizedData) {
+      delete sanitizedData.event;
+    }
+
+    return await TicketTier.findByIdAndUpdate(id, sanitizedData, {
       new: true,
     }).populate('event');
   }

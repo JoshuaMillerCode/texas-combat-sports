@@ -262,7 +262,7 @@ export default function TicketPurchaseModal({
                               <p className="text-gray-400 text-sm mb-2">{tier.description}</p>
                             )}
                             <p className="text-2xl font-bold text-red-600">
-                              {formatAmountForDisplay(tier.price / 100, tier.currency)}
+                              {formatAmountForDisplay(tier.price, tier.currency)}
                             </p>
                           </div>
                           <div className="flex items-center space-x-3">
@@ -305,7 +305,7 @@ export default function TicketPurchaseModal({
                           </span>
                           {currentQuantity > 0 && (
                             <Badge className="bg-red-600 text-white">
-                              Subtotal: {formatAmountForDisplay((tier.price * currentQuantity) / 100, tier.currency)}
+                              Subtotal: {formatAmountForDisplay(tier.price * currentQuantity, tier.currency)}
                             </Badge>
                           )}
                         </div>
@@ -329,7 +329,7 @@ export default function TicketPurchaseModal({
                             <span>
                               {tier.name} × {quantity}
                             </span>
-                            <span>{formatAmountForDisplay((tier.price * quantity) / 100, tier.currency)}</span>
+                            <span>{formatAmountForDisplay(tier.price * quantity, tier.currency)}</span>
                           </div>
                         )
                       })}
