@@ -209,7 +209,7 @@ function CreateTicketTierForm({ onSubmit, isLoading, onClose }: { onSubmit: (dat
       event: formData.event,
       tierId: formData.tierId || formData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, ''),
       name: formData.name,
-      price: Math.round(parseFloat(formData.price) * 100), // Convert to cents
+      price: parseFloat(formData.price), // Store price as entered
       currency: formData.currency,
       features: formData.features.split('\n').map(feature => feature.trim()).filter(feature => feature.length > 0),
       stripePriceId: formData.stripePriceId,
@@ -409,7 +409,7 @@ function EditTicketTierForm({ tier, onSubmit, isLoading, onClose }: { tier: any,
     event: tier.event?._id || '',
     name: tier.name || '',
     description: tier.description || '',
-    price: tier.price ? (tier.price / 100).toFixed(2) : '', // Convert cents to dollars for display
+    price: tier.price ? tier.price.toString() : '', // Display price as stored
     quantity: tier.quantity || '',
     features: Array.isArray(tier.features) ? tier.features.join('\n') : '',
     isActive: tier.isActive !== undefined ? tier.isActive : true
@@ -423,7 +423,7 @@ function EditTicketTierForm({ tier, onSubmit, isLoading, onClose }: { tier: any,
       event: formData.event,
       name: formData.name,
       description: formData.description,
-      price: Math.round(parseFloat(formData.price) * 100), // Convert dollars to cents
+      price: parseFloat(formData.price), // Store price as entered
       quantity: parseInt(formData.quantity),
       features: formData.features
         .split('\n')

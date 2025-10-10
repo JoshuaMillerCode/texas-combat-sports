@@ -337,7 +337,7 @@ export default function TicketPurchaseModal({
                   <div className="border-t border-red-600/30 pt-3">
                     <div className="flex justify-between text-white font-bold text-lg">
                       <span>Total ({getTotalTickets()} tickets)</span>
-                      <span>{formatAmountForDisplay(getTotalAmount() / 100, "USD")}</span>
+                      <span>{formatAmountForDisplay(getTotalAmount(), "USD")}</span>
                     </div>
                   </div>
                 </div>
