@@ -213,7 +213,7 @@ export default function CheckoutSuccessPage() {
                           <span className="text-gray-400 ml-2">× {item.quantity}</span>
                         </div>
                         <span className="text-white font-bold">
-                          {formatAmountForDisplay(item.amount_total / 100, session.currency)}
+                          {formatAmountForDisplay(item.amount_total, session.currency)}
                         </span>
                       </div>
                     ))}
@@ -225,7 +225,7 @@ export default function CheckoutSuccessPage() {
                   <div className="flex justify-between items-center">
                     <span className="text-xl font-bold text-white">Total Paid</span>
                     <span className="text-2xl font-bold text-red-600">
-                      {formatAmountForDisplay(session.amount_total / 100, session.currency)}
+                      {formatAmountForDisplay(session.amount_total, session.currency)}
                     </span>
                   </div>
                 </div>
@@ -320,7 +320,6 @@ export default function CheckoutSuccessPage() {
                 <div>
                   <h4 className="text-white font-bold mb-2">Event Entry</h4>
                   <ul className="space-y-1">
-                    <li>• Arrive 30 minutes before event start</li>
                     <li>• Bring valid photo ID</li>
                     <li>• Present tickets (digital or printed)</li>
                   </ul>
@@ -328,8 +327,8 @@ export default function CheckoutSuccessPage() {
                 <div>
                   <h4 className="text-white font-bold mb-2">Need Help?</h4>
                   <ul className="space-y-1">
-                    <li>• Email: support@texascombatsport.com</li>
-                    <li>• Phone: (713) 555-FIGHT</li>
+                    <li>• Email: stevemares@nwec.edu</li>
+                    <li>• Phone: 832-955-5180</li>
                     {isTransactionLoading ? (
                       <li>• Order ID: Loading...</li>
                     ) : (

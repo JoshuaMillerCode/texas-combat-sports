@@ -25,7 +25,20 @@ export class TransactionService {
     sessionId: string
   ): Promise<ITransaction | null> {
     await dbConnect();
-    return await Transaction.findOne({ stripeSessionId: sessionId }, 'orderId');
+    return await Transaction.findOne({ stripeSessionId: sessionId })
+      .populate('ticketItems.ticketTier')
+      .populate('merchItems.merch')
+      .populate('event');
+  }
+
+  static async getTransactionByPaymentIntent(
+    paymentIntentId: string
+  ): Promise<ITransaction | null> {
+    await dbConnect();
+    return await Transaction.findOne({ stripePaymentIntentId: paymentIntentId })
+      .populate('ticketItems.ticketTier')
+      .populate('merchItems.merch')
+      .populate('event');
   }
 
   static async getAllTransactions(): Promise<ITransaction[]> {

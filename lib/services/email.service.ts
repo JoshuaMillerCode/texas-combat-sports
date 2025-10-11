@@ -27,8 +27,8 @@ export class EmailService {
 
       // Send email
       const result = await resend.emails.send({
-        // from: 'Texas Combat Sports <tickets@texascombatsports.com>',
-        from: 'Texas Combat Sports <support@joshuarmiller.dev>',
+        from: 'Texas Combat Sports <tickets@texascombatsportsllc.com>',
+        // from: 'Texas Combat Sports <support@joshuarmiller.dev>',
         to: [transaction.customerDetails.email],
         subject: `Your Tickets for ${event.title} - Texas Combat Sports`,
         html: emailContent,

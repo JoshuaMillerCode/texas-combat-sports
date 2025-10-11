@@ -8,12 +8,12 @@ export default function AchievementsSection() {
   const achievements = [
     {
       icon: <Trophy className="w-8 h-8 text-red-500" />,
-      number: "50+",
-      label: "Championship Fights",
+      number: "6",
+      label: "Events Hosted",
     },
     {
       icon: <Users className="w-8 h-8 text-red-500" />,
-      number: "100K+",
+      number: "10K+",
       label: "Fans Served",
     },
     {
@@ -23,8 +23,8 @@ export default function AchievementsSection() {
     },
     {
       icon: <Award className="w-8 h-8 text-red-500" />,
-      number: "4",
-      label: "Years Strong",
+      number: "10",
+      label: "Months Strong",
     },
   ]
 

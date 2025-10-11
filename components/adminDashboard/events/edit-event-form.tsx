@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Loader2 } from "lucide-react"
+import { formatAmountForDisplay } from "@/lib/stripe"
 
 interface EditEventFormProps {
   event: any
@@ -337,7 +338,7 @@ export function EditEventForm({ event, onSubmit, isLoading, onClose }: EditEvent
                   className="border-gray-600"
                 />
                 <Label htmlFor={`edit-tier-${tier._id}`} className="text-gray-300 text-sm">
-                  {tier.name} - ${(tier.price / 100).toFixed(2)} ({tier.availableQuantity}/{tier.maxQuantity} available)
+                  {tier.name} - {formatAmountForDisplay(tier.price, tier.currency)} ({tier.availableQuantity}/{tier.maxQuantity} available)
                 </Label>
               </div>
             )) : (
