@@ -59,8 +59,8 @@ export async function POST(request: NextRequest) {
 
     // Send email using Resend
     const { data, error } = await resend.emails.send({
-      // from: 'Texas Combat Sports <noreply@texascombatsportsllc.com>',
-      from: 'Texas Combat Sports <noreply@joshuarmiller.dev>',
+      from: 'Texas Combat Sports <noreply@texascombatsportsllc.com>',
+      // from: 'Texas Combat Sports <noreply@joshuarmiller.dev>',
       to: [recipientEmail],
       replyTo: formData.email,
       subject: subject,
