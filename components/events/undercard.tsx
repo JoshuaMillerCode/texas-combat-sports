@@ -52,7 +52,7 @@ export default function Undercard({ fights, isPastEvent }: UndercardProps) {
                 scaleRange={[0.95, 1]}
                 className="bg-black/50 border border-red-900/30 rounded-lg p-6 hover:border-red-600/50 transition-all duration-300"
               >
-                <div className="grid md:grid-cols-3 gap-6 items-center">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
                   {/* Fighter 1 */}
                   <div className="text-center md:text-right">
                     <div className="relative h-32 w-24 mx-auto md:ml-auto md:mr-0 mb-4 rounded-lg overflow-hidden">
@@ -64,12 +64,12 @@ export default function Undercard({ fights, isPastEvent }: UndercardProps) {
                       />
                     </div>
                     <h4 className="text-lg font-bold text-white mb-1">{fight.fighter1.name}</h4>
-                    <p className="text-red-500 text-sm mb-2">"{fight.fighter1.nickname}"</p>
+                    <p className="text-red-500 text-sm mb-2">{fight.fighter1.nickname === "Boxer" || fight.fighter1.nickname === "TBA" ? null : `"${fight.fighter1.nickname}"`}</p>
                     <Badge className="bg-gray-700 text-white text-xs">{fight.fighter1.record}</Badge>
                   </div>
 
                   {/* VS */}
-                  <div className="text-center">
+                  <div className="text-center order-first md:order-none">
                     <div className="text-2xl font-bold text-red-600 mb-2">VS</div>
                     <div className="text-white font-bold text-sm mb-1">{fight.title}</div>
                     <div className="text-gray-400 text-xs">{fight.rounds} Rounds</div>
@@ -86,7 +86,7 @@ export default function Undercard({ fights, isPastEvent }: UndercardProps) {
                       />
                     </div>
                     <h4 className="text-lg font-bold text-white mb-1">{fight.fighter2.name}</h4>
-                    <p className="text-red-500 text-sm mb-2">"{fight.fighter2.nickname}"</p>
+                    <p className="text-red-500 text-sm mb-2">{fight.fighter2.nickname === "Boxer" || fight.fighter2.nickname === "TBA" ? null : `"${fight.fighter2.nickname}"`}</p>
                     <Badge className="bg-gray-700 text-white text-xs">{fight.fighter2.record}</Badge>
                   </div>
                 </div>

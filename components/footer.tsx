@@ -29,7 +29,7 @@ export default function Footer() {
                 height={40}
                 className="object-contain"
               />
-              <h3 className="text-2xl font-bold text-red-600">Texas Combat Sport</h3>
+              <h3 className="text-2xl font-bold text-red-600">Texas Combat Sports</h3>
             </div>
             <p className="text-gray-400">Real Fights. Real Houston.</p>
           </div>
@@ -52,6 +52,7 @@ export default function Footer() {
 
         <div className="mt-8 pt-8 border-t border-red-900/30 text-center text-gray-400">
           <p>&copy; {new Date().getFullYear()} Texas Combat Sports. All rights reserved.</p>
+          <p>Designed & developed by Joshua Miller | millerjoshua737@gmail.com</p>
         </div>
       </div>
     </footer>

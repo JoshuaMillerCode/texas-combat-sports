@@ -18,7 +18,7 @@ export default function WhySection() {
         <div className="max-w-4xl mx-auto text-center">
           <RevealAnimation>
             <h2 className="text-5xl font-black mb-8 text-white">
-              WHY <span className="text-red-600">TEXAS COMBAT SPORT?</span>
+              WHY <span className="text-red-600">TEXAS COMBAT SPORTS?</span>
             </h2>
           </RevealAnimation>
 

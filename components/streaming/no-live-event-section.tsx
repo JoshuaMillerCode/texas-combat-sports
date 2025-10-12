@@ -16,7 +16,7 @@ export default function NoLiveEventSection({ upcomingLiveEvents }: NoLiveEventSe
         <h2 className="text-4xl font-black text-white mb-8">
           NO LIVE <span className="text-red-600">EVENT</span>
         </h2>
-        <p className="text-xl text-gray-300 mb-8">
+        <p className="text-xl text-gray-300">
           Stay tuned for our next live event. Check out our past fights below!
         </p>
         {upcomingLiveEvents && upcomingLiveEvents.length > 0 && (
@@ -41,9 +41,9 @@ export default function NoLiveEventSection({ upcomingLiveEvents }: NoLiveEventSe
             </div>
           </div>
         )}
-        <Button className="bg-red-600 hover:bg-red-700 text-white font-bold px-8 py-4">
+        {/* <Button className="bg-red-600 hover:bg-red-700 text-white font-bold px-8 py-4">
           Get Notified of Next Event
-        </Button>
+        </Button> */}
       </div>
     </section>
   )

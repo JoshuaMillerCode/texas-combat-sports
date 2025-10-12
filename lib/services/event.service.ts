@@ -44,6 +44,13 @@ export class EventService {
     return await Event.find({})
       .populate('fights')
       .populate('ticketTiers')
+      .populate({
+        path: 'mainEventFight',
+        populate: {
+          path: 'fighter1 fighter2',
+          model: 'Fighter',
+        },
+      })
       .sort({ date: 1 });
   }
 

@@ -293,8 +293,17 @@ function CreateFightForm({ onSubmit, isLoading, onClose }: { onSubmit: (data: an
             </SelectTrigger>
             <SelectContent className="bg-gray-800 border-gray-700">
               <SelectItem value="1" className="text-white">1 Round</SelectItem>
+              <SelectItem value="1" className="text-white">2 Round</SelectItem>
               <SelectItem value="3" className="text-white">3 Rounds</SelectItem>
+              <SelectItem value="1" className="text-white">4 Round</SelectItem>
               <SelectItem value="5" className="text-white">5 Rounds</SelectItem>
+              <SelectItem value="1" className="text-white">6 Round</SelectItem>
+              <SelectItem value="1" className="text-white">7 Round</SelectItem>
+              <SelectItem value="1" className="text-white">8 Round</SelectItem>
+              <SelectItem value="1" className="text-white">9 Round</SelectItem>
+              <SelectItem value="1" className="text-white">10 Round</SelectItem>
+              <SelectItem value="1" className="text-white">11 Round</SelectItem>
+              <SelectItem value="1" className="text-white">12 Round</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -434,8 +443,17 @@ function EditFightForm({ fight, onSubmit, isLoading, onClose }: { fight: any, on
             </SelectTrigger>
             <SelectContent className="bg-gray-800 border-gray-700">
               <SelectItem value="1" className="text-white">1 Round</SelectItem>
+              <SelectItem value="1" className="text-white">2 Round</SelectItem>
               <SelectItem value="3" className="text-white">3 Rounds</SelectItem>
+              <SelectItem value="1" className="text-white">4 Round</SelectItem>
               <SelectItem value="5" className="text-white">5 Rounds</SelectItem>
+              <SelectItem value="1" className="text-white">6 Round</SelectItem>
+              <SelectItem value="1" className="text-white">7 Round</SelectItem>
+              <SelectItem value="1" className="text-white">8 Round</SelectItem>
+              <SelectItem value="1" className="text-white">9 Round</SelectItem>
+              <SelectItem value="1" className="text-white">10 Round</SelectItem>
+              <SelectItem value="1" className="text-white">11 Round</SelectItem>
+              <SelectItem value="1" className="text-white">12 Round</SelectItem>
             </SelectContent>
           </Select>
         </div>

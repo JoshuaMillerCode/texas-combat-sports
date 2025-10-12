@@ -74,7 +74,7 @@ export default function MainEvent({ mainEventFight, isPastEvent }: MainEventProp
                 </div>
 
                 <h3 className="text-2xl font-bold text-white mb-2">{mainEventFight.fighter1.name}</h3>
-                <p className="text-red-500 font-bold text-lg mb-4">"{mainEventFight.fighter1.nickname}"</p>
+                <p className="text-red-500 font-bold text-lg mb-4">{mainEventFight.fighter1.nickname === "Boxer" || mainEventFight.fighter1.nickname === "TBA" || mainEventFight.fighter1.nickname === "N/A" ? null : `"${mainEventFight.fighter1.nickname}"`}</p>
 
                 <div className="space-y-2 mb-6">
                   <div className="flex justify-center lg:justify-end items-center">
@@ -146,7 +146,7 @@ export default function MainEvent({ mainEventFight, isPastEvent }: MainEventProp
                 </div>
 
                 <h3 className="text-2xl font-bold text-white mb-2">{mainEventFight.fighter2.name}</h3>
-                <p className="text-red-500 font-bold text-lg mb-4">"{mainEventFight.fighter2.nickname}"</p>
+                <p className="text-red-500 font-bold text-lg mb-4">{mainEventFight.fighter2.nickname === "Boxer" || mainEventFight.fighter2.nickname === "TBA" || mainEventFight.fighter2.nickname === "N/A" ? null : `"${mainEventFight.fighter2.nickname}"`}</p>
 
                 <div className="space-y-2 mb-6">
                   <div className="flex justify-center lg:justify-start items-center">

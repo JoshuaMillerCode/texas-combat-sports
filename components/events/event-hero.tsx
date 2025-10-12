@@ -164,7 +164,7 @@ export default function EventHero({ event, onOpenTicketModal }: EventHeroProps) 
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                     <div className="absolute bottom-6 left-6 right-6">
                       <div className="text-white text-center">
-                        <div className="text-2xl font-bold mb-2">{event.ticketPrice}</div>
+                        <div className="text-2xl font-bold mb-2">{String(event.ticketPrice).includes("$") ? event.ticketPrice : "$" + event.ticketPrice}</div>
                         <div className="text-sm text-gray-300">Starting Price</div>
                       </div>
                     </div>
@@ -254,34 +254,42 @@ export default function EventHero({ event, onOpenTicketModal }: EventHeroProps) 
                   </div>
                 </div>
 
-                <div className="mb-8">
-                  <div className="drop-shadow-2xl">
-                    <CountdownTimer targetDate={event.date} />
-                  </div>
-                </div>
+                {
+                  event.isActive ? (
+                    <div className="mb-8">
+                      <div className="drop-shadow-2xl">
+                        <CountdownTimer targetDate={event.date} />
+                      </div>
+                    </div>
+                  ) : ""
+                }
 
-                <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-                  <Button
-                    size="lg"
-                    onClick={handleBuyTickets}
-                    className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 text-lg font-bold transition-all duration-300 hover:scale-105 shadow-2xl"
-                  >
-                    Buy Tickets Now
-                  </Button>
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="border-red-600 text-red-600 hover:bg-red-600 hover:text-white px-8 py-4 text-lg font-bold transition-all duration-300 hover:scale-105 bg-black/30 backdrop-blur-sm shadow-2xl"
-                  >
-                    Share Event
-                  </Button>
-                </div>
+                {
+                  event.isActive ? (
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+                      <Button
+                        size="lg"
+                        onClick={handleBuyTickets}
+                        className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 text-lg font-bold transition-all duration-300 hover:scale-105 shadow-2xl"
+                      >
+                        Buy Tickets Now
+                      </Button>
+                      {/* <Button
+                        size="lg"
+                        variant="outline"
+                        className="border-red-600 text-red-600 hover:bg-red-600 hover:text-white px-8 py-4 text-lg font-bold transition-all duration-300 hover:scale-105 bg-black/30 backdrop-blur-sm shadow-2xl"
+                      >
+                        Share Event
+                      </Button> */}
+                    </div>
+                  ) : ""
+                }
 
                 {/* Ticket Price Display */}
                 <div className="text-center">
                   <div className="inline-block bg-black/50 backdrop-blur-sm rounded-lg px-6 py-4 border border-red-600/30">
                     <div className="text-2xl md:text-3xl font-bold text-white mb-1 drop-shadow-lg">
-                      {event.ticketPrice}
+                      {"$" + event.ticketPrice}
                     </div>
                     <div className="text-sm text-gray-300 drop-shadow-lg">Starting Price</div>
                   </div>

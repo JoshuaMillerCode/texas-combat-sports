@@ -44,22 +44,22 @@ export default function CountdownTimer({ targetDate }: CountdownTimerProps) {
   }, [targetDate])
 
   return (
-    <div className="flex justify-center space-x-4 text-center">
-      <div className="bg-red-600/20 p-4 rounded-lg border border-red-600/30">
-        <div className="text-2xl font-bold text-red-500">{timeLeft.days}</div>
-        <div className="text-sm text-gray-400">Days</div>
+    <div className="flex justify-center gap-2 sm:gap-4 text-center px-4">
+      <div className="bg-red-600/20 p-2 sm:p-4 rounded-lg border border-red-600/30 flex-1 max-w-[80px] sm:max-w-none">
+        <div className="text-xl sm:text-2xl font-bold text-red-500">{timeLeft.days}</div>
+        <div className="text-xs sm:text-sm text-gray-400">Days</div>
       </div>
-      <div className="bg-red-600/20 p-4 rounded-lg border border-red-600/30">
-        <div className="text-2xl font-bold text-red-500">{timeLeft.hours}</div>
-        <div className="text-sm text-gray-400">Hours</div>
+      <div className="bg-red-600/20 p-2 sm:p-4 rounded-lg border border-red-600/30 flex-1 max-w-[80px] sm:max-w-none">
+        <div className="text-xl sm:text-2xl font-bold text-red-500">{timeLeft.hours}</div>
+        <div className="text-xs sm:text-sm text-gray-400">Hours</div>
       </div>
-      <div className="bg-red-600/20 p-4 rounded-lg border border-red-600/30">
-        <div className="text-2xl font-bold text-red-500">{timeLeft.minutes}</div>
-        <div className="text-sm text-gray-400">Minutes</div>
+      <div className="bg-red-600/20 p-2 sm:p-4 rounded-lg border border-red-600/30 flex-1 max-w-[80px] sm:max-w-none">
+        <div className="text-xl sm:text-2xl font-bold text-red-500">{timeLeft.minutes}</div>
+        <div className="text-xs sm:text-sm text-gray-400">Minutes</div>
       </div>
-      <div className="bg-red-600/20 p-4 rounded-lg border border-red-600/30">
-        <div className="text-2xl font-bold text-red-500">{timeLeft.seconds}</div>
-        <div className="text-sm text-gray-400">Seconds</div>
+      <div className="bg-red-600/20 p-2 sm:p-4 rounded-lg border border-red-600/30 flex-1 max-w-[80px] sm:max-w-none">
+        <div className="text-xl sm:text-2xl font-bold text-red-500">{timeLeft.seconds}</div>
+        <div className="text-xs sm:text-sm text-gray-400">Seconds</div>
       </div>
     </div>
   )

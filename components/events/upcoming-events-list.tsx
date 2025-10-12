@@ -46,7 +46,7 @@ export default function UpcomingEventsList({ events }: UpcomingEventsListProps) 
             {upcomingEvents.map((event: any) => (
               <div key={event._id} className="bg-black/50 border border-red-900/30 rounded-lg overflow-hidden">
                 <div className="grid lg:grid-cols-2 gap-8">
-                  <div className="relative h-80 lg:h-auto">
+                  <div className="relative h-80 lg:h-auto flex items-center justify-center">
                     <Image src={event.posterImage || getRandomEventImage(event._id || event.slug)} alt={event.title} fill className="object-contain" />
                   </div>
                   <div className="p-8">
@@ -83,7 +83,7 @@ export default function UpcomingEventsList({ events }: UpcomingEventsListProps) 
 
                     <div className="bg-red-600/20 p-4 rounded-lg mb-6">
                       <h4 className="text-red-400 font-bold mb-2">MAIN EVENT</h4>
-                      <p className="text-white font-semibold">{event.mainEvent ? event.mainEvent.title : "No main event... yet"}</p>
+                      <p className="text-white font-semibold">{event.mainEventFight ? `${event.mainEventFight.fighter1.name} vs ${event.mainEventFight.fighter2.name}` : "No main event... yet"}</p>
                     </div>
 
                     <CountdownTimer targetDate={event.date} />
