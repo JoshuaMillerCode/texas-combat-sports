@@ -216,7 +216,6 @@ export async function POST(req: NextRequest) {
 
                     // Then, find and deduct 3 from the General Admission tier
                     const gaTier = await TicketTierService.getTicketTierByName(
-                      // event._id.toString(),
                       'General Admission'
                     );
                     if (gaTier) {
