@@ -561,7 +561,9 @@ export class TicketGenerator {
           eventVenue: event.venue,
           ticketTier: ticketItem.tierName,
           ticketNumber: ticket.ticketNumber,
-          price: formatAmountForDisplay(ticketItem.price, 'USD'),
+          price: ticketItem.isPromoDeal
+            ? 'Promo Deal'
+            : formatAmountForDisplay(ticketItem.price, 'USD'),
           transactionId:
             transaction._id?.toString() || transaction.orderId || '',
         };
