@@ -12,6 +12,8 @@ interface UndercardProps {
 
 export default function Undercard({ fights, isPastEvent }: UndercardProps) {
   const undercardFights = fights?.filter((f: any) => f.isMainEvent == false)
+  const tbaImage = "https://res.cloudinary.com/dujmomznj/image/upload/v1760787691/1_ntonh6.webp"
+  const fighterImage = "https://res.cloudinary.com/dujmomznj/image/upload/f_webp/v1760788552/silhouette-muscular-boxer-mma-fighter-260nw-419652985_c6bebw.jpg"
   if (!undercardFights || undercardFights.length === 0) {
     return (
       <section className="py-20 bg-gradient-to-b from-gray-900 to-black">
@@ -50,6 +52,8 @@ export default function Undercard({ fights, isPastEvent }: UndercardProps) {
             <RevealAnimation key={fight.id} delay={index * 0.1}>
               <ScrollTriggeredAnimation
                 scaleRange={[0.95, 1]}
+                startOffset="start 40%"
+                endOffset="end start"
                 className="bg-black/50 border border-red-900/30 rounded-lg p-6 hover:border-red-600/50 transition-all duration-300"
               >
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
@@ -57,7 +61,7 @@ export default function Undercard({ fights, isPastEvent }: UndercardProps) {
                   <div className="text-center md:text-right">
                     <div className="relative h-32 w-24 mx-auto md:ml-auto md:mr-0 mb-4 rounded-lg overflow-hidden">
                       <Image
-                        src={fight.fighter1.image || "/placeholder.svg"}
+                        src={fight.fighter1.image || (fight.fighter1.name === "TBA" ? tbaImage : fighterImage)}
                         alt={fight.fighter1.name}
                         fill
                         className="object-cover"
@@ -79,7 +83,7 @@ export default function Undercard({ fights, isPastEvent }: UndercardProps) {
                   <div className="text-center md:text-left">
                     <div className="relative h-32 w-24 mx-auto md:mr-auto md:ml-0 mb-4 rounded-lg overflow-hidden">
                       <Image
-                        src={fight.fighter2.image || "/placeholder.svg"}
+                        src={fight.fighter2.image || (fight.fighter2.name === "TBA" ? tbaImage : fighterImage)}
                         alt={fight.fighter2.name}
                         fill
                         className="object-cover"

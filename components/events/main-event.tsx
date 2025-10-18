@@ -12,6 +12,8 @@ interface MainEventProps {
 }
 
 export default function MainEvent({ mainEventFight, isPastEvent }: MainEventProps) {
+  const tbaImage = "https://res.cloudinary.com/dujmomznj/image/upload/v1760787691/1_ntonh6.webp"
+  const fighterImage = "https://res.cloudinary.com/dujmomznj/image/upload/f_webp/v1760788552/silhouette-muscular-boxer-mma-fighter-260nw-419652985_c6bebw.jpg"
   if (!mainEventFight) {
     return (
       <section className="py-12 lg:py-20 bg-gradient-to-b from-black to-gray-900 relative z-10">
@@ -59,7 +61,7 @@ export default function MainEvent({ mainEventFight, isPastEvent }: MainEventProp
                 <div className="relative mb-6">
                   <div className="relative h-80 w-64 mx-auto lg:ml-auto lg:mr-0 rounded-lg overflow-hidden group">
                     <Image
-                      src={mainEventFight.fighter1.image || "/placeholder.svg"}
+                      src={mainEventFight.fighter1.image || (mainEventFight.fighter1.name === "TBA" ? tbaImage : fighterImage)}
                       alt={mainEventFight.fighter1.name}
                       fill
                       className="object-cover transition-transform duration-500 group-hover:scale-110"
@@ -131,7 +133,7 @@ export default function MainEvent({ mainEventFight, isPastEvent }: MainEventProp
                 <div className="relative mb-6">
                   <div className="relative h-80 w-64 mx-auto lg:mr-auto lg:ml-0 rounded-lg overflow-hidden group">
                     <Image
-                      src={mainEventFight.fighter2.image || "/placeholder.svg"}
+                      src={mainEventFight.fighter2.image || (mainEventFight.fighter2.name === "TBA" ? tbaImage : fighterImage)}
                       alt={mainEventFight.fighter2.name}
                       fill
                       className="object-cover transition-transform duration-500 group-hover:scale-110"
