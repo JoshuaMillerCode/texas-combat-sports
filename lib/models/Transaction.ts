@@ -15,6 +15,9 @@ export interface ITransaction extends Document {
     tierName: string; // Store name for easy access
     quantity: number;
     price: number;
+    // Promo deal tracking
+    isPromoDeal?: boolean; // Flag to indicate this was a promo purchase
+    originalTierName?: string; // Original tier name for promo deals
     // Individual ticket tracking
     tickets: Array<{
       ticketNumber: string;
@@ -154,6 +157,14 @@ const TransactionSchema: Schema = new Schema(
         price: {
           type: Number,
           required: true,
+        },
+        // Promo deal tracking
+        isPromoDeal: {
+          type: Boolean,
+          default: false,
+        },
+        originalTierName: {
+          type: String,
         },
         tickets: [
           {

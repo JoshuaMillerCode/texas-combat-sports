@@ -91,6 +91,16 @@ export class TicketTierService {
     return await TicketTier.findOne({ event: eventId, tierId, isActive: true });
   }
 
+  static async getTicketTierByName(
+    tierName: string
+  ): Promise<ITicketTier | null> {
+    await dbConnect();
+    return await TicketTier.findOne({
+      name: tierName,
+      isActive: true,
+    });
+  }
+
   static async updateAvailableQuantity(
     tierObjectId: string,
     quantityChange: number
