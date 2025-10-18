@@ -8,6 +8,7 @@ import { TicketGenerator } from '@/lib/utils/ticket-generator';
 import { EventService } from '@/lib/services/event.service';
 import { OrderIDGenerator } from '@/lib/utils/order-id-generator';
 import { TransferService } from '@/lib/services/transfer.service';
+import { TicketTierService } from '@/lib/services/ticketTier.service';
 import mongoose from 'mongoose';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -186,6 +187,33 @@ export async function POST(req: NextRequest) {
               ticketItems: ticketItems,
             });
 
+            // Deduct ticket availability now that payment is confirmed
+            // Only deduct if this is a new transaction (not already processed)
+            if (ticketItems && ticketItems.length > 0) {
+              console.log(
+                'Deducting ticket availability for confirmed transaction:',
+                transaction._id.toString()
+              );
+              for (const ticketItem of ticketItems) {
+                try {
+                  await TicketTierService.reserveTickets(
+                    ticketItem.ticketTier.toString(),
+                    ticketItem.quantity
+                  );
+                  console.log(
+                    `Deducted ${ticketItem.quantity} tickets from tier ${ticketItem.ticketTier}`
+                  );
+                } catch (error) {
+                  console.error(
+                    `Failed to deduct tickets for tier ${ticketItem.ticketTier}:`,
+                    error
+                  );
+                  // This is a critical error - the payment succeeded but we can't deduct tickets
+                  // We should log this for manual intervention
+                }
+              }
+            }
+
             // Generate and send tickets via email
             try {
               const event = await EventService.getEventById(
@@ -239,6 +267,19 @@ export async function POST(req: NextRequest) {
               session.id,
               'skipping creation'
             );
+
+            // Skip deduction for existing transactions to prevent double processing
+            // The tickets should have already been deducted when the transaction was first created
+            if (
+              transaction &&
+              transaction.ticketItems &&
+              transaction.ticketItems.length > 0
+            ) {
+              console.log(
+                'Skipping ticket deduction for existing transaction (already processed):',
+                transaction._id.toString()
+              );
+            }
           }
 
           // Create service fee transfer (4%) to developer account
@@ -300,6 +341,13 @@ export async function POST(req: NextRequest) {
 
         break;
 
+      case 'checkout.session.expired':
+        console.log('🕐 Processing checkout.session.expired event');
+        const expiredSession = event.data.object as Stripe.Checkout.Session;
+        console.log('Checkout session expired:', expiredSession.id);
+        // No action needed - tickets were not reserved during checkout
+        break;
+
       case 'payment_intent.payment_failed':
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
         console.log('Payment failed:', paymentIntent.id);
@@ -315,7 +363,7 @@ export async function POST(req: NextRequest) {
       case 'payment_intent.canceled':
         const canceledPaymentIntent = event.data.object as Stripe.PaymentIntent;
         console.log('Payment canceled:', canceledPaymentIntent.id);
-        // Update transaction status to canceled
+        // No action needed - tickets were not reserved during checkout
         break;
 
       case 'charge.refunded':
@@ -377,6 +425,31 @@ export async function POST(req: NextRequest) {
                   'Service fee transfer reversal failed:',
                   reversalResult.error
                 );
+              }
+            }
+
+            // Restore ticket availability for refunded ticket transactions
+            if (transaction.ticketItems && transaction.ticketItems.length > 0) {
+              console.log(
+                'Restoring ticket availability for refunded transaction:',
+                transaction._id.toString()
+              );
+              for (const ticketItem of transaction.ticketItems) {
+                try {
+                  await TicketTierService.releaseReservedTickets(
+                    ticketItem.ticketTier.toString(),
+                    ticketItem.quantity
+                  );
+                  console.log(
+                    `Restored ${ticketItem.quantity} tickets to tier ${ticketItem.ticketTier}`
+                  );
+                } catch (error) {
+                  console.error(
+                    `Failed to restore tickets for tier ${ticketItem.ticketTier}:`,
+                    error
+                  );
+                  // Don't fail the entire webhook - log the error and continue
+                }
               }
             }
 

@@ -1,6 +1,7 @@
 import dbConnect from '@/lib/dbConnect';
 import { Transaction, TicketTier, Merch } from '@/lib/models';
 import { ITransaction } from '@/lib/models/Transaction';
+import { TicketTierService } from './ticketTier.service';
 import mongoose from 'mongoose';
 
 export class TransactionService {
@@ -165,8 +166,13 @@ export class TransactionService {
 
     // Update inventory for confirmed transactions
     if (transaction) {
-      // Handle ticket items - no inventory update needed as tickets are unlimited
-      // but we could track sold quantities if needed
+      // Handle ticket items - tickets were already deducted during checkout reservation
+      // No need to deduct again here
+      if (transaction.ticketItems && transaction.ticketItems.length > 0) {
+        console.log(
+          `Confirming transaction with ${transaction.ticketItems.length} ticket items`
+        );
+      }
 
       // Handle merch items - confirm the sale in inventory
       if (transaction.merchItems && transaction.merchItems.length > 0) {
@@ -199,9 +205,18 @@ export class TransactionService {
     // Handle ticket items
     if (transaction.ticketItems && transaction.ticketItems.length > 0) {
       for (const ticketItem of transaction.ticketItems) {
-        await TicketTier.findByIdAndUpdate(ticketItem.ticketTier, {
-          $inc: { availableQuantity: ticketItem.quantity },
-        });
+        try {
+          await TicketTierService.releaseReservedTickets(
+            ticketItem.ticketTier.toString(),
+            ticketItem.quantity
+          );
+        } catch (error) {
+          console.error(
+            `Failed to restore tickets for tier ${ticketItem.ticketTier}:`,
+            error
+          );
+          // Don't fail the entire transaction - log the error and continue
+        }
       }
     }
 
@@ -241,9 +256,18 @@ export class TransactionService {
     // Handle ticket items
     if (transaction.ticketItems && transaction.ticketItems.length > 0) {
       for (const ticketItem of transaction.ticketItems) {
-        await TicketTier.findByIdAndUpdate(ticketItem.ticketTier, {
-          $inc: { availableQuantity: ticketItem.quantity },
-        });
+        try {
+          await TicketTierService.releaseReservedTickets(
+            ticketItem.ticketTier.toString(),
+            ticketItem.quantity
+          );
+        } catch (error) {
+          console.error(
+            `Failed to restore tickets for tier ${ticketItem.ticketTier}:`,
+            error
+          );
+          // Don't fail the entire transaction - log the error and continue
+        }
       }
     }
 

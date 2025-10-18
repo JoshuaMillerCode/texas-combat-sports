@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import type { CheckoutSessionData } from '@/types/stripe';
 import { isFeatureEnabled } from '@/lib/feature-flags';
+import { TicketTierService } from '@/lib/services/ticketTier.service';
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
@@ -60,6 +61,41 @@ export async function POST(req: NextRequest) {
           { status: 400 }
         );
       }
+    }
+
+    // Validate ticket availability (but don't reserve yet)
+    console.log('Validating ticket availability...');
+
+    for (const ticket of body.tickets) {
+      const ticketTier = await TicketTierService.getTicketTierById(
+        ticket.tierId
+      );
+      if (!ticketTier) {
+        return NextResponse.json(
+          { error: `Ticket tier not found: ${ticket.tierName}` },
+          { status: 400 }
+        );
+      }
+
+      if (!ticketTier.isActive) {
+        return NextResponse.json(
+          { error: `Ticket tier "${ticket.tierName}" is no longer available` },
+          { status: 400 }
+        );
+      }
+
+      if (ticketTier.availableQuantity < ticket.quantity) {
+        return NextResponse.json(
+          {
+            error: `Insufficient tickets available for "${ticket.tierName}". Only ${ticketTier.availableQuantity} tickets remaining.`,
+          },
+          { status: 400 }
+        );
+      }
+
+      console.log(
+        `✅ ${ticket.tierName}: ${ticket.quantity} tickets available (${ticketTier.availableQuantity} remaining)`
+      );
     }
 
     // Fetch actual prices from Stripe API to ensure accuracy
