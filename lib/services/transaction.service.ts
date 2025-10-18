@@ -767,6 +767,25 @@ export class TransactionService {
   static async formatTicketItems(ticketData: any) {
     const ticketItems = JSON.parse(ticketData);
     const formattedTicketItems = ticketItems.map((item: any) => {
+      // Handle promo deal: 3 tickets for price of 2 ($110)
+      // Check if this is a promo deal tier (you can customize this condition)
+      const isPromoDeal =
+        item.tierName?.toLowerCase().includes('promo') ||
+        item.tierName?.toLowerCase().includes('deal') ||
+        item.price === 11000; // $110 in cents
+
+      if (isPromoDeal) {
+        // For promo deal, customer gets 3 GA tickets but pays for 2
+        return {
+          ticketTier: new mongoose.Types.ObjectId(item.tierId),
+          tierName: 'General Admission', // Override to GA for the actual tickets
+          price: item.price, // Keep original price ($110)
+          quantity: 3, // Customer gets 3 tickets (for ticket generation)
+          isPromoDeal: true, // Flag to track this was a promo purchase
+          originalTierName: item.tierName, // Keep original tier name for reference
+        };
+      }
+
       return {
         ticketTier: new mongoose.Types.ObjectId(item.tierId),
         tierName: item.tierName,

@@ -196,13 +196,52 @@ export async function POST(req: NextRequest) {
               );
               for (const ticketItem of ticketItems) {
                 try {
-                  await TicketTierService.reserveTickets(
-                    ticketItem.ticketTier.toString(),
-                    ticketItem.quantity
-                  );
-                  console.log(
-                    `Deducted ${ticketItem.quantity} tickets from tier ${ticketItem.ticketTier}`
-                  );
+                  if (ticketItem.isPromoDeal) {
+                    // For promo deals, we need to deduct from both tiers:
+                    // 1. Deduct 1 from the promo tier (the purchase)
+                    // 2. Deduct 3 from the GA tier (the actual tickets)
+
+                    console.log(
+                      'Promo deal detected - deducting from both tiers'
+                    );
+
+                    // First, deduct 1 from the promo tier
+                    await TicketTierService.reserveTickets(
+                      ticketItem.ticketTier.toString(),
+                      1 // Always deduct 1 from promo tier
+                    );
+                    console.log(
+                      `Deducted 1 ticket from promo tier ${ticketItem.ticketTier}`
+                    );
+
+                    // Then, find and deduct 3 from the General Admission tier
+                    const gaTier = await TicketTierService.getTicketTierByName(
+                      // event._id.toString(),
+                      'General Admission'
+                    );
+                    if (gaTier) {
+                      await TicketTierService.reserveTickets(
+                        gaTier._id.toString(),
+                        3 // Deduct 3 GA tickets
+                      );
+                      console.log(
+                        `Deducted 3 tickets from GA tier ${gaTier._id}`
+                      );
+                    } else {
+                      console.error(
+                        'General Admission tier not found for promo deal'
+                      );
+                    }
+                  } else {
+                    // Regular ticket purchase - deduct normally
+                    await TicketTierService.reserveTickets(
+                      ticketItem.ticketTier.toString(),
+                      ticketItem.quantity
+                    );
+                    console.log(
+                      `Deducted ${ticketItem.quantity} tickets from tier ${ticketItem.ticketTier}`
+                    );
+                  }
                 } catch (error) {
                   console.error(
                     `Failed to deduct tickets for tier ${ticketItem.ticketTier}:`,
