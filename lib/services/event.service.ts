@@ -14,9 +14,21 @@ export class EventService {
   static async getEventById(id: string): Promise<IEvent | null> {
     await dbConnect();
     return await Event.findById(id)
-      .populate('fights')
+      .populate({
+        path: 'fights',
+        populate: {
+          path: 'fighter1 fighter2',
+          model: 'Fighter',
+        },
+      })
       .populate('ticketTiers')
-      .populate('mainEventFight');
+      .populate({
+        path: 'mainEventFight',
+        populate: {
+          path: 'fighter1 fighter2',
+          model: 'Fighter',
+        },
+      });
   }
 
   static async getEventBySlug(slug: string): Promise<IEvent | null> {
