@@ -198,33 +198,37 @@ export async function POST(req: NextRequest) {
                 try {
                   if (ticketItem.isPromoDeal) {
                     // For promo deals, we need to deduct from both tiers:
-                    // 1. Deduct 1 from the promo tier (the purchase)
-                    // 2. Deduct 3 from the GA tier (the actual tickets)
+                    // 1. Deduct from the promo tier based on original quantity
+                    // 2. Deduct from the GA tier based on total tickets given (3 per promo deal)
 
                     console.log(
                       'Promo deal detected - deducting from both tiers'
                     );
 
-                    // First, deduct 1 from the promo tier
+                    // Calculate the original quantity purchased (before conversion to 3x)
+                    const originalQuantity = ticketItem.quantity / 3;
+                    const gaTicketsToDeduct = ticketItem.quantity; // Total GA tickets to give
+
+                    // First, deduct from the promo tier (original quantity)
                     await TicketTierService.reserveTickets(
                       ticketItem.ticketTier.toString(),
-                      1 // Always deduct 1 from promo tier
+                      originalQuantity
                     );
                     console.log(
-                      `Deducted 1 ticket from promo tier ${ticketItem.ticketTier}`
+                      `Deducted ${originalQuantity} tickets from promo tier ${ticketItem.ticketTier}`
                     );
 
-                    // Then, find and deduct 3 from the General Admission tier
+                    // Then, find and deduct from the General Admission tier
                     const gaTier = await TicketTierService.getTicketTierByName(
                       'General Admission'
                     );
                     if (gaTier) {
                       await TicketTierService.reserveTickets(
                         gaTier._id.toString(),
-                        3 // Deduct 3 GA tickets
+                        gaTicketsToDeduct
                       );
                       console.log(
-                        `Deducted 3 tickets from GA tier ${gaTier._id}`
+                        `Deducted ${gaTicketsToDeduct} tickets from GA tier ${gaTier._id}`
                       );
                     } else {
                       console.error(

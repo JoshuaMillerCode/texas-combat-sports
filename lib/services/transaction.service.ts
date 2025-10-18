@@ -775,12 +775,13 @@ export class TransactionService {
         item.price === 11000; // $110 in cents
 
       if (isPromoDeal) {
-        // For promo deal, customer gets 3 GA tickets but pays for 2
+        // For promo deal, customer gets 3 GA tickets per promo deal purchased
+        // If they buy 2 promo deals, they get 6 tickets total (2 × 3)
         return {
           ticketTier: new mongoose.Types.ObjectId(item.tierId),
           tierName: 'General Admission', // Override to GA for the actual tickets
           price: item.price, // Keep original price ($110)
-          quantity: 3, // Customer gets 3 tickets (for ticket generation)
+          quantity: 3 * item.quantity, // Customer gets 3 tickets per promo deal purchased
           isPromoDeal: true, // Flag to track this was a promo purchase
           originalTierName: item.tierName, // Keep original tier name for reference
         };
