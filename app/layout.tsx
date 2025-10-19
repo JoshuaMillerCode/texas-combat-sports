@@ -7,6 +7,8 @@ import Footer from "@/components/footer"
 import { QueryProvider } from "@/contexts/query-context"
 import { AuthProvider } from "@/contexts/auth-context"
 import { CurrentEventProvider } from "@/contexts/current-event-context"
+import { Analytics } from '@vercel/analytics/next';
+
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -36,6 +38,7 @@ export default function RootLayout({
             </CurrentEventProvider>
           </AuthProvider>
         </QueryProvider>
+        <Analytics />
       </body>
     </html>
   )
