@@ -20,11 +20,13 @@ export default function HeroSection() {
         <RevealAnimation delay={0.1}>
           <div className="flex justify-center mb-6">
             <Image 
-              src="https://res.cloudinary.com/dujmomznj/image/upload/f_webp/v1759384197/helmet-removebg-preview_syokop.png"
+              src="https://res.cloudinary.com/dujmomznj/image/upload/f_auto,q_auto:good,w_150,h_150/v1759384197/helmet-removebg-preview_syokop.png"
               alt="Texas Combat Sports Logo"
               width={150}
               height={150}
               className="object-contain drop-shadow-2xl"
+              priority
+              loading="eager"
             />
           </div>
         </RevealAnimation>

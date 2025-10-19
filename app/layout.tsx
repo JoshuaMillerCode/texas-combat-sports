@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   description: "Houston-based combat sports promotion company putting on high-intensity boxing events.",
   generator: 'v0.dev',
   icons: {
-    icon: 'https://res.cloudinary.com/dujmomznj/image/upload/f_webp/v1755476673/helmet_ouwsr5.jpg',
+    icon: 'https://res.cloudinary.com/dujmomznj/image/upload/f_auto,q_auto:good,w_32,h_32/v1755476673/helmet_ouwsr5.jpg',
   }
 }
 

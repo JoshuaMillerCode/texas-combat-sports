@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(body),
-      cache: 'no-store',
+      next: { revalidate: 3600 }, // Cache for 1 hour
     });
 
     if (!response.ok) {
@@ -92,17 +92,26 @@ export async function GET(request: NextRequest) {
       publicId: r.public_id,
       secureUrl: r.secure_url.replace(
         '/upload/',
-        '/upload/f_webp,q_85,w_1200/'
+        '/upload/f_auto,q_auto:low,w_600/'
       ),
       width: r.width,
       height: r.height,
       format: r.format,
     }));
 
-    return NextResponse.json({
-      resources,
-      nextCursor: data.next_cursor,
-    });
+    return NextResponse.json(
+      {
+        resources,
+        nextCursor: data.next_cursor,
+      },
+      {
+        headers: {
+          'Cache-Control': 'public, max-age=3600, s-maxage=86400',
+          'CDN-Cache-Control': 'max-age=86400',
+          Vary: 'Accept-Encoding',
+        },
+      }
+    );
   } catch (error: any) {
     return NextResponse.json(
       { error: error?.message || 'Internal server error' },

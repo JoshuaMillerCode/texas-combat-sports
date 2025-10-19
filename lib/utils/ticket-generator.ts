@@ -30,7 +30,7 @@ export class TicketGenerator {
   private static readonly DEFAULT_SECONDARY_COLOR = rgb(0.8, 0.8, 0.8);
   private static readonly ACCENT_COLOR = rgb(0.9, 0.2, 0.2); // Red accent for boxing theme
   private static readonly DEFAULT_LOGO_URL =
-    'https://res.cloudinary.com/dujmomznj/image/upload/v1753627714/txcs-logo_wb9qnx.jpg';
+    'https://res.cloudinary.com/dujmomznj/image/upload/f_auto,q_auto:good,w_200,h_200/v1753627714/txcs-logo_wb9qnx.jpg';
 
   /**
    * Generates a PDF ticket as a Uint8Array without persisting to storage

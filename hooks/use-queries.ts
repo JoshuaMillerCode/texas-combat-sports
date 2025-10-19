@@ -71,7 +71,12 @@ export function useGalleryEventsQuery() {
 
       return response.json() as Promise<GalleryEvent[]>;
     },
-    // Public query - no auth required
+    // Enhanced caching - cache for 1 hour, keep in memory for 2 hours
+    staleTime: 60 * 60 * 1000, // 1 hour
+    gcTime: 2 * 60 * 60 * 1000, // 2 hours
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
   });
 }
 
@@ -94,11 +99,13 @@ export function useGalleryImagesQuery(folder: string, nextCursor?: string) {
       }>;
     },
     enabled: !!folder,
+    // Enhanced caching - cache for 1 hour, keep in memory for 2 hours
+    staleTime: 60 * 60 * 1000, // 1 hour
+    gcTime: 2 * 60 * 60 * 1000, // 2 hours
     // Disable automatic refetching to prevent infinite loops
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     refetchOnReconnect: false,
-    // Public query - no auth required
   });
 }
 
@@ -114,9 +121,12 @@ export function useRandomImagesQuery() {
 
       return response.json() as Promise<RandomImage[]>;
     },
-    // Cache for 5 minutes to avoid too many requests
-    staleTime: 5 * 60 * 1000,
-    // Public query - no auth required
+    // Enhanced caching - cache for 1 hour, keep in memory for 2 hours
+    staleTime: 60 * 60 * 1000, // 1 hour (increased from 5 minutes)
+    gcTime: 2 * 60 * 60 * 1000, // 2 hours
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
   });
 }
 

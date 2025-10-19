@@ -54,7 +54,7 @@ async function testOrderIDAndQR() {
     const pdfBytes = await TicketGenerator.generateTicket(testTicketData, {
       includeQRCode: true,
       logoUrl:
-        'https://res.cloudinary.com/dujmomznj/image/upload/v1753627714/txcs-logo_wb9qnx.jpg',
+        'https://res.cloudinary.com/dujmomznj/image/upload/f_auto,q_auto:good,w_200,h_200/v1753627714/txcs-logo_wb9qnx.jpg',
     });
 
     console.log(`✅ QR Code generated successfully!`);
@@ -81,7 +81,7 @@ async function testOrderIDAndQR() {
     const jsonPdfBytes = await TicketGenerator.generateTicket(jsonTicketData, {
       includeQRCode: true,
       logoUrl:
-        'https://res.cloudinary.com/dujmomznj/image/upload/v1753627714/txcs-logo_wb9qnx.jpg',
+        'https://res.cloudinary.com/dujmomznj/image/upload/f_auto,q_auto:good,w_200,h_200/v1753627714/txcs-logo_wb9qnx.jpg',
     });
 
     console.log(`✅ JSON QR Code generated successfully!`);

@@ -491,7 +491,14 @@ function SpotlightCard({ fighter, onClose }: SpotlightCardProps) {
         {/* Fighter Image */}
         <div className="relative">
           <div className="aspect-[3/4] relative rounded-lg overflow-hidden">
-            <Image src={fighter.image || "/placeholder.svg"} alt={fighter.name} fill className="object-cover" />
+            <Image 
+              src={fighter.image || "/placeholder.svg"} 
+              alt={fighter.name} 
+              fill 
+              className="object-cover"
+              loading="lazy"
+              sizes="(max-width: 768px) 100vw, 50vw"
+            />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
           </div>
 

@@ -23,7 +23,7 @@ export async function GET() {
       `https://api.cloudinary.com/v1_1/${cloudName}/folders/events`,
       {
         headers: { Authorization: authHeader },
-        cache: 'no-store',
+        next: { revalidate: 1800 }, // Cache for 30 minutes
       }
     );
 
@@ -52,10 +52,10 @@ export async function GET() {
               },
               body: JSON.stringify({
                 expression,
-                max_results: 10, // Get more results to see what's available
+                max_results: 5, // Reduced from 10 to 5
                 sort_by: [{ created_at: 'desc' }],
               }),
-              cache: 'no-store',
+              next: { revalidate: 1800 }, // Cache for 30 minutes
             }
           );
 
@@ -71,7 +71,7 @@ export async function GET() {
             const first = data.resources[0];
             const thumbUrl = first.secure_url.replace(
               '/upload/',
-              '/upload/f_webp,q_85,w_600,h_400,c_fill/'
+              '/upload/f_auto,q_auto:eco,w_300,h_200,c_fill/'
             );
 
             return {
@@ -87,7 +87,13 @@ export async function GET() {
       })
     );
 
-    return NextResponse.json(events);
+    return NextResponse.json(events, {
+      headers: {
+        'Cache-Control': 'public, max-age=1800, s-maxage=3600',
+        'CDN-Cache-Control': 'max-age=3600',
+        Vary: 'Accept-Encoding',
+      },
+    });
   } catch (error: any) {
     return NextResponse.json([] as GalleryEvent[]);
   }
