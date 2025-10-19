@@ -12,8 +12,8 @@ interface MainEventProps {
 }
 
 export default function MainEvent({ mainEventFight, isPastEvent }: MainEventProps) {
-  const tbaImage = "https://res.cloudinary.com/dujmomznj/image/upload/v1760787691/1_ntonh6.webp"
-  const fighterImage = "https://res.cloudinary.com/dujmomznj/image/upload/f_webp/v1760788552/silhouette-muscular-boxer-mma-fighter-260nw-419652985_c6bebw.jpg"
+  const tbaImage = "https://res.cloudinary.com/dujmomznj/image/upload/f_auto,q_auto:low,w_256,h_320,c_fill/v1760787691/1_ntonh6.webp"
+  const fighterImage = "https://res.cloudinary.com/dujmomznj/image/upload/f_auto,q_auto:low,w_256,h_320,c_fill/v1760788552/silhouette-muscular-boxer-mma-fighter-260nw-419652985_c6bebw.jpg"
   if (!mainEventFight) {
     return (
       <section className="py-12 lg:py-20 bg-gradient-to-b from-black to-gray-900 relative z-10">
@@ -65,6 +65,8 @@ export default function MainEvent({ mainEventFight, isPastEvent }: MainEventProp
                       alt={mainEventFight.fighter1.name}
                       fill
                       className="object-cover transition-transform duration-500 group-hover:scale-110"
+                      loading="lazy"
+                      sizes="256px"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
                     <div className="absolute bottom-4 left-4 right-4">
@@ -137,6 +139,8 @@ export default function MainEvent({ mainEventFight, isPastEvent }: MainEventProp
                       alt={mainEventFight.fighter2.name}
                       fill
                       className="object-cover transition-transform duration-500 group-hover:scale-110"
+                      loading="lazy"
+                      sizes="256px"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
                     <div className="absolute bottom-4 left-4 right-4">

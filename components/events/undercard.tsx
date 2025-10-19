@@ -12,8 +12,8 @@ interface UndercardProps {
 
 export default function Undercard({ fights, isPastEvent }: UndercardProps) {
   const undercardFights = fights?.filter((f: any) => f.isMainEvent == false)
-  const tbaImage = "https://res.cloudinary.com/dujmomznj/image/upload/v1760787691/1_ntonh6.webp"
-  const fighterImage = "https://res.cloudinary.com/dujmomznj/image/upload/f_webp/v1760788552/silhouette-muscular-boxer-mma-fighter-260nw-419652985_c6bebw.jpg"
+  const tbaImage = "https://res.cloudinary.com/dujmomznj/image/upload/f_auto,q_auto:eco,w_96,h_128,c_fill/v1760787691/1_ntonh6.webp"
+  const fighterImage = "https://res.cloudinary.com/dujmomznj/image/upload/f_auto,q_auto:eco,w_96,h_128,c_fill/v1760788552/silhouette-muscular-boxer-mma-fighter-260nw-419652985_c6bebw.jpg"
   if (!undercardFights || undercardFights.length === 0) {
     return (
       <section className="py-20 bg-gradient-to-b from-gray-900 to-black">
@@ -65,6 +65,8 @@ export default function Undercard({ fights, isPastEvent }: UndercardProps) {
                         alt={fight.fighter1.name}
                         fill
                         className="object-cover"
+                        loading="lazy"
+                        sizes="96px"
                       />
                     </div>
                     <h4 className="text-lg font-bold text-white mb-1">{fight.fighter1.name}</h4>
@@ -87,6 +89,8 @@ export default function Undercard({ fights, isPastEvent }: UndercardProps) {
                         alt={fight.fighter2.name}
                         fill
                         className="object-cover"
+                        loading="lazy"
+                        sizes="96px"
                       />
                     </div>
                     <h4 className="text-lg font-bold text-white mb-1">{fight.fighter2.name}</h4>

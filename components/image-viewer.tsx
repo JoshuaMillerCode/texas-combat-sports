@@ -13,11 +13,39 @@ interface ImageViewerProps {
 }
 
 function toOptimized(url: string) {
-  // High quality for full-screen viewing, but still optimized
-  return url.replace("/upload/", "/upload/w_1200,h_800,c_fill/")
+  // Check if URL already has transformations from API
+  if (url.includes("/upload/f_auto") || url.includes("/upload/w_")) {
+    // Replace existing transformations with full-screen optimized ones
+    const parts = url.split("/upload/")
+    if (parts.length === 2) {
+      const [base, rest] = parts
+      // Find where version starts (v + numbers)
+      const versionMatch = rest.match(/\/(v\d+\/.+)$/)
+      if (versionMatch) {
+        return `${base}/upload/f_auto,q_auto:good,w_1200,h_800,c_fill/${versionMatch[1]}`
+      }
+    }
+    return url
+  }
+  // Optimized for full-screen viewing with auto format and quality
+  return url.replace("/upload/", "/upload/f_auto,q_auto:good,w_1200,h_800,c_fill/")
 }
 
 function toBlur(url: string) {
+  // Check if URL already has transformations from API
+  if (url.includes("/upload/f_auto") || url.includes("/upload/w_") || url.includes("/upload/e_blur")) {
+    // Extract base URL without transformations for blur
+    const parts = url.split("/upload/")
+    if (parts.length === 2) {
+      const [base, rest] = parts
+      // Find where version starts (v + numbers)
+      const versionMatch = rest.match(/\/(v\d+\/.+)$/)
+      if (versionMatch) {
+        return `${base}/upload/e_blur:2000,q_1,w_30,h_20,c_fill/${versionMatch[1]}`
+      }
+    }
+    return url
+  }
   // Small blurry placeholder for faster loading
   return url.replace("/upload/", "/upload/e_blur:2000,q_1,w_30,h_20,c_fill/")
 }
@@ -108,12 +136,13 @@ export default function ImageViewer({ images, initialIndex, isOpen, onClose }: I
         <Image
           src={optimized}
           alt={currentImage.publicId}
-          width={1200}
-          height={800}
+          width={1000}
+          height={700}
           className="object-contain max-h-[80vh] w-auto"
           placeholder="blur"
           blurDataURL={blur}
           priority
+          loading="eager"
         />
       </div>
 
@@ -137,6 +166,7 @@ export default function ImageViewer({ images, initialIndex, isOpen, onClose }: I
                   width={64}
                   height={64}
                   className="object-cover w-full h-full"
+                  loading="lazy"
                 />
               </button>
             ))}

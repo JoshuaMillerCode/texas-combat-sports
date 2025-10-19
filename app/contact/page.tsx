@@ -226,7 +226,7 @@ export default function ContactPage() {
         <div 
           className="absolute inset-0 w-full h-full object-cover"
           style={{
-            backgroundImage: `url(https://res.cloudinary.com/dujmomznj/image/upload/f_webp,q_auto/v1754612275/207-IMG_2557_blblcb.jpg)`,
+            backgroundImage: `url(https://res.cloudinary.com/dujmomznj/image/upload/f_auto,q_auto:eco,w_1600,h_900,c_fill,e_sharpen:50/v1754612275/207-IMG_2557_blblcb.jpg)`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
           }}

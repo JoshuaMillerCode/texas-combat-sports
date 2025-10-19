@@ -36,6 +36,8 @@ export default function VideoCard({
             alt={video.title}
             fill
             className="object-cover"
+            loading="lazy"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
         ) : (
           <div className="w-full h-full bg-gray-800 flex items-center justify-center">
