@@ -8,11 +8,29 @@ import ImageViewer from "@/components/image-viewer"
 import LoadingBoxing from "@/components/ui/loading-boxing"
 
 function toOptimized(url: string) {
-  // Since API now provides WebP, just add responsive sizing
-  return url.replace("/upload/", "/upload/w_800,h_600,c_fill/")
+  // Check if URL already has transformations from API
+  if (url.includes("/upload/f_auto") || url.includes("/upload/w_")) {
+    return url // Already optimized by API
+  }
+  // Optimized for gallery thumbnails with auto format and quality
+  return url.replace("/upload/", "/upload/f_auto,q_auto:low,w_500,h_375,c_fill/")
 }
 
 function toBlur(url: string) {
+  // Check if URL already has transformations from API
+  if (url.includes("/upload/f_auto") || url.includes("/upload/w_") || url.includes("/upload/e_blur")) {
+    // Extract base URL without transformations for blur
+    const parts = url.split("/upload/")
+    if (parts.length === 2) {
+      const [base, rest] = parts
+      // Find where version starts (v + numbers)
+      const versionMatch = rest.match(/\/(v\d+\/.+)$/)
+      if (versionMatch) {
+        return `${base}/upload/e_blur:2000,q_1,w_20,h_15,c_fill/${versionMatch[1]}`
+      }
+    }
+    return url
+  }
   // Very small, blurry placeholder for faster loading
   return url.replace("/upload/", "/upload/e_blur:2000,q_1,w_20,h_15,c_fill/")
 }

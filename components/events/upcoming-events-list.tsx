@@ -8,10 +8,10 @@ import { useTicketPurchase } from "@/hooks/use-ticket-purchase"
 import ComingSoonModal from "@/components/coming-soon-modal"
 
 const DEFAULT_EVENT_IMAGES = [
-  "https://res.cloudinary.com/dujmomznj/image/upload/f_webp/v1759378172/scene-from-olympic-games-tournament-with-athletes-competing_23-2151471034_rumfsk.avif",
-  "https://res.cloudinary.com/dujmomznj/image/upload/f_webp/v1759378718/download_1_qbznu9.jpg",
-  "https://res.cloudinary.com/dujmomznj/image/upload/f_webp/v1759378718/download_xayqnn.jpg",
-  "https://res.cloudinary.com/dujmomznj/image/upload/f_webp/v1759378718/images_paqp96.jpg",
+  "https://res.cloudinary.com/dujmomznj/image/upload/f_auto,q_auto:low,w_600,h_450,c_fill/v1759378172/scene-from-olympic-games-tournament-with-athletes-competing_23-2151471034_rumfsk.avif",
+  "https://res.cloudinary.com/dujmomznj/image/upload/f_auto,q_auto:low,w_600,h_450,c_fill/v1759378718/download_1_qbznu9.jpg",
+  "https://res.cloudinary.com/dujmomznj/image/upload/f_auto,q_auto:low,w_600,h_450,c_fill/v1759378718/download_xayqnn.jpg",
+  "https://res.cloudinary.com/dujmomznj/image/upload/f_auto,q_auto:low,w_600,h_450,c_fill/v1759378718/images_paqp96.jpg",
 ]
 
 const getRandomEventImage = (seed?: string) => {
@@ -47,7 +47,14 @@ export default function UpcomingEventsList({ events }: UpcomingEventsListProps) 
               <div key={event._id} className="bg-black/50 border border-red-900/30 rounded-lg overflow-hidden">
                 <div className="grid lg:grid-cols-2 gap-8">
                   <div className="relative h-80 lg:h-auto flex items-center justify-center">
-                    <Image src={event.posterImage || getRandomEventImage(event._id || event.slug)} alt={event.title} fill className="object-contain" />
+                    <Image 
+                      src={event.posterImage || getRandomEventImage(event._id || event.slug)} 
+                      alt={event.title} 
+                      fill 
+                      className="object-contain"
+                      loading="lazy"
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                    />
                   </div>
                   <div className="p-8">
                     <h3 className="text-3xl font-bold text-white mb-4">{event.title}</h3>

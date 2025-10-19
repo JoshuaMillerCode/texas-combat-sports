@@ -10,7 +10,7 @@ export default function WhySection() {
   return (
     <SmoothParallax
       className="py-20"
-      backgroundImage="https://res.cloudinary.com/dujmomznj/image/upload/f_webp,q_auto/v1754612352/10-DSC04518_reme1d.jpg"
+      backgroundImage="https://res.cloudinary.com/dujmomznj/image/upload/f_auto,q_auto:eco,w_1600,h_900,c_fill,e_sharpen:50/v1754612352/10-DSC04518_reme1d.jpg"
       speed={0.6}
       overlayOpacity={0.8}
     >

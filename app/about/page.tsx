@@ -58,7 +58,7 @@ export default function AboutPage() {
   return (
     <div className="min-h-screen pt-16">
       {/* Hero Section */}
-      <HeroParallax backgroundImage="https://res.cloudinary.com/dujmomznj/image/upload/f_webp,q_auto/v1754612339/59-DSC05643_ime0qx.jpg" height="60vh">
+      <HeroParallax backgroundImage="https://res.cloudinary.com/dujmomznj/image/upload/f_auto,q_auto:eco,w_1600,h_900,c_fill,e_sharpen:50/v1754612339/59-DSC05643_ime0qx.jpg" height="60vh">
         <div className="text-center">
           <RevealAnimation>
             <h1 className="text-6xl font-black text-white mb-4 drop-shadow-2xl">
@@ -99,10 +99,11 @@ export default function AboutPage() {
             <RevealAnimation direction="right" delay={0.2}>
               <ScrollTriggeredAnimation scaleRange={[0.8, 1]} className="relative h-96">
                 <Image
-                  src="https://res.cloudinary.com/dujmomznj/image/upload/f_webp,q_auto/v1755403315/txcs_logo_toiioe.png"
+                  src="https://res.cloudinary.com/dujmomznj/image/upload/f_auto,q_auto:good,w_400,h_400/v1755403315/txcs_logo_toiioe.png"
                   alt="Texas Combat Sport History"
                   fill
                   className="object-contain rounded-lg"
+                  loading="lazy"
                 />
               </ScrollTriggeredAnimation>
             </RevealAnimation>
@@ -113,7 +114,7 @@ export default function AboutPage() {
       {/* What Sets Us Apart */}
       <SmoothParallax 
         className="py-20" 
-        backgroundImage="https://res.cloudinary.com/dujmomznj/image/upload/f_webp,q_auto/v1754612278/202-IMG_2552_ve2via.jpg"
+        backgroundImage="https://res.cloudinary.com/dujmomznj/image/upload/f_auto,q_auto:eco,w_1600,h_900,c_fill,e_sharpen:50/v1754612278/202-IMG_2552_ve2via.jpg"
         speed={0.4}
         overlayOpacity={0.75}
       >
@@ -147,7 +148,7 @@ export default function AboutPage() {
       {/* Evolution Timeline
       <SmoothParallax
         className="py-20"
-        backgroundImage="https://res.cloudinary.com/dujmomznj/image/upload/f_webp,q_auto/v1754612318/157-DSC07636_vuhcsq.jpg"
+        backgroundImage="https://res.cloudinary.com/dujmomznj/image/upload/f_auto,q_auto:eco,w_1600,h_900,c_fill,e_sharpen:50/v1754612318/157-DSC07636_vuhcsq.jpg"
         speed={0.5}
         overlayOpacity={0.6}
       >

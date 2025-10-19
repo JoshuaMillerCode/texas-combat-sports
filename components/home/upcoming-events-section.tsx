@@ -13,10 +13,10 @@ import type { IEvent } from "@/lib/models/Event"
 import { useRouter } from "next/navigation"
 
 const DEFAULT_EVENT_IMAGES = [
-  "https://res.cloudinary.com/dujmomznj/image/upload/f_webp/v1759378172/scene-from-olympic-games-tournament-with-athletes-competing_23-2151471034_rumfsk.avif",
-  "https://res.cloudinary.com/dujmomznj/image/upload/f_webp/v1759378718/download_1_qbznu9.jpg",
-  "https://res.cloudinary.com/dujmomznj/image/upload/f_webp/v1759378718/download_xayqnn.jpg",
-  "https://res.cloudinary.com/dujmomznj/image/upload/f_webp/v1759378718/images_paqp96.jpg",
+  "https://res.cloudinary.com/dujmomznj/image/upload/f_auto,q_auto:low,w_600,h_450,c_fill/v1759378172/scene-from-olympic-games-tournament-with-athletes-competing_23-2151471034_rumfsk.avif",
+  "https://res.cloudinary.com/dujmomznj/image/upload/f_auto,q_auto:low,w_600,h_450,c_fill/v1759378718/download_1_qbznu9.jpg",
+  "https://res.cloudinary.com/dujmomznj/image/upload/f_auto,q_auto:low,w_600,h_450,c_fill/v1759378718/download_xayqnn.jpg",
+  "https://res.cloudinary.com/dujmomznj/image/upload/f_auto,q_auto:low,w_600,h_450,c_fill/v1759378718/images_paqp96.jpg",
 ]
 
 const getRandomEventImage = (seed?: string) => {
@@ -79,6 +79,8 @@ export default function UpcomingEventsSection() {
                         alt={event.title}
                         fill
                         className="object-cover"
+                        loading="lazy"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
                       <div className="absolute bottom-4 left-4">

@@ -4,10 +4,10 @@ import { Calendar, Clock, MapPin } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 const DEFAULT_EVENT_IMAGES = [
-  "https://res.cloudinary.com/dujmomznj/image/upload/f_webp/v1759378172/scene-from-olympic-games-tournament-with-athletes-competing_23-2151471034_rumfsk.avif",
-  "https://res.cloudinary.com/dujmomznj/image/upload/f_webp/v1759378718/download_1_qbznu9.jpg",
-  "https://res.cloudinary.com/dujmomznj/image/upload/f_webp/v1759378718/download_xayqnn.jpg",
-  "https://res.cloudinary.com/dujmomznj/image/upload/f_webp/v1759378718/images_paqp96.jpg",
+  "https://res.cloudinary.com/dujmomznj/image/upload/f_auto,q_auto:eco,w_300,h_225,c_fill/v1759378172/scene-from-olympic-games-tournament-with-athletes-competing_23-2151471034_rumfsk.avif",
+  "https://res.cloudinary.com/dujmomznj/image/upload/f_auto,q_auto:eco,w_300,h_225,c_fill/v1759378718/download_1_qbznu9.jpg",
+  "https://res.cloudinary.com/dujmomznj/image/upload/f_auto,q_auto:eco,w_300,h_225,c_fill/v1759378718/download_xayqnn.jpg",
+  "https://res.cloudinary.com/dujmomznj/image/upload/f_auto,q_auto:eco,w_300,h_225,c_fill/v1759378718/images_paqp96.jpg",
 ]
 
 const getRandomEventImage = (seed?: string) => {
@@ -50,6 +50,8 @@ export default function PastEventsList({ events }: PastEventsListProps) {
                     alt={event.title}
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    loading="lazy"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
                 </div>
