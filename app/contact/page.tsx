@@ -422,7 +422,7 @@ export default function ContactPage() {
               <div className="bg-black/50 border border-red-900/30 rounded-lg p-8">
                 <h3 className="text-white font-bold mb-4">Find Us in Houston</h3>
                 <div className="bg-gray-800 h-64 rounded-lg flex items-center justify-center">
-                  <p className="text-gray-400">Interactive Map Coming Soon</p>
+                  <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d865.1569761107797!2d-95.50546307156425!3d29.846160461659835!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8640c680b07db59f%3A0x2995d9597862c3e3!2sNorthwest%20Educational%20Center!5e0!3m2!1sen!2sus!4v1761102567538!5m2!1sen!2sus" width="600" height="450" style={{border:0}} allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade"></iframe>
                 </div>
               </div>
             </div>
