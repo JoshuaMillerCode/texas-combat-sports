@@ -20,6 +20,14 @@ export default function ContactPage() {
   const [isSponsorModalOpen, setIsSponsorModalOpen] = useState(false)
   
   // Form states
+
+  const [generalForm, setGeneralForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    message: "",
+  })
+
   const [fightForm, setFightForm] = useState({
     name: "",
     email: "",
@@ -198,6 +206,58 @@ export default function ContactPage() {
     }
   }
 
+  const handleGeneralSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsSubmitting(prev => ({ ...prev, general: true }))
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          formType: 'general',
+          ...generalForm,
+        }),
+      })
+      const data = await response.json()
+      if (response.ok) {
+        toast({
+          title: "Success!",
+          description: "Your message has been sent successfully.",
+        })
+        setGeneralForm({
+          name: "",
+          email: "",
+          phone: "",
+          message: "",
+        })
+      } else {
+        toast({
+          title: "Error",
+          description: data.error || "Failed to send message. Please try again.",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsSubmitting(prev => ({ ...prev, general: false }))
+    }
+  }
+
+  const handleGeneralChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setGeneralForm({
+      ...generalForm,
+      [e.target.name]: e.target.value,
+    })
+  }
+
   const handleFightChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFightForm({
       ...fightForm,
@@ -247,7 +307,7 @@ export default function ContactPage() {
             {/* Contact Form */}
             <div className="bg-black/50 border border-red-900/30 rounded-lg p-8">
               <h2 className="text-3xl font-bold text-white mb-6">Send Us a Message</h2>
-              <form className="space-y-6">
+              <form className="space-y-6" onSubmit={handleGeneralSubmit}>
                 <div>
                   <label htmlFor="name" className="block text-white font-medium mb-2">
                     Name
@@ -256,6 +316,8 @@ export default function ContactPage() {
                     id="name"
                     name="name"
                     type="text"
+                    value={generalForm.name}
+                    onChange={handleGeneralChange}
                     className="bg-black/50 border-red-900/30 text-white placeholder-gray-500"
                     placeholder="Your full name"
                     required
@@ -269,8 +331,25 @@ export default function ContactPage() {
                     id="email"
                     name="email"
                     type="email"
+                    value={generalForm.email}
+                    onChange={handleGeneralChange}
                     className="bg-black/50 border-red-900/30 text-white placeholder-gray-500"
                     placeholder="your.email@example.com"
+                    required
+                  />
+                </div>
+                <div>
+                  <label htmlFor="phone" className="block text-white font-medium mb-2">
+                    Phone
+                  </label>
+                  <Input
+                    id="phone"
+                    name="phone"
+                    type="tel"
+                    value={generalForm.phone}
+                    onChange={handleGeneralChange}
+                    className="bg-black/50 border-red-900/30 text-white placeholder-gray-500"
+                    placeholder="(555) 123-4567"
                     required
                   />
                 </div>
@@ -281,6 +360,8 @@ export default function ContactPage() {
                   <Textarea
                     id="message"
                     name="message"
+                    value={generalForm.message}
+                    onChange={handleGeneralChange}
                     className="bg-black/50 border-red-900/30 text-white placeholder-gray-500 min-h-[120px]"
                     placeholder="Tell us how we can help you..."
                     required
@@ -302,36 +383,33 @@ export default function ContactPage() {
                     <div>
                       <h3 className="text-white font-bold mb-1">Location</h3>
                       <p className="text-gray-300">
-                        Houston, Texas
-                        <br />
-                        Various premium venues across the city
+                        13163 Northwest Fwy, Houston, TX 77040
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-start space-x-4">
+                  {/* <div className="flex items-start space-x-4">
                     <Mail className="w-6 h-6 text-red-500 mt-1" />
                     <div>
                       <h3 className="text-white font-bold mb-1">Email</h3>
                       <p className="text-gray-300">info@texascombatsport.com</p>
                       <p className="text-gray-300">business@texascombatsport.com</p>
                     </div>
-                  </div>
+                  </div> */}
                   <div className="flex items-start space-x-4">
                     <Phone className="w-6 h-6 text-red-500 mt-1" />
                     <div>
                       <h3 className="text-white font-bold mb-1">Phone</h3>
-                      <p className="text-gray-300">(713) 555-FIGHT</p>
-                      <p className="text-gray-300">(713) 555-3444</p>
+                      <p className="text-gray-300">(713) 680-2929</p>
                     </div>
                   </div>
                   <div className="flex items-start space-x-4">
                     <Clock className="w-6 h-6 text-red-500 mt-1" />
                     <div>
-                      <h3 className="text-white font-bold mb-1">Business Hours</h3>
+                      <h3 className="text-white font-bold mb-1">Business Hours (CST)</h3>
                       <p className="text-gray-300">
-                        Monday - Friday: 9:00 AM - 6:00 PM
+                        Monday - Friday: 8:00 AM - 10:00 PM
                         <br />
-                        Saturday: 10:00 AM - 4:00 PM
+                        Saturday: 9:00 AM - 4:00 PM
                         <br />
                         Sunday: Closed
                       </p>
