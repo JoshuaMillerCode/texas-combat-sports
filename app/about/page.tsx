@@ -62,7 +62,7 @@ export default function AboutPage() {
         <div className="text-center">
           <RevealAnimation>
             <h1 className="text-6xl font-black text-white mb-4 drop-shadow-2xl">
-              ABOUT <span className="text-red-600 drop-shadow-2xl">TCS</span>
+              ABOUT <span className="text-red-600 drop-shadow-2xl">TEXAS COMBAT SPORTS</span>
             </h1>
           </RevealAnimation>
           <RevealAnimation delay={0.2}>
