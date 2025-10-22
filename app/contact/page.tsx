@@ -54,6 +54,7 @@ export default function ContactPage() {
 
   // Loading states
   const [isSubmitting, setIsSubmitting] = useState({
+    general: false,
     fight: false,
     venue: false,
     sponsor: false,
@@ -282,7 +283,7 @@ export default function ContactPage() {
   return (
     <div className="min-h-screen pt-16">
       {/* Hero Section */}
-      <section className="relative h-96 flex items-center justify-center overflow-hidden">
+      <section className="relative h-64 sm:h-80 md:h-96 flex items-center justify-center overflow-hidden">
         <div 
           className="absolute inset-0 w-full h-full object-cover"
           style={{
@@ -292,21 +293,21 @@ export default function ContactPage() {
           }}
         />
         <div className="absolute inset-0 bg-black/70" />
-        <div className="relative z-10 text-center">
-          <h1 className="text-6xl font-black text-white mb-4 drop-shadow-2xl">
+        <div className="relative z-10 text-center px-4">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white mb-2 sm:mb-4 drop-shadow-2xl">
             CONTACT <span className="text-red-600 drop-shadow-2xl">US</span>
           </h1>
-          <p className="text-xl text-gray-300 drop-shadow-lg">Get in Touch with Texas Combat Sports</p>
+          <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-300 drop-shadow-lg">Get in Touch with Texas Combat Sports</p>
         </div>
       </section>
 
       {/* Contact Content */}
-      <section className="py-20 bg-gradient-to-b from-black to-gray-900">
+      <section className="py-12 sm:py-16 md:py-20 bg-gradient-to-b from-black to-gray-900">
         <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-12">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
             {/* Contact Form */}
-            <div className="bg-black/50 border border-red-900/30 rounded-lg p-8">
-              <h2 className="text-3xl font-bold text-white mb-6">Send Us a Message</h2>
+            <div className="bg-black/50 border border-red-900/30 rounded-lg p-4 sm:p-6 md:p-8">
+              <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6">Send Us a Message</h2>
               <form className="space-y-6" onSubmit={handleGeneralSubmit}>
                 <div>
                   <label htmlFor="name" className="block text-white font-medium mb-2">
@@ -367,22 +368,26 @@ export default function ContactPage() {
                     required
                   />
                 </div>
-                <Button type="submit" className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3">
-                  Send Message
+                <Button 
+                  type="submit" 
+                  disabled={isSubmitting.general}
+                  className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 text-sm sm:text-base disabled:opacity-50"
+                >
+                  {isSubmitting.general ? "Sending..." : "Send Message"}
                 </Button>
               </form>
             </div>
 
             {/* Contact Information */}
-            <div className="space-y-8">
-              <div className="bg-black/50 border border-red-900/30 rounded-lg p-8">
-                <h2 className="text-3xl font-bold text-white mb-6">Get in Touch</h2>
-                <div className="space-y-6">
-                  <div className="flex items-start space-x-4">
-                    <MapPin className="w-6 h-6 text-red-500 mt-1" />
+            <div className="space-y-6 sm:space-y-8">
+              <div className="bg-black/50 border border-red-900/30 rounded-lg p-4 sm:p-6 md:p-8">
+                <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6">Get in Touch</h2>
+                <div className="space-y-4 sm:space-y-6">
+                  <div className="flex items-start space-x-3 sm:space-x-4">
+                    <MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-red-500 mt-1 flex-shrink-0" />
                     <div>
-                      <h3 className="text-white font-bold mb-1">Location</h3>
-                      <p className="text-gray-300">
+                      <h3 className="text-white font-bold mb-1 text-sm sm:text-base">Location</h3>
+                      <p className="text-gray-300 text-sm sm:text-base">
                         13163 Northwest Fwy, Houston, TX 77040
                       </p>
                     </div>
@@ -395,18 +400,18 @@ export default function ContactPage() {
                       <p className="text-gray-300">business@texascombatsport.com</p>
                     </div>
                   </div> */}
-                  <div className="flex items-start space-x-4">
-                    <Phone className="w-6 h-6 text-red-500 mt-1" />
+                  <div className="flex items-start space-x-3 sm:space-x-4">
+                    <Phone className="w-5 h-5 sm:w-6 sm:h-6 text-red-500 mt-1 flex-shrink-0" />
                     <div>
-                      <h3 className="text-white font-bold mb-1">Phone</h3>
-                      <p className="text-gray-300">(713) 680-2929</p>
+                      <h3 className="text-white font-bold mb-1 text-sm sm:text-base">Phone</h3>
+                      <p className="text-gray-300 text-sm sm:text-base">(713) 680-2929</p>
                     </div>
                   </div>
-                  <div className="flex items-start space-x-4">
-                    <Clock className="w-6 h-6 text-red-500 mt-1" />
+                  <div className="flex items-start space-x-3 sm:space-x-4">
+                    <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-red-500 mt-1 flex-shrink-0" />
                     <div>
-                      <h3 className="text-white font-bold mb-1">Business Hours (CST)</h3>
-                      <p className="text-gray-300">
+                      <h3 className="text-white font-bold mb-1 text-sm sm:text-base">Business Hours (CST)</h3>
+                      <p className="text-gray-300 text-sm sm:text-base">
                         Monday - Friday: 8:00 AM - 10:00 PM
                         <br />
                         Saturday: 9:00 AM - 4:00 PM
@@ -419,10 +424,19 @@ export default function ContactPage() {
               </div>
 
               {/* Map Placeholder */}
-              <div className="bg-black/50 border border-red-900/30 rounded-lg p-8">
+              <div className="bg-black/50 border border-red-900/30 rounded-lg p-4 sm:p-6 md:p-8">
                 <h3 className="text-white font-bold mb-4">Find Us in Houston</h3>
-                <div className="bg-gray-800 h-64 rounded-lg flex items-center justify-center">
-                  <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d865.1569761107797!2d-95.50546307156425!3d29.846160461659835!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8640c680b07db59f%3A0x2995d9597862c3e3!2sNorthwest%20Educational%20Center!5e0!3m2!1sen!2sus!4v1761102567538!5m2!1sen!2sus" width="600" height="450" style={{border:0}} allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade"></iframe>
+                <div className="bg-gray-800 h-48 sm:h-56 md:h-64 rounded-lg overflow-hidden">
+                  <iframe 
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d865.1569761107797!2d-95.50546307156425!3d29.846160461659835!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8640c680b07db59f%3A0x2995d9597862c3e3!2sNorthwest%20Educational%20Center!5e0!3m2!1sen!2sus!4v1761102567538!5m2!1sen!2sus" 
+                    width="100%" 
+                    height="100%" 
+                    style={{border:0}} 
+                    allowFullScreen 
+                    loading="lazy" 
+                    referrerPolicy="no-referrer-when-downgrade"
+                    className="w-full h-full"
+                  ></iframe>
                 </div>
               </div>
             </div>
@@ -431,36 +445,36 @@ export default function ContactPage() {
       </section>
 
       {/* Business Inquiries */}
-      <section className="py-20 bg-gradient-to-b from-gray-900 to-black">
+      <section className="py-12 sm:py-16 md:py-20 bg-gradient-to-b from-gray-900 to-black">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-4xl font-black mb-8 text-white">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-black mb-6 sm:mb-8 text-white">
             BUSINESS <span className="text-red-600">INQUIRIES</span>
           </h2>
-          <p className="text-xl text-gray-300 mb-12 max-w-3xl mx-auto">
+          <p className="text-base sm:text-lg md:text-xl text-gray-300 mb-8 sm:mb-12 max-w-3xl mx-auto">
             Interested in fighting, venue partnerships, or sponsorship opportunities? We'd love to hear from you.
           </p>
           
           {/* Business Inquiry Cards */}
-          <div className="grid lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
             {/* Want to Fight Card */}
-            <div className="bg-black/50 border border-red-900/30 rounded-lg p-8 text-center">
-              <div className="text-6xl mb-4">🥊</div>
-              <h3 className="text-2xl font-bold text-white mb-4">Want to Fight?</h3>
-              <p className="text-gray-300 mb-6">
+            <div className="bg-black/50 border border-red-900/30 rounded-lg p-4 sm:p-6 md:p-8 text-center">
+              <div className="text-4xl sm:text-5xl md:text-6xl mb-3 sm:mb-4">🥊</div>
+              <h3 className="text-xl sm:text-2xl font-bold text-white mb-3 sm:mb-4">Want to Fight?</h3>
+              <p className="text-sm sm:text-base text-gray-300 mb-4 sm:mb-6">
                 Ready to step into the ring? Let us know about your fighting background and experience.
               </p>
               <Dialog open={isFightModalOpen} onOpenChange={setIsFightModalOpen}>
                 <DialogTrigger asChild>
-                  <Button className="bg-red-600 hover:bg-red-700 text-white font-bold px-8 py-3">
+                  <Button className="bg-red-600 hover:bg-red-700 text-white font-bold px-4 sm:px-6 md:px-8 py-2 sm:py-3 text-sm sm:text-base">
                     Apply to Fight
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-black/95 border-red-900/30">
+                <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto bg-black/95 border-red-900/30 sm:mx-4">
                   <DialogHeader>
-                    <DialogTitle className="text-2xl font-bold text-white">Fighter Application</DialogTitle>
+                    <DialogTitle className="text-xl sm:text-2xl font-bold text-white">Fighter Application</DialogTitle>
                   </DialogHeader>
-                  <form onSubmit={handleFightSubmit} className="space-y-6">
-                    <div className="grid md:grid-cols-2 gap-4">
+                  <form onSubmit={handleFightSubmit} className="space-y-4 sm:space-y-6">
+                    <div className="grid sm:grid-cols-2 gap-4">
                       <div>
                         <label htmlFor="fight-name" className="block text-white font-medium mb-2">
                           Full Name
@@ -492,7 +506,7 @@ export default function ContactPage() {
                         />
                       </div>
                     </div>
-                    <div className="grid md:grid-cols-2 gap-4">
+                    <div className="grid sm:grid-cols-2 gap-4">
                       <div>
                         <label htmlFor="fight-phone" className="block text-white font-medium mb-2">
                           Phone Number
@@ -543,7 +557,7 @@ export default function ContactPage() {
                         required
                       />
                     </div>
-                    <div className="flex gap-4 pt-4">
+                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
                       <Button 
                         type="submit" 
                         disabled={isSubmitting.fight}
@@ -566,24 +580,24 @@ export default function ContactPage() {
             </div>
 
             {/* Venue Contact Card */}
-            <div className="bg-black/50 border border-red-900/30 rounded-lg p-8 text-center">
-              <div className="text-6xl mb-4">🏟️</div>
-              <h3 className="text-2xl font-bold text-white mb-4">Venue Contact</h3>
-              <p className="text-gray-300 mb-6">
+            <div className="bg-black/50 border border-red-900/30 rounded-lg p-4 sm:p-6 md:p-8 text-center">
+              <div className="text-4xl sm:text-5xl md:text-6xl mb-3 sm:mb-4">🏟️</div>
+              <h3 className="text-xl sm:text-2xl font-bold text-white mb-3 sm:mb-4">Venue Contact</h3>
+              <p className="text-sm sm:text-base text-gray-300 mb-4 sm:mb-6">
                 Host TCS events at your premium venue in Houston. Let's discuss partnership opportunities.
               </p>
               <Dialog open={isVenueModalOpen} onOpenChange={setIsVenueModalOpen}>
                 <DialogTrigger asChild>
-                  <Button className="bg-red-600 hover:bg-red-700 text-white font-bold px-8 py-3">
+                  <Button className="bg-red-600 hover:bg-red-700 text-white font-bold px-4 sm:px-6 md:px-8 py-2 sm:py-3 text-sm sm:text-base">
                     Contact Us
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-black/95 border-red-900/30">
+                <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto bg-black/95 border-red-900/30 sm:mx-4">
                   <DialogHeader>
-                    <DialogTitle className="text-2xl font-bold text-white">Venue Partnership Inquiry</DialogTitle>
+                    <DialogTitle className="text-xl sm:text-2xl font-bold text-white">Venue Partnership Inquiry</DialogTitle>
                   </DialogHeader>
-                  <form onSubmit={handleVenueSubmit} className="space-y-6">
-                    <div className="grid md:grid-cols-2 gap-4">
+                  <form onSubmit={handleVenueSubmit} className="space-y-4 sm:space-y-6">
+                    <div className="grid sm:grid-cols-2 gap-4">
                       <div>
                         <label htmlFor="venue-name" className="block text-white font-medium mb-2">
                           Contact Name
@@ -615,7 +629,7 @@ export default function ContactPage() {
                         />
                       </div>
                     </div>
-                    <div className="grid md:grid-cols-2 gap-4">
+                    <div className="grid sm:grid-cols-2 gap-4">
                       <div>
                         <label htmlFor="venue-venueName" className="block text-white font-medium mb-2">
                           Venue Name
@@ -661,7 +675,7 @@ export default function ContactPage() {
                         required
                       />
                     </div>
-                    <div className="flex gap-4 pt-4">
+                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
                       <Button 
                         type="submit" 
                         disabled={isSubmitting.venue}
@@ -684,24 +698,24 @@ export default function ContactPage() {
             </div>
 
             {/* Sponsor Contact Card */}
-            <div className="bg-black/50 border border-red-900/30 rounded-lg p-8 text-center">
-              <div className="text-6xl mb-4">💼</div>
-              <h3 className="text-2xl font-bold text-white mb-4">Sponsor Contact</h3>
-              <p className="text-gray-300 mb-6">
+            <div className="bg-black/50 border border-red-900/30 rounded-lg p-4 sm:p-6 md:p-8 text-center">
+              <div className="text-4xl sm:text-5xl md:text-6xl mb-3 sm:mb-4">💼</div>
+              <h3 className="text-xl sm:text-2xl font-bold text-white mb-3 sm:mb-4">Sponsor Contact</h3>
+              <p className="text-sm sm:text-base text-gray-300 mb-4 sm:mb-6">
                 Partner with Houston's premier combat sports promotion. Explore sponsorship opportunities.
               </p>
               <Dialog open={isSponsorModalOpen} onOpenChange={setIsSponsorModalOpen}>
                 <DialogTrigger asChild>
-                  <Button className="bg-red-600 hover:bg-red-700 text-white font-bold px-8 py-3">
+                  <Button className="bg-red-600 hover:bg-red-700 text-white font-bold px-4 sm:px-6 md:px-8 py-2 sm:py-3 text-sm sm:text-base">
                     Partner With Us
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-black/95 border-red-900/30">
+                <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto bg-black/95 border-red-900/30 sm:mx-4">
                   <DialogHeader>
-                    <DialogTitle className="text-2xl font-bold text-white">Sponsorship Partnership</DialogTitle>
+                    <DialogTitle className="text-xl sm:text-2xl font-bold text-white">Sponsorship Partnership</DialogTitle>
                   </DialogHeader>
-                  <form onSubmit={handleSponsorSubmit} className="space-y-6">
-                    <div className="grid md:grid-cols-2 gap-4">
+                  <form onSubmit={handleSponsorSubmit} className="space-y-4 sm:space-y-6">
+                    <div className="grid sm:grid-cols-2 gap-4">
                       <div>
                         <label htmlFor="sponsor-name" className="block text-white font-medium mb-2">
                           Contact Name
@@ -733,7 +747,7 @@ export default function ContactPage() {
                         />
                       </div>
                     </div>
-                    <div className="grid md:grid-cols-2 gap-4">
+                    <div className="grid sm:grid-cols-2 gap-4">
                       <div>
                         <label htmlFor="sponsor-company" className="block text-white font-medium mb-2">
                           Company Name
@@ -781,7 +795,7 @@ export default function ContactPage() {
                         required
                       />
                     </div>
-                    <div className="flex gap-4 pt-4">
+                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
                       <Button 
                         type="submit" 
                         disabled={isSubmitting.sponsor}
