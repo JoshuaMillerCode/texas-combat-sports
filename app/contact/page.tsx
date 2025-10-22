@@ -296,7 +296,7 @@ export default function ContactPage() {
           <h1 className="text-6xl font-black text-white mb-4 drop-shadow-2xl">
             CONTACT <span className="text-red-600 drop-shadow-2xl">US</span>
           </h1>
-          <p className="text-xl text-gray-300 drop-shadow-lg">Get in Touch with TCS</p>
+          <p className="text-xl text-gray-300 drop-shadow-lg">Get in Touch with Texas Combat Sports</p>
         </div>
       </section>
 
