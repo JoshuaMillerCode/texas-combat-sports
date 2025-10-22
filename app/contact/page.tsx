@@ -383,36 +383,33 @@ export default function ContactPage() {
                     <div>
                       <h3 className="text-white font-bold mb-1">Location</h3>
                       <p className="text-gray-300">
-                        Houston, Texas
-                        <br />
-                        Various premium venues across the city
+                        13163 Northwest Fwy, Houston, TX 77040
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-start space-x-4">
+                  {/* <div className="flex items-start space-x-4">
                     <Mail className="w-6 h-6 text-red-500 mt-1" />
                     <div>
                       <h3 className="text-white font-bold mb-1">Email</h3>
                       <p className="text-gray-300">info@texascombatsport.com</p>
                       <p className="text-gray-300">business@texascombatsport.com</p>
                     </div>
-                  </div>
+                  </div> */}
                   <div className="flex items-start space-x-4">
                     <Phone className="w-6 h-6 text-red-500 mt-1" />
                     <div>
                       <h3 className="text-white font-bold mb-1">Phone</h3>
-                      <p className="text-gray-300">(713) 555-FIGHT</p>
-                      <p className="text-gray-300">(713) 555-3444</p>
+                      <p className="text-gray-300">(713) 680-2929</p>
                     </div>
                   </div>
                   <div className="flex items-start space-x-4">
                     <Clock className="w-6 h-6 text-red-500 mt-1" />
                     <div>
-                      <h3 className="text-white font-bold mb-1">Business Hours</h3>
+                      <h3 className="text-white font-bold mb-1">Business Hours (CST)</h3>
                       <p className="text-gray-300">
-                        Monday - Friday: 9:00 AM - 6:00 PM
+                        Monday - Friday: 8:00 AM - 10:00 PM
                         <br />
-                        Saturday: 10:00 AM - 4:00 PM
+                        Saturday: 9:00 AM - 4:00 PM
                         <br />
                         Sunday: Closed
                       </p>
