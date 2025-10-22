@@ -8,7 +8,7 @@ import { QueryProvider } from "@/contexts/query-context"
 import { AuthProvider } from "@/contexts/auth-context"
 import { CurrentEventProvider } from "@/contexts/current-event-context"
 import { Analytics } from '@vercel/analytics/next';
-
+import { ToasterClient } from "@/components/ui/toaster-client"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -39,6 +39,7 @@ export default function RootLayout({
           </AuthProvider>
         </QueryProvider>
         <Analytics />
+        <ToasterClient />
       </body>
     </html>
   )
