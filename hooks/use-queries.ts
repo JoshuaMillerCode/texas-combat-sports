@@ -8,6 +8,7 @@ import type { IFight } from '@/lib/models/Fight';
 import type { IMerch } from '@/lib/models/Merch';
 import type { ITicketTier } from '@/lib/models/TicketTier';
 import type { IVideo } from '@/lib/models/Video';
+import type { IFlashSale } from '@/lib/models/FlashSale';
 
 // ==================== UTILITY FUNCTIONS ====================
 
@@ -809,6 +810,121 @@ export function useDeleteVideoMutation() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['videos'] });
+    },
+  });
+}
+
+// ==================== FLASH SALES ====================
+
+export function useFlashSalesQuery(
+  status?: 'active' | 'upcoming' | 'past' | 'all'
+) {
+  const { accessToken } = useAuth();
+
+  return useQuery({
+    queryKey: ['flashSales', status || 'all'],
+    queryFn: () => {
+      const url = status
+        ? `/api/flash-sales?status=${status}`
+        : '/api/flash-sales';
+      return apiRequest(url, {}, accessToken);
+    },
+    // Public query - no auth required
+  });
+}
+
+export function useFlashSaleQuery(id: string) {
+  const { accessToken } = useAuth();
+
+  return useQuery({
+    queryKey: ['flashSales', id],
+    queryFn: () => apiRequest(`/api/flash-sales/${id}`, {}, accessToken),
+    enabled: !!id,
+  });
+}
+
+export function useFlashSaleForTicketQuery(tierId: string) {
+  return useQuery({
+    queryKey: ['flashSales', 'ticket', tierId],
+    queryFn: () =>
+      apiRequest(`/api/flash-sales/ticket-tier/${tierId}`, {}, null),
+    enabled: !!tierId,
+    // Cache flash sale status for 30 seconds to avoid excessive API calls
+    staleTime: 30 * 1000,
+  });
+}
+
+export function useCreateFlashSaleMutation() {
+  const { accessToken, isAuthenticated } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (flashSaleData: Partial<IFlashSale>) => {
+      if (!isAuthenticated || !accessToken) {
+        throw new Error('Admin authentication required');
+      }
+      return apiRequest(
+        '/api/flash-sales',
+        {
+          method: 'POST',
+          body: JSON.stringify(flashSaleData),
+        },
+        accessToken
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['flashSales'] });
+    },
+  });
+}
+
+export function useUpdateFlashSaleMutation() {
+  const { accessToken, isAuthenticated } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      id,
+      ...flashSaleData
+    }: Partial<IFlashSale> & { id: string }) => {
+      if (!isAuthenticated || !accessToken) {
+        throw new Error('Admin authentication required');
+      }
+      return apiRequest(
+        `/api/flash-sales/${id}`,
+        {
+          method: 'PATCH',
+          body: JSON.stringify(flashSaleData),
+        },
+        accessToken
+      );
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['flashSales'] });
+      queryClient.invalidateQueries({ queryKey: ['flashSales', variables.id] });
+    },
+  });
+}
+
+export function useDeleteFlashSaleMutation() {
+  const { accessToken, isAuthenticated } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => {
+      if (!isAuthenticated || !accessToken) {
+        throw new Error('Admin authentication required');
+      }
+      return apiRequest(
+        `/api/flash-sales/${id}`,
+        {
+          method: 'DELETE',
+        },
+        accessToken
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['flashSales'] });
     },
   });
 }

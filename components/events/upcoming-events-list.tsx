@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button"
 import CountdownTimer from "@/components/countdown-timer"
 import { useTicketPurchase } from "@/hooks/use-ticket-purchase"
 import ComingSoonModal from "@/components/coming-soon-modal"
+import FlashSalePrice from "@/components/flash-sale-price"
+import { formatAmountForDisplay } from "@/lib/stripe"
 
 const DEFAULT_EVENT_IMAGES = [
   "https://res.cloudinary.com/dujmomznj/image/upload/f_auto,q_auto:low,w_600,h_450,c_fill/v1759378172/scene-from-olympic-games-tournament-with-athletes-competing_23-2151471034_rumfsk.avif",
@@ -29,12 +31,26 @@ const getRandomEventImage = (seed?: string) => {
 
 interface UpcomingEventsListProps {
   events: any[]
+  activeFlashSales?: any[]
 }
 
-export default function UpcomingEventsList({ events }: UpcomingEventsListProps) {
+export default function UpcomingEventsList({ events, activeFlashSales = [] }: UpcomingEventsListProps) {
   const router = useRouter()
   const { handleTicketPurchase, isComingSoonModalOpen, closeComingSoonModal } = useTicketPurchase()
   const upcomingEvents = events?.filter((event: any) => !event.isPastEvent && event.isActive) || []
+
+  // Helper function to get flash sale info for an event
+  const getFlashSaleForEvent = (event: any) => {
+    if (!activeFlashSales.length || !event.ticketTiers) return null
+    
+    // Check if any flash sale applies to this event's ticket tiers
+    const eventTicketIds = event.ticketTiers.map((tier: any) => tier._id)
+    const applicableSale = activeFlashSales.find((sale: any) =>
+      sale.targetTicketTypes.some((id: string) => eventTicketIds.includes(id))
+    )
+    
+    return applicableSale
+  }
 
   return (
     <section className="py-20 bg-gradient-to-b from-black to-gray-900">
@@ -84,7 +100,23 @@ export default function UpcomingEventsList({ events }: UpcomingEventsListProps) 
                       </div>
                       <div className="flex items-center text-gray-300">
                         <DollarSign className="w-5 h-5 mr-3 text-red-500" />
-                        {event.ticketPrice}
+                        <div className="flex-1">
+                          {(() => {
+                            const flashSale = getFlashSaleForEvent(event)
+                            if (flashSale) {
+                              // For flash sale, we need to get the pricing info
+                              // Since we don't have the exact pricing here, we'll show a generic flash sale indicator
+                              return (
+                                <div className="flex items-center gap-2">
+                                  <span className="text-red-400 font-bold">⚡ FLASH SALE ACTIVE</span>
+                                  <span className="text-white">- Click "Buy Tickets" to check the pricing</span>
+                                </div>
+                              )
+                            } else {
+                              return <span>{event.ticketPrice}</span>
+                            }
+                          })()}
+                        </div>
                       </div>
                     </div>
 
