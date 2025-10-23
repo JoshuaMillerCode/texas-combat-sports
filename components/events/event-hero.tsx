@@ -9,6 +9,8 @@ import Link from "next/link"
 import { useTicketPurchase } from "@/hooks/use-ticket-purchase"
 import { isFeatureEnabled } from "@/lib/feature-flags"
 import ComingSoonModal from "@/components/coming-soon-modal"
+import FlashSalePrice from "@/components/flash-sale-price"
+import { formatAmountForDisplay } from "@/lib/stripe"
 
 const DEFAULT_EVENT_IMAGES = [
   "https://res.cloudinary.com/dujmomznj/image/upload/f_auto,q_auto:low,w_600,h_450,c_fill/v1759378172/scene-from-olympic-games-tournament-with-athletes-competing_23-2151471034_rumfsk.avif",
@@ -33,10 +35,24 @@ const getRandomEventImage = (seed?: string) => {
 interface EventHeroProps {
   event: any
   onOpenTicketModal: () => void
+  activeFlashSales?: any[]
 }
 
-export default function EventHero({ event, onOpenTicketModal }: EventHeroProps) {
+export default function EventHero({ event, onOpenTicketModal, activeFlashSales = [] }: EventHeroProps) {
   const { handleTicketPurchase, isComingSoonModalOpen, closeComingSoonModal } = useTicketPurchase()
+
+  // Helper function to get flash sale info for this event
+  const getFlashSaleForEvent = () => {
+    if (!activeFlashSales.length || !event.ticketTiers) return null
+    
+    // Check if any flash sale applies to this event's ticket tiers
+    const eventTicketIds = event.ticketTiers.map((tier: any) => tier._id)
+    const applicableSale = activeFlashSales.find((sale: any) =>
+      sale.targetTicketTypes.some((id: string) => eventTicketIds.includes(id))
+    )
+    
+    return applicableSale
+  }
 
   const handleBuyTickets = () => {
     if (isFeatureEnabled('TICKET_SALES_ENABLED')) {
@@ -166,8 +182,24 @@ export default function EventHero({ event, onOpenTicketModal }: EventHeroProps) 
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                     <div className="absolute bottom-6 left-6 right-6">
                       <div className="text-white text-center">
-                        <div className="text-2xl font-bold mb-2">{String(event.ticketPrice).includes("$") ? event.ticketPrice : "$" + event.ticketPrice}</div>
-                        <div className="text-sm text-gray-300">Starting Price</div>
+                        {(() => {
+                          const flashSale = getFlashSaleForEvent()
+                          if (flashSale) {
+                            return (
+                              <div>
+                                <div className="text-red-400 font-bold mb-1">⚡ FLASH SALE ACTIVE</div>
+                                <div className="text-sm text-gray-300">Click "Buy Tickets" to check the pricing</div>
+                              </div>
+                            )
+                          } else {
+                            return (
+                              <>
+                                <div className="text-2xl font-bold mb-2">{String(event.ticketPrice).includes("$") ? event.ticketPrice : "$" + event.ticketPrice}</div>
+                                <div className="text-sm text-gray-300">Starting Price</div>
+                              </>
+                            )
+                          }
+                        })()}
                       </div>
                     </div>
                   </div>

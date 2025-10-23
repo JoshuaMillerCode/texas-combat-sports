@@ -3,6 +3,7 @@ import Stripe from 'stripe';
 import type { CheckoutSessionData } from '@/types/stripe';
 import { isFeatureEnabled } from '@/lib/feature-flags';
 import { TicketTierService } from '@/lib/services/ticketTier.service';
+import { FlashSaleService } from '@/lib/services/flashSale.service';
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
@@ -98,15 +99,44 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Fetch actual prices from Stripe API to ensure accuracy
+    // Check for active flash sales and use flash sale prices if applicable
     const pricePromises = body.tickets.map(async (ticket) => {
       try {
-        const stripePrice = await stripe.prices.retrieve(ticket.stripePriceId);
+        // Get the ticket tier to check for flash sales
+        const ticketTier = await TicketTierService.getTicketTierById(
+          ticket.tierId
+        );
+
+        if (!ticketTier) {
+          throw new Error(`Ticket tier not found: ${ticket.tierId}`);
+        }
+
+        // Check if flash sales are enabled and get effective price ID
+        let effectivePriceId = ticket.stripePriceId;
+        let isFlashSale = false;
+
+        if (isFeatureEnabled('FLASH_SALES_ENABLED')) {
+          const priceInfo = await FlashSaleService.getEffectiveStripePriceId(
+            ticketTier
+          );
+          effectivePriceId = priceInfo.stripePriceId;
+          isFlashSale = priceInfo.isFlashSale;
+
+          if (isFlashSale) {
+            console.log(
+              `✨ Flash sale active for ${ticket.tierName}: using price ${effectivePriceId}`
+            );
+          }
+        }
+
+        // Fetch the actual price from Stripe to ensure accuracy
+        const stripePrice = await stripe.prices.retrieve(effectivePriceId);
         return {
-          priceId: ticket.stripePriceId,
+          priceId: effectivePriceId,
           quantity: ticket.quantity,
           unitAmountCents: stripePrice.unit_amount || 0,
           currency: stripePrice.currency,
+          isFlashSale,
         };
       } catch (error) {
         console.error(`Failed to fetch price ${ticket.stripePriceId}:`, error);
@@ -125,11 +155,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Create line items for Stripe
+    // Create line items for Stripe using the effective price IDs (flash sale or regular)
     const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] =
-      body.tickets.map((ticket) => ({
-        price: ticket.stripePriceId,
-        quantity: ticket.quantity,
+      fetchedPrices.map((price) => ({
+        price: price.priceId,
+        quantity: price.quantity,
       }));
 
     // Calculate total amount from Stripe-fetched prices (already in cents)
@@ -165,6 +195,46 @@ export async function POST(req: NextRequest) {
         eventDate: body.eventDate,
         eventVenue: body.eventVenue,
         ticketData: JSON.stringify(body.tickets),
+        flashSaleData: JSON.stringify(
+          await Promise.all(
+            fetchedPrices.map(async (price, index) => {
+              const ticket = body.tickets[index];
+              const baseData = {
+                tierId: ticket.tierId,
+                isFlashSale: price.isFlashSale,
+                originalPriceId: ticket.stripePriceId,
+                salePriceId: price.priceId,
+              };
+
+              if (price.isFlashSale) {
+                // Get flash sale details
+                const ticketTier = await TicketTierService.getTicketTierById(
+                  ticket.tierId
+                );
+                if (ticketTier) {
+                  const flashSalePricing =
+                    await FlashSaleService.getFlashSalePricing(
+                      ticketTier._id.toString()
+                    );
+                  if (
+                    flashSalePricing.hasFlashSale &&
+                    flashSalePricing.flashSale
+                  ) {
+                    return {
+                      ...baseData,
+                      flashSaleId: flashSalePricing.flashSale._id.toString(),
+                      flashSaleTitle: flashSalePricing.flashSale.title,
+                      originalPrice: flashSalePricing.originalPrice,
+                      actualPricePaid: price.unitAmountCents, // The actual price paid in cents
+                    };
+                  }
+                }
+              }
+
+              return baseData;
+            })
+          )
+        ),
         order_type: 'event_tickets',
         total_amount: totalAmountInCents.toString(),
       },

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -8,6 +8,8 @@ import { Badge } from "@/components/ui/badge"
 import { X, Plus, Minus, CreditCard, Shield, Clock } from "lucide-react"
 import type { CheckoutSessionData } from "@/types/stripe"
 import { formatAmountForDisplay } from "@/lib/stripe"
+import FlashSaleBanner from "@/components/flash-sale-banner"
+import FlashSalePrice from "@/components/flash-sale-price"
 
 // Updated interface to match the TicketTier model
 interface TicketTier {
@@ -51,11 +53,42 @@ export default function TicketPurchaseModal({
   const [customerEmail, setCustomerEmail] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [flashSales, setFlashSales] = useState<Record<string, any>>({})
+  const [loadingFlashSales, setLoadingFlashSales] = useState(true)
 
   // Filter active ticket tiers and sort by sortOrder
   const activeTicketTiers = ticketTiers
     .filter(tier => tier.isActive)
     .sort((a, b) => a.sortOrder - b.sortOrder)
+
+  // Fetch flash sale data for all ticket tiers
+  useEffect(() => {
+    const fetchFlashSales = async () => {
+      setLoadingFlashSales(true)
+      const flashSaleData: Record<string, any> = {}
+
+      await Promise.all(
+        activeTicketTiers.map(async (tier) => {
+          try {
+            const response = await fetch(`/api/flash-sales/ticket-tier/${tier._id}`)
+            const data = await response.json()
+            if (data.hasFlashSale) {
+              flashSaleData[tier._id] = data
+            }
+          } catch (error) {
+            console.error(`Error fetching flash sale for tier ${tier._id}:`, error)
+          }
+        })
+      )
+
+      setFlashSales(flashSaleData)
+      setLoadingFlashSales(false)
+    }
+
+    if (isOpen && activeTicketTiers.length > 0) {
+      fetchFlashSales()
+    }
+  }, [isOpen, activeTicketTiers.length])
 
   const updateTicketQuantity = (tierId: string, quantity: number) => {
     const tier = activeTicketTiers.find((t) => t._id === tierId)
@@ -74,7 +107,14 @@ export default function TicketPurchaseModal({
   const getTotalAmount = () => {
     return Object.entries(selectedTickets).reduce((total, [tierId, quantity]) => {
       const tier = activeTicketTiers.find((t) => t._id === tierId)
-      return total + (tier ? tier.price * quantity : 0)
+      if (!tier) return total
+      
+      // Use flash sale price if available, otherwise use regular price
+      const flashSale = flashSales[tierId]
+      // Flash sale prices are in cents, regular tier prices are in dollars
+      const price = flashSale ? flashSale.salePrice / 100 : tier.price
+      
+      return total + (price * quantity)
     }, 0)
   }
 
@@ -206,6 +246,20 @@ export default function TicketPurchaseModal({
             </div>
 
             <div className="p-6">
+              {/* Flash Sale Banner - Show if any active flash sales */}
+              {Object.values(flashSales).length > 0 && !loadingFlashSales && (
+                <div className="mb-6">
+                  {Object.values(flashSales).map((flashSale: any, index: number) => (
+                    <FlashSaleBanner
+                      key={index}
+                      title={flashSale.flashSale.title}
+                      endAt={flashSale.flashSale.endAt}
+                      className="mb-3"
+                    />
+                  ))[0]}
+                </div>
+              )}
+
               {/* Security Notice */}
               <div className="bg-green-600/10 border border-green-600/30 rounded-lg p-4 mb-6">
                 <div className="flex items-center text-green-400 mb-2">
@@ -247,6 +301,7 @@ export default function TicketPurchaseModal({
                     const currentQuantity = selectedTickets[tier._id] || 0
                     const maxAllowed = Math.min(tier.maxQuantity, tier.availableQuantity)
                     const isSoldOut = tier.availableQuantity === 0
+                    const flashSale = flashSales[tier._id]
 
                     return (
                       <div
@@ -261,9 +316,18 @@ export default function TicketPurchaseModal({
                             {tier.description && (
                               <p className="text-gray-400 text-sm mb-2">{tier.description}</p>
                             )}
-                            <p className="text-2xl font-bold text-red-600">
-                              {formatAmountForDisplay(tier.price, tier.currency)}
-                            </p>
+                            {flashSale ? (
+                              <FlashSalePrice
+                                originalPrice={flashSale.originalPrice}
+                                salePrice={flashSale.salePrice}
+                                currency={flashSale.currency}
+                                size="md"
+                              />
+                            ) : (
+                              <p className="text-2xl font-bold text-red-600">
+                                {formatAmountForDisplay(tier.price, tier.currency)}
+                              </p>
+                            )}
                           </div>
                           <div className="flex items-center space-x-3">
                             <button
@@ -305,7 +369,7 @@ export default function TicketPurchaseModal({
                           </span>
                           {currentQuantity > 0 && (
                             <Badge className="bg-red-600 text-white">
-                              Subtotal: {formatAmountForDisplay(tier.price * currentQuantity, tier.currency)}
+                              Subtotal: {formatAmountForDisplay((flashSale ? flashSale.salePrice : tier.price * 100) * currentQuantity, tier.currency)}
                             </Badge>
                           )}
                         </div>
@@ -324,12 +388,16 @@ export default function TicketPurchaseModal({
                       .filter(([_, quantity]) => quantity > 0)
                       .map(([tierId, quantity]) => {
                         const tier = activeTicketTiers.find((t) => t._id === tierId)!
+                        const flashSale = flashSales[tierId]
+                        // Flash sale prices are in cents, regular tier prices are in dollars
+                        const price = flashSale ? flashSale.salePrice : tier.price * 100
                         return (
                           <div key={tierId} className="flex justify-between text-gray-300">
                             <span>
                               {tier.name} × {quantity}
+                              {flashSale && <span className="text-red-400 ml-2">⚡</span>}
                             </span>
-                            <span>{formatAmountForDisplay(tier.price * quantity, tier.currency)}</span>
+                            <span>{formatAmountForDisplay(price * quantity, tier.currency)}</span>
                           </div>
                         )
                       })}
@@ -337,7 +405,7 @@ export default function TicketPurchaseModal({
                   <div className="border-t border-red-600/30 pt-3">
                     <div className="flex justify-between text-white font-bold text-lg">
                       <span>Total ({getTotalTickets()} tickets)</span>
-                      <span>{formatAmountForDisplay(getTotalAmount(), "USD")}</span>
+                      <span>{formatAmountForDisplay(getTotalAmount() * 100, "USD")}</span>
                     </div>
                   </div>
                 </div>

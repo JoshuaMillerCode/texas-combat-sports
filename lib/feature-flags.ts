@@ -9,6 +9,8 @@
 export const FEATURE_FLAGS = {
   // Set to false to disable ticket sales and show "coming soon" popup
   TICKET_SALES_ENABLED: true,
+  // Set to false to disable flash sale functionality
+  FLASH_SALES_ENABLED: true,
 } as const;
 
 export type FeatureFlag = keyof typeof FEATURE_FLAGS;
