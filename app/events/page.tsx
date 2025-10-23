@@ -1,12 +1,32 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { useEventsQuery } from "@/hooks/use-queries"
 import PastEventsList from "@/components/events/past-events-list"
 import UpcomingEventsList from "@/components/events/upcoming-events-list"
 import LoadingBoxing from "@/components/ui/loading-boxing"
+import FlashSaleBanner from "@/components/flash-sale-banner"
 
 export default function EventsPage() {
   const { data: events, isLoading, error } = useEventsQuery()
+  const [activeFlashSales, setActiveFlashSales] = useState<any[]>([])
+
+  // Fetch active flash sales for banner display
+  useEffect(() => {
+    const fetchFlashSales = async () => {
+      try {
+        const response = await fetch("/api/flash-sales?status=active")
+        const data = await response.json()
+        if (data.flashSales && data.flashSales.length > 0) {
+          setActiveFlashSales(data.flashSales)
+        }
+      } catch (error) {
+        console.error("Error fetching flash sales:", error)
+      }
+    }
+
+    fetchFlashSales()
+  }, [])
 
   if (isLoading) {
     return (
@@ -31,6 +51,18 @@ export default function EventsPage() {
 
   return (
     <div className="min-h-screen pt-10">
+      {/* Flash Sale Banner */}
+      {activeFlashSales.length > 0 && (
+        <div className="fixed top-20 left-0 right-0 z-40 px-4">
+          <div className="container mx-auto max-w-6xl">
+            <FlashSaleBanner
+              title={activeFlashSales[0].title}
+              endAt={activeFlashSales[0].endAt}
+            />
+          </div>
+        </div>
+      )}
+
       {/* Hero Section */}
       <section className="relative h-96 flex items-center justify-center overflow-hidden">
         <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover">
@@ -45,7 +77,7 @@ export default function EventsPage() {
         </div>
       </section>
 
-      <UpcomingEventsList events={events} />
+      <UpcomingEventsList events={events} activeFlashSales={activeFlashSales} />
       <PastEventsList events={events} />
     </div>
   )

@@ -128,7 +128,8 @@ export async function POST(req: NextRequest) {
             console.log('Creating new transaction for session:', session.id);
 
             const ticketItems = await TransactionService.formatTicketItems(
-              session.metadata?.ticketData
+              session.metadata?.ticketData,
+              session.metadata?.flashSaleData
             );
 
             const orderId = OrderIDGenerator.generateOrderID();

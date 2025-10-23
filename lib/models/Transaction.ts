@@ -18,6 +18,11 @@ export interface ITransaction extends Document {
     // Promo deal tracking
     isPromoDeal?: boolean; // Flag to indicate this was a promo purchase
     originalTierName?: string; // Original tier name for promo deals
+    // Flash sale tracking
+    isFlashSale?: boolean; // Flag to indicate this was a flash sale purchase
+    flashSaleId?: mongoose.Types.ObjectId; // Reference to the flash sale
+    flashSaleTitle?: string; // Flash sale title for display
+    originalPrice?: number; // Original price before flash sale discount
     // Individual ticket tracking
     tickets: Array<{
       ticketNumber: string;
@@ -165,6 +170,21 @@ const TransactionSchema: Schema = new Schema(
         },
         originalTierName: {
           type: String,
+        },
+        // Flash sale tracking
+        isFlashSale: {
+          type: Boolean,
+          default: false,
+        },
+        flashSaleId: {
+          type: Schema.Types.ObjectId,
+          ref: 'FlashSale',
+        },
+        flashSaleTitle: {
+          type: String,
+        },
+        originalPrice: {
+          type: Number,
         },
         tickets: [
           {

@@ -764,9 +764,16 @@ export class TransactionService {
     };
   }
 
-  static async formatTicketItems(ticketData: any) {
+  static async formatTicketItems(ticketData: any, flashSaleData?: any) {
     const ticketItems = JSON.parse(ticketData);
+    const flashSaleInfo = flashSaleData ? JSON.parse(flashSaleData) : [];
+
     const formattedTicketItems = ticketItems.map((item: any) => {
+      // Find flash sale info for this ticket tier
+      const flashSale = flashSaleInfo.find(
+        (fs: any) => fs.tierId === item.tierId
+      );
+
       // Handle promo deal: 3 tickets for price of 2 ($110)
       // Check if this is a promo deal tier (you can customize this condition)
       const isPromoDeal =
@@ -787,12 +794,27 @@ export class TransactionService {
         };
       }
 
-      return {
+      // Regular ticket item with potential flash sale information
+      const baseItem = {
         ticketTier: new mongoose.Types.ObjectId(item.tierId),
         tierName: item.tierName,
         price: item.price,
         quantity: item.quantity,
       };
+
+      // Add flash sale information if applicable
+      if (flashSale && flashSale.isFlashSale) {
+        return {
+          ...baseItem,
+          price: flashSale.actualPricePaid || item.price, // Use actual price paid if available
+          isFlashSale: true,
+          flashSaleId: flashSale.flashSaleId,
+          flashSaleTitle: flashSale.flashSaleTitle,
+          originalPrice: flashSale.originalPrice, // Store original price for display
+        };
+      }
+
+      return baseItem;
     });
     return formattedTicketItems;
   }

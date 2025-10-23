@@ -14,6 +14,9 @@ export interface TicketData {
   ticketTier: string;
   ticketNumber: string;
   price: string;
+  originalPrice?: string; // Original price before flash sale
+  isFlashSale?: boolean; // Whether this was a flash sale purchase
+  flashSaleTitle?: string; // Flash sale title if applicable
   transactionId?: string; // Transaction ID for QR code
   qrCode?: string; // Optional QR code data
 }
@@ -341,27 +344,90 @@ export class TicketGenerator {
       color,
     });
 
-    // Price
-    page.drawText('PRICE:', {
-      x: rightX,
-      y: startY - 100,
-      size: 12,
-      font: boldFont,
-      color,
-    });
+    // Price section
+    if (ticketData.isFlashSale && ticketData.originalPrice) {
+      // Flash sale price display
+      page.drawText('FLASH SALE PRICE:', {
+        x: rightX,
+        y: startY - 100,
+        size: 12,
+        font: boldFont,
+        color,
+      });
 
-    page.drawText(`${ticketData.price}`, {
-      x: rightX,
-      y: startY - 120,
-      size: 16,
-      font: boldFont,
-      color: this.ACCENT_COLOR,
-    });
+      // Original price (crossed out effect)
+      page.drawText(`${ticketData.originalPrice}`, {
+        x: rightX,
+        y: startY - 120,
+        size: 12,
+        font,
+        color: rgb(0.5, 0.5, 0.5),
+      });
 
-    // Purchaser info - moved up to ensure it's not cut off
+      // Draw line through original price
+      page.drawLine({
+        start: { x: rightX, y: startY - 126 },
+        end: {
+          x: rightX + ticketData.originalPrice.length * 7,
+          y: startY - 126,
+        },
+        color: rgb(0.5, 0.5, 0.5),
+        thickness: 1,
+      });
+
+      // Sale price
+      page.drawText(`${ticketData.price}`, {
+        x: rightX,
+        y: startY - 145,
+        size: 16,
+        font: boldFont,
+        color: this.ACCENT_COLOR,
+      });
+
+      // Flash sale indicator
+      page.drawText('⚡ FLASH SALE', {
+        x: rightX,
+        y: startY - 165,
+        size: 10,
+        font: boldFont,
+        color: this.ACCENT_COLOR,
+      });
+
+      // Flash sale title if available
+      if (ticketData.flashSaleTitle) {
+        page.drawText(ticketData.flashSaleTitle, {
+          x: rightX,
+          y: startY - 180,
+          size: 8,
+          font,
+          color: rgb(0.6, 0.6, 0.6),
+        });
+      }
+    } else {
+      // Regular price display
+      page.drawText('PRICE:', {
+        x: rightX,
+        y: startY - 100,
+        size: 12,
+        font: boldFont,
+        color,
+      });
+
+      page.drawText(`${ticketData.price}`, {
+        x: rightX,
+        y: startY - 120,
+        size: 16,
+        font: boldFont,
+        color: this.ACCENT_COLOR,
+      });
+    }
+
+    // Purchaser info - positioned based on whether it's a flash sale or not
+    const purchaserY = ticketData.isFlashSale ? startY - 200 : startY - 140;
+
     page.drawText('PURCHASED BY:', {
       x: rightX,
-      y: startY - 140,
+      y: purchaserY,
       size: 12,
       font: boldFont,
       color,
@@ -369,7 +435,7 @@ export class TicketGenerator {
 
     page.drawText(ticketData.purchaserName, {
       x: rightX,
-      y: startY - 160,
+      y: purchaserY - 20,
       size: 12,
       font,
       color,
@@ -377,7 +443,7 @@ export class TicketGenerator {
 
     page.drawText(ticketData.purchaserEmail, {
       x: rightX,
-      y: startY - 175,
+      y: purchaserY - 35,
       size: 10,
       font,
       color,
@@ -564,6 +630,12 @@ export class TicketGenerator {
           price: ticketItem.isPromoDeal
             ? 'Promo Deal'
             : formatAmountForDisplay(ticketItem.price, 'USD'),
+          // Add flash sale information if applicable
+          isFlashSale: ticketItem.isFlashSale || false,
+          flashSaleTitle: ticketItem.flashSaleTitle,
+          originalPrice: ticketItem.originalPrice
+            ? formatAmountForDisplay(ticketItem.originalPrice, 'USD')
+            : undefined,
           transactionId:
             transaction._id?.toString() || transaction.orderId || '',
         };
