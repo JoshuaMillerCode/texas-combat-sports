@@ -32,7 +32,7 @@ export default function CreateFlashSaleModal({ isOpen, onClose, onSuccess }: Cre
     isActive: true,
   })
 
-  const ticketTiers = ticketTiersData?.ticketTiers || []
+  const ticketTiers = ticketTiersData || []
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
