@@ -46,7 +46,7 @@ export default function LiveStreamSection({ currentLiveEvent, formatViewCount }:
           
           <div className="bg-black/50 border border-red-900/30 rounded-lg p-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
-              <div className="flex items-center gap-6">
+              {/* <div className="flex items-center gap-6">
                 <div className="flex items-center text-gray-300">
                   <Eye className="w-5 h-5 mr-2 text-red-500" />
                   <span className="font-semibold">{formatViewCount(currentLiveEvent.viewCount)} views</span>
@@ -60,11 +60,11 @@ export default function LiveStreamSection({ currentLiveEvent, formatViewCount }:
                     }
                   </span>
                 </div>
-              </div>
+              </div> */}
               {currentLiveEvent.liveStreamUrl && (
                 <Button 
                   className="bg-red-600 hover:bg-red-700 text-white font-bold"
-                  onClick={() => window.open(currentLiveEvent.liveStreamUrl, '_blank')}
+                  onClick={() => window.open(currentLiveEvent.videoUrl, '_blank')}
                 >
                   <ExternalLink className="w-4 h-4 mr-2" />
                   Watch Full Screen

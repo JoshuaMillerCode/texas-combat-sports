@@ -82,12 +82,6 @@ export default function Header() {
                   {item.label}
                 </Link>
               ))}
-              <button 
-                className="text-white hover:text-red-500 transition-colors font-medium text-sm"
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-              >
-                More
-              </button>
             </div>
           </nav>
 
