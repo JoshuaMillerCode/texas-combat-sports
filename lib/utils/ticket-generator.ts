@@ -385,7 +385,7 @@ export class TicketGenerator {
       });
 
       // Flash sale indicator
-      page.drawText('⚡ FLASH SALE', {
+      page.drawText('FLASH SALE', {
         x: rightX,
         y: startY - 165,
         size: 10,
