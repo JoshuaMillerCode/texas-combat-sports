@@ -769,48 +769,57 @@ export class TransactionService {
     const flashSaleInfo = flashSaleData ? JSON.parse(flashSaleData) : [];
 
     const formattedTicketItems = ticketItems.map((item: any) => {
+      // Handle both old and new field name formats for backward compatibility
+      const tierId = item.tierId || item.t; // Support both formats
+      const tierName = item.tierName || item.n;
+      const quantity = item.quantity || item.q;
+      const price = item.price || item.p;
+      const stripePriceId = item.stripePriceId || item.s;
+
       // Find flash sale info for this ticket tier
+      // Note: flashSaleInfo now only contains items with flash sales
       const flashSale = flashSaleInfo.find(
-        (fs: any) => fs.tierId === item.tierId
+        (fs: any) => fs.t === tierId // 't' is the shortened field name for tierId
       );
 
       // Handle promo deal: 3 tickets for price of 2 ($110)
       // Check if this is a promo deal tier (you can customize this condition)
       const isPromoDeal =
-        item.tierName?.toLowerCase().includes('promo') ||
-        item.tierName?.toLowerCase().includes('deal') ||
-        item.price === 11000; // $110 in cents
+        tierName?.toLowerCase().includes('promo') ||
+        tierName?.toLowerCase().includes('deal') ||
+        price === 11000; // $110 in cents
 
       if (isPromoDeal) {
         // For promo deal, customer gets 3 GA tickets per promo deal purchased
         // If they buy 2 promo deals, they get 6 tickets total (2 × 3)
         return {
-          ticketTier: new mongoose.Types.ObjectId(item.tierId),
+          ticketTier: new mongoose.Types.ObjectId(tierId),
           tierName: 'General Admission', // Override to GA for the actual tickets
-          price: item.price, // Keep original price ($110)
-          quantity: 3 * item.quantity, // Customer gets 3 tickets per promo deal purchased
+          price: price, // Keep original price ($110)
+          quantity: 3 * quantity, // Customer gets 3 tickets per promo deal purchased
           isPromoDeal: true, // Flag to track this was a promo purchase
-          originalTierName: item.tierName, // Keep original tier name for reference
+          originalTierName: tierName, // Keep original tier name for reference
         };
       }
 
       // Regular ticket item with potential flash sale information
       const baseItem = {
-        ticketTier: new mongoose.Types.ObjectId(item.tierId),
-        tierName: item.tierName,
-        price: item.price,
-        quantity: item.quantity,
+        ticketTier: new mongoose.Types.ObjectId(tierId),
+        tierName: tierName,
+        price: price,
+        quantity: quantity,
       };
 
       // Add flash sale information if applicable
-      if (flashSale && flashSale.isFlashSale) {
+      // Since flashSaleInfo now only contains flash sale items, if we find a match, it's a flash sale
+      if (flashSale) {
         return {
           ...baseItem,
-          price: flashSale.actualPricePaid || item.price, // Use actual price paid if available
+          price: flashSale.ap || price, // 'ap' is actualPricePaid
           isFlashSale: true,
-          flashSaleId: flashSale.flashSaleId,
-          flashSaleTitle: flashSale.flashSaleTitle,
-          originalPrice: flashSale.originalPrice, // Store original price for display
+          flashSaleId: flashSale.fs, // 'fs' is flashSaleId
+          flashSaleTitle: flashSale.ft, // 'ft' is flashSaleTitle
+          originalPrice: flashSale.op, // 'op' is originalPrice
         };
       }
 

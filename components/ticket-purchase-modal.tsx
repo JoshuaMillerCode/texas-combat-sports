@@ -111,15 +111,27 @@ export default function TicketPurchaseModal({
       
       // Use flash sale price if available, otherwise use regular price
       const flashSale = flashSales[tierId]
-      // Flash sale prices are in cents, regular tier prices are in dollars
-      const price = flashSale ? flashSale.salePrice / 100 : tier.price
+      // Both flash sale prices and regular tier prices are in cents
+      const price = flashSale ? flashSale.salePrice : tier.price
       
       return total + (price * quantity)
     }, 0)
   }
 
   const getTotalTickets = () => {
-    return Object.values(selectedTickets).reduce((total, quantity) => total + quantity, 0)
+    return Object.entries(selectedTickets).reduce((total, [tierId, quantity]) => {
+      const tier = activeTicketTiers.find((t) => t._id === tierId)
+      if (!tier) return total
+      
+      // Check if this is a promo deal tier
+      const isPromoDeal = 
+        tier.name?.toLowerCase().includes('promo') ||
+        tier.name?.toLowerCase().includes('deal') ||
+        tier.price === 11000 // $110 in cents
+      
+      // Promo deals give 3 tickets per purchase
+      return total + (isPromoDeal ? quantity * 3 : quantity)
+    }, 0)
   }
 
   const handleCheckout = async () => {
@@ -369,7 +381,7 @@ export default function TicketPurchaseModal({
                           </span>
                           {currentQuantity > 0 && (
                             <Badge className="bg-red-600 text-white">
-                              Subtotal: {formatAmountForDisplay((flashSale ? flashSale.salePrice : tier.price * 100) * currentQuantity, tier.currency)}
+                              Subtotal: {formatAmountForDisplay((flashSale ? flashSale.salePrice : tier.price) * currentQuantity, tier.currency)}
                             </Badge>
                           )}
                         </div>
@@ -389,8 +401,8 @@ export default function TicketPurchaseModal({
                       .map(([tierId, quantity]) => {
                         const tier = activeTicketTiers.find((t) => t._id === tierId)!
                         const flashSale = flashSales[tierId]
-                        // Flash sale prices are in cents, regular tier prices are in dollars
-                        const price = flashSale ? flashSale.salePrice : tier.price * 100
+                        // Both flash sale prices and regular tier prices are in cents
+                        const price = flashSale ? flashSale.salePrice : tier.price
                         return (
                           <div key={tierId} className="flex justify-between text-gray-300">
                             <span>
@@ -405,7 +417,7 @@ export default function TicketPurchaseModal({
                   <div className="border-t border-red-600/30 pt-3">
                     <div className="flex justify-between text-white font-bold text-lg">
                       <span>Total ({getTotalTickets()} tickets)</span>
-                      <span>{formatAmountForDisplay(getTotalAmount() * 100, "USD")}</span>
+                      <span>{formatAmountForDisplay(getTotalAmount(), "USD")}</span>
                     </div>
                   </div>
                 </div>

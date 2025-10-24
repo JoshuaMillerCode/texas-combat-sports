@@ -194,46 +194,52 @@ export async function POST(req: NextRequest) {
         eventTitle: body.eventTitle,
         eventDate: body.eventDate,
         eventVenue: body.eventVenue,
-        ticketData: JSON.stringify(body.tickets),
+        ticketData: JSON.stringify(
+          body.tickets.map((ticket) => ({
+            t: ticket.tierId, // tierId
+            n: ticket.tierName, // tierName
+            q: ticket.quantity, // quantity
+            p: ticket.price, // price
+            s: ticket.stripePriceId, // stripePriceId
+          }))
+        ),
         flashSaleData: JSON.stringify(
-          await Promise.all(
-            fetchedPrices.map(async (price, index) => {
-              const ticket = body.tickets[index];
-              const baseData = {
-                tierId: ticket.tierId,
-                isFlashSale: price.isFlashSale,
-                originalPriceId: ticket.stripePriceId,
-                salePriceId: price.priceId,
-              };
+          (
+            await Promise.all(
+              fetchedPrices.map(async (price, index) => {
+                const ticket = body.tickets[index];
 
-              if (price.isFlashSale) {
-                // Get flash sale details
-                const ticketTier = await TicketTierService.getTicketTierById(
-                  ticket.tierId
-                );
-                if (ticketTier) {
-                  const flashSalePricing =
-                    await FlashSaleService.getFlashSalePricing(
-                      ticketTier._id.toString()
-                    );
-                  if (
-                    flashSalePricing.hasFlashSale &&
-                    flashSalePricing.flashSale
-                  ) {
-                    return {
-                      ...baseData,
-                      flashSaleId: flashSalePricing.flashSale._id.toString(),
-                      flashSaleTitle: flashSalePricing.flashSale.title,
-                      originalPrice: flashSalePricing.originalPrice,
-                      actualPricePaid: price.unitAmountCents, // The actual price paid in cents
-                    };
+                // Only include flash sale data if there's actually a flash sale
+                if (price.isFlashSale) {
+                  // Get flash sale details
+                  const ticketTier = await TicketTierService.getTicketTierById(
+                    ticket.tierId
+                  );
+                  if (ticketTier) {
+                    const flashSalePricing =
+                      await FlashSaleService.getFlashSalePricing(
+                        ticketTier._id.toString()
+                      );
+                    if (
+                      flashSalePricing.hasFlashSale &&
+                      flashSalePricing.flashSale
+                    ) {
+                      return {
+                        t: ticket.tierId, // tierId
+                        fs: flashSalePricing.flashSale._id.toString(), // flashSaleId
+                        ft: flashSalePricing.flashSale.title.substring(0, 15), // flashSaleTitle (truncated to 15 chars)
+                        op: flashSalePricing.originalPrice, // originalPrice
+                        ap: price.unitAmountCents, // actualPricePaid
+                      };
+                    }
                   }
                 }
-              }
 
-              return baseData;
-            })
-          )
+                // Return null for non-flash sale items to filter them out
+                return null;
+              })
+            )
+          ).filter((item) => item !== null) // Remove null items
         ),
         order_type: 'event_tickets',
         total_amount: totalAmountInCents.toString(),
