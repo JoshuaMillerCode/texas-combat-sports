@@ -322,10 +322,26 @@ export default function EventHero({ event, onOpenTicketModal, activeFlashSales =
                 {/* Ticket Price Display */}
                 <div className="text-center">
                   <div className="inline-block bg-black/50 backdrop-blur-sm rounded-lg px-6 py-4 border border-red-600/30">
-                    <div className="text-2xl md:text-3xl font-bold text-white mb-1 drop-shadow-lg">
-                      {"$" + event.ticketPrice}
-                    </div>
-                    <div className="text-sm text-gray-300 drop-shadow-lg">Starting Price</div>
+                    {(() => {
+                      const flashSale = getFlashSaleForEvent()
+                      if (flashSale) {
+                        return (
+                          <div>
+                            <div className="text-red-400 font-bold mb-1 text-lg md:text-xl">⚡ FLASH SALE ACTIVE</div>
+                            <div className="text-sm text-gray-300">Click "Buy Tickets" to check the pricing</div>
+                          </div>
+                        )
+                      } else {
+                        return (
+                          <>
+                            <div className="text-2xl md:text-3xl font-bold text-white mb-1 drop-shadow-lg">
+                              {"$" + event.ticketPrice}
+                            </div>
+                            <div className="text-sm text-gray-300 drop-shadow-lg">Starting Price</div>
+                          </>
+                        )
+                      }
+                    })()}
                   </div>
                 </div>
               </div>

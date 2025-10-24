@@ -57,10 +57,10 @@ export default function FlashSaleBanner({ title, endAt, className = "" }: FlashS
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      className={`bg-gradient-to-r from-red-600 via-red-500 to-orange-500 text-white px-6 py-3 rounded-lg shadow-lg ${className}`}
+      className={`bg-gradient-to-r from-red-600 via-red-500 to-orange-500 text-white px-3 py-2 md:px-6 md:py-3 rounded-lg shadow-lg ${className}`}
     >
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div className="flex items-center space-x-3">
+      <div className="flex items-center justify-between flex-wrap gap-2 md:gap-4">
+        <div className="flex items-center space-x-2 md:space-x-3">
           <motion.div
             animate={{
               scale: [1, 1.2, 1],
@@ -71,16 +71,16 @@ export default function FlashSaleBanner({ title, endAt, className = "" }: FlashS
               repeatDelay: 0.5,
             }}
           >
-            <Zap className="w-6 h-6 fill-white" />
+            <Zap className="w-4 h-4 md:w-6 md:h-6 fill-white" />
           </motion.div>
           <div>
-            <p className="font-bold text-lg">🔥 {title}</p>
-            <p className="text-sm text-white/90">Limited time offer - Don't miss out!</p>
+            <p className="font-bold text-sm md:text-lg">🔥 {title}</p>
+            <p className="text-xs md:text-sm text-white/90 hidden md:block">Limited time offer - Don't miss out!</p>
           </div>
         </div>
-        <div className="flex items-center space-x-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
-          <Clock className="w-4 h-4" />
-          <span className="font-bold text-sm">Ends in: {timeRemaining}</span>
+        <div className="flex items-center space-x-1 md:space-x-2 bg-white/20 backdrop-blur-sm px-2 py-1 md:px-4 md:py-2 rounded-full">
+          <Clock className="w-3 h-3 md:w-4 md:h-4" />
+          <span className="font-bold text-xs md:text-sm">Ends: {timeRemaining}</span>
         </div>
       </div>
     </motion.div>
