@@ -58,7 +58,7 @@ export default function Undercard({ fights, isPastEvent }: UndercardProps) {
               >
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
                   {/* Fighter 1 */}
-                  <div className="text-center md:text-right">
+                  <div className="text-center md:text-right order-1 md:order-none">
                     <div className="relative h-32 w-24 mx-auto md:ml-auto md:mr-0 mb-4 rounded-lg overflow-hidden">
                       <Image
                         src={fight.fighter1.image || (fight.fighter1.name === "TBA" ? tbaImage : fighterImage)}
@@ -75,14 +75,14 @@ export default function Undercard({ fights, isPastEvent }: UndercardProps) {
                   </div>
 
                   {/* VS */}
-                  <div className="text-center order-first md:order-none">
+                  <div className="text-center order-2 md:order-none">
                     <div className="text-2xl font-bold text-red-600 mb-2">VS</div>
                     <div className="text-white font-bold text-sm mb-1">{fight.title}</div>
                     <div className="text-gray-400 text-xs">{fight.rounds} Rounds</div>
                   </div>
 
                   {/* Fighter 2 */}
-                  <div className="text-center md:text-left">
+                  <div className="text-center md:text-left order-3 md:order-none">
                     <div className="relative h-32 w-24 mx-auto md:mr-auto md:ml-0 mb-4 rounded-lg overflow-hidden">
                       <Image
                         src={fight.fighter2.image || (fight.fighter2.name === "TBA" ? tbaImage : fighterImage)}
