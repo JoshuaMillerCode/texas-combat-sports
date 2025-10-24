@@ -13,7 +13,8 @@ import {
   Ticket,
   Loader2,
   QrCode,
-  Zap
+  Zap,
+  Play
 } from "lucide-react"
 import { useAuth } from "@/contexts/auth-context"
 import EventsSection from "@/components/adminDashboard/events-section"
@@ -22,6 +23,7 @@ import FightsSection from "@/components/adminDashboard/fights-section"
 import MerchSection from "@/components/adminDashboard/merch-section"
 import TicketTiersSection from "@/components/adminDashboard/ticket-tiers-section"
 import FlashSalesSection from "@/components/adminDashboard/flash-sales-section"
+import VideosSection from "@/components/adminDashboard/videos-section"
 
 
 export default function AdminDashboardPage() {
@@ -104,7 +106,7 @@ export default function AdminDashboardPage() {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 bg-gray-800 border-gray-700">
+          <TabsList className="grid w-full grid-cols-6 bg-gray-800 border-gray-700">
             <TabsTrigger value="events" className="flex items-center gap-2 data-[state=active]:bg-red-600 data-[state=active]:text-white">
               <Calendar className="h-4 w-4" />
               Events
@@ -124,6 +126,10 @@ export default function AdminDashboardPage() {
             <TabsTrigger value="flash-sales" className="flex items-center gap-2 data-[state=active]:bg-red-600 data-[state=active]:text-white">
               <Zap className="h-4 w-4" />
               Flash Sales
+            </TabsTrigger>
+            <TabsTrigger value="videos" className="flex items-center gap-2 data-[state=active]:bg-red-600 data-[state=active]:text-white">
+              <Play className="h-4 w-4" />
+              Videos
             </TabsTrigger>
           </TabsList>
 
@@ -155,6 +161,11 @@ export default function AdminDashboardPage() {
           {/* Flash Sales Tab */}
           <TabsContent value="flash-sales">
             <FlashSalesSection searchTerm={searchTerm} />
+          </TabsContent>
+
+          {/* Videos Tab */}
+          <TabsContent value="videos">
+            <VideosSection searchTerm={searchTerm} />
           </TabsContent>
         </Tabs>
       </div>
