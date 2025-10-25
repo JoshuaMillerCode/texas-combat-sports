@@ -54,7 +54,7 @@ export class EmailService {
       const emailContent = this.generateSimpleEmailContent(transaction, event);
 
       const result = await resend.emails.send({
-        from: 'Texas Combat Sports <tickets@joshuarmiller.dev>',
+        from: 'Texas Combat Sports <tickets@texascombatsportsllc.com>',
         to: [transaction.customerDetails.email],
         subject: `Ticket Purchase Confirmed - ${event.title}`,
         html: emailContent,
