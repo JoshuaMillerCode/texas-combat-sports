@@ -88,7 +88,7 @@ export default function TicketScanPage() {
     }
   }, [])
 
-  // Dynamic button styling after scanner loads
+  // Dynamic styling after scanner loads to fix visibility issues
   useEffect(() => {
     if (isScanning) {
       const timer = setTimeout(() => {
@@ -112,6 +112,24 @@ export default function TicketScanPage() {
             htmlElement.style.setProperty('display', 'inline-block', 'important')
             htmlElement.style.setProperty('visibility', 'visible', 'important')
             htmlElement.style.setProperty('opacity', '1', 'important')
+          })
+          
+          // Fix all select elements
+          const selects = qrReader.querySelectorAll('select')
+          selects.forEach((select) => {
+            select.style.setProperty('background', 'white', 'important')
+            select.style.setProperty('color', '#1f2937', 'important')
+            select.style.setProperty('border', '1px solid #d1d5db', 'important')
+          })
+          
+          // Fix all text elements to be visible (except buttons)
+          const textElements = qrReader.querySelectorAll('span:not(button span), div:not(button div)')
+          textElements.forEach((element) => {
+            const htmlElement = element as HTMLElement
+            // Only set color if not inside a button
+            if (!htmlElement.closest('button')) {
+              htmlElement.style.setProperty('color', '#1f2937', 'important')
+            }
           })
         }
       }, 500)
@@ -282,6 +300,24 @@ export default function TicketScanPage() {
           margin: 8px 0 !important;
           padding: 4px 8px !important;
           font-size: 14px !important;
+          background: white !important;
+          color: #1f2937 !important;
+          border: 1px solid #d1d5db !important;
+          border-radius: 4px !important;
+        }
+        
+        /* Ensure all text elements inside qr-reader are visible */
+        #qr-reader * {
+          color: #1f2937 !important;
+        }
+        
+        /* Override button colors specifically */
+        #qr-reader button,
+        #qr-reader a,
+        #qr-reader span[onclick],
+        #qr-reader div[onclick],
+        #qr-reader *[role="button"] {
+          color: white !important;
         }
         
         /* Clean video styling */
@@ -295,6 +331,14 @@ export default function TicketScanPage() {
         #qr-reader div {
           font-size: 14px !important;
           line-height: 1.4 !important;
+          color: #1f2937 !important;
+        }
+        
+        /* Specifically target the camera selection text */
+        #qr-reader select + span,
+        #qr-reader select ~ span,
+        #qr-reader select ~ div {
+          color: #1f2937 !important;
         }
       `}</style>
 
@@ -375,9 +419,9 @@ export default function TicketScanPage() {
                 <Button 
                   onClick={stopScanner}
                   variant="outline"
-                  className="border-gray-700 text-gray-300 hover:bg-gray-800"
+                  className="border-2 border-red-600 text-red-600 hover:bg-red-600 hover:text-white bg-transparent"
                 >
-                  Cancel Scan
+                  Back
                 </Button>
               </div>
             </div>
