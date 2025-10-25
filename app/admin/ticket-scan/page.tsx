@@ -421,7 +421,7 @@ export default function TicketScanPage() {
                   variant="outline"
                   className="border-2 border-red-600 text-red-600 hover:bg-red-600 hover:text-white bg-transparent"
                 >
-                  Stop Scanning
+                  Back
                 </Button>
               </div>
             </div>
