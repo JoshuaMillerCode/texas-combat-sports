@@ -335,7 +335,7 @@ export default function EventHero({ event, onOpenTicketModal, activeFlashSales =
                         return (
                           <>
                             <div className="text-2xl md:text-3xl font-bold text-white mb-1 drop-shadow-lg">
-                              {"$" + event.ticketPrice}
+                              {event.ticketPrice}
                             </div>
                             <div className="text-sm text-gray-300 drop-shadow-lg">Starting Price</div>
                           </>
