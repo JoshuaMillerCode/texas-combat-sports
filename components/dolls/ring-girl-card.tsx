@@ -12,14 +12,14 @@ interface RingGirlCardProps {
 export default function RingGirlCard({ ringGirl }: RingGirlCardProps) {
   return (
     <motion.div
-      className="group relative w-full max-w-md"
+      className="group relative w-[420px]"
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.5 }}
     >
       {/* Card Container with Glassmorphism */}
-      <div className="relative bg-black/50 border border-pink-500/20 rounded-xl overflow-hidden transition-all duration-200 ease-out hover:border-pink-500/50 hover:shadow-xl hover:shadow-pink-500/10 h-full flex flex-col will-change-transform">
+      <div className="relative bg-black/50 border border-pink-500/20 rounded-xl overflow-hidden transition-all duration-200 ease-out hover:border-pink-500/50 hover:shadow-xl hover:shadow-pink-500/10 h-full flex flex-col will-change-transform w-full">
         {/* Image Container */}
         <div className="relative h-[450px] overflow-hidden flex-shrink-0">
           <Image

@@ -9,6 +9,7 @@ import TicketTier from './TicketTier';
 import Transaction from './Transaction';
 import User from './User';
 import FlashSale from './FlashSale';
+import Doll from './Doll';
 
 // Export all models for easy access
 export {
@@ -20,6 +21,7 @@ export {
   Transaction,
   User,
   FlashSale,
+  Doll,
 };
 
 // Ensure all models are registered when this file is imported

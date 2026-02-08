@@ -14,7 +14,8 @@ import {
   Loader2,
   QrCode,
   Zap,
-  Play
+  Play,
+  Sparkles
 } from "lucide-react"
 import { useAuth } from "@/contexts/auth-context"
 import EventsSection from "@/components/adminDashboard/events-section"
@@ -24,6 +25,7 @@ import MerchSection from "@/components/adminDashboard/merch-section"
 import TicketTiersSection from "@/components/adminDashboard/ticket-tiers-section"
 import FlashSalesSection from "@/components/adminDashboard/flash-sales-section"
 import VideosSection from "@/components/adminDashboard/videos-section"
+import DollsSection from "@/components/adminDashboard/dolls-section"
 
 
 export default function AdminDashboardPage() {
@@ -132,8 +134,8 @@ export default function AdminDashboardPage() {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
-          {/* Desktop tabs - 2x3 grid */}
-          <TabsList className="hidden md:grid md:grid-cols-6 bg-gray-800 border-gray-700 h-auto">
+          {/* Desktop tabs - 2x4 grid */}
+          <TabsList className="hidden md:grid md:grid-cols-7 bg-gray-800 border-gray-700 h-auto">
             <TabsTrigger value="events" className="flex flex-col items-center gap-1 sm:flex-row sm:gap-2 py-3 data-[state=active]:bg-red-600 data-[state=active]:text-white text-xs sm:text-sm">
               <Calendar className="h-4 w-4" />
               Events
@@ -157,6 +159,10 @@ export default function AdminDashboardPage() {
             <TabsTrigger value="videos" className="flex flex-col items-center gap-1 sm:flex-row sm:gap-2 py-3 data-[state=active]:bg-red-600 data-[state=active]:text-white text-xs sm:text-sm">
               <Play className="h-4 w-4" />
               Videos
+            </TabsTrigger>
+            <TabsTrigger value="dolls" className="flex flex-col items-center gap-1 sm:flex-row sm:gap-2 py-3 data-[state=active]:bg-red-600 data-[state=active]:text-white text-xs sm:text-sm">
+              <Sparkles className="h-4 w-4" />
+              Dolls
             </TabsTrigger>
           </TabsList>
 
@@ -186,6 +192,10 @@ export default function AdminDashboardPage() {
               <TabsTrigger value="videos" className="flex items-center gap-1 px-3 py-2 data-[state=active]:bg-red-600 data-[state=active]:text-white text-xs whitespace-nowrap">
                 <Play className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 Videos
+              </TabsTrigger>
+              <TabsTrigger value="dolls" className="flex items-center gap-1 px-3 py-2 data-[state=active]:bg-red-600 data-[state=active]:text-white text-xs whitespace-nowrap">
+                <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                Dolls
               </TabsTrigger>
             </TabsList>
           </div>
@@ -223,6 +233,11 @@ export default function AdminDashboardPage() {
           {/* Videos Tab */}
           <TabsContent value="videos">
             <VideosSection searchTerm={searchTerm} />
+          </TabsContent>
+
+          {/* Dolls Tab */}
+          <TabsContent value="dolls">
+            <DollsSection searchTerm={searchTerm} />
           </TabsContent>
         </Tabs>
       </div>

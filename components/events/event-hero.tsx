@@ -44,13 +44,13 @@ export default function EventHero({ event, onOpenTicketModal, activeFlashSales =
   // Helper function to get flash sale info for this event
   const getFlashSaleForEvent = () => {
     if (!activeFlashSales.length || !event.ticketTiers) return null
-    
+
     // Check if any flash sale applies to this event's ticket tiers
     const eventTicketIds = event.ticketTiers.map((tier: any) => tier._id)
     const applicableSale = activeFlashSales.find((sale: any) =>
       sale.targetTicketTypes.some((id: string) => eventTicketIds.includes(id))
     )
-    
+
     return applicableSale
   }
 
@@ -69,11 +69,11 @@ export default function EventHero({ event, onOpenTicketModal, activeFlashSales =
         <div className="relative h-screen bg-black">
           {/* Background Video */}
           <div className="absolute inset-0">
-            <video 
-              autoPlay 
-              muted 
-              loop 
-              playsInline 
+            <video
+              autoPlay
+              muted
+              loop
+              playsInline
               className="w-full h-full object-cover opacity-40"
             >
               <source src={event.heroVideo} type="video/mp4" />
@@ -143,7 +143,7 @@ export default function EventHero({ event, onOpenTicketModal, activeFlashSales =
                       </div>
                     ) : ""
                   }
-                  
+
                   <div className="flex flex-col sm:flex-row gap-4">
                     {
                       event.isActive ? (
@@ -156,7 +156,7 @@ export default function EventHero({ event, onOpenTicketModal, activeFlashSales =
                         </Button>
                       ) : ""
                     }
-                    
+
                     {/* <Button
                       size="lg"
                       variant="outline"
@@ -222,11 +222,11 @@ export default function EventHero({ event, onOpenTicketModal, activeFlashSales =
 
         {/* Video background overlay (optional - can be removed if not needed) */}
         <div className="absolute inset-0 z-0">
-          <video 
-            autoPlay 
-            muted 
-            loop 
-            playsInline 
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
             className="w-full h-full object-cover opacity-30"
           >
             <source src={event.heroVideo} type="video/mp4" />

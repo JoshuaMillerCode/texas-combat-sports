@@ -9,6 +9,7 @@ import type { IMerch } from '@/lib/models/Merch';
 import type { ITicketTier } from '@/lib/models/TicketTier';
 import type { IVideo } from '@/lib/models/Video';
 import type { IFlashSale } from '@/lib/models/FlashSale';
+import type { IDoll } from '@/lib/models/Doll';
 
 // ==================== UTILITY FUNCTIONS ====================
 
@@ -373,6 +374,103 @@ export function useDeleteFighterMutation() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['fighters'] });
+    },
+  });
+}
+
+// ==================== DOLLS ====================
+
+export function useDollsQuery() {
+  const { accessToken } = useAuth();
+
+  return useQuery({
+    queryKey: ['dolls'],
+    queryFn: () => apiRequest('/api/dolls', {}, accessToken),
+    // Public query - no auth required
+  });
+}
+
+export function useDollQuery(id: string) {
+  const { accessToken } = useAuth();
+
+  return useQuery({
+    queryKey: ['dolls', id],
+    queryFn: () => apiRequest(`/api/dolls/${id}`, {}, accessToken),
+    enabled: !!id, // Only requires valid ID, not auth
+  });
+}
+
+export function useCreateDollMutation() {
+  const { accessToken, isAuthenticated } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (dollData: Partial<IDoll>) => {
+      if (!isAuthenticated || !accessToken) {
+        throw new Error('Admin authentication required');
+      }
+      return apiRequest(
+        '/api/dolls',
+        {
+          method: 'POST',
+          body: JSON.stringify(dollData),
+        },
+        accessToken
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dolls'] });
+    },
+  });
+}
+
+export function useUpdateDollMutation() {
+  const { accessToken, isAuthenticated } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      id,
+      ...dollData
+    }: Partial<IDoll> & { id: string }) => {
+      if (!isAuthenticated || !accessToken) {
+        throw new Error('Admin authentication required');
+      }
+      return apiRequest(
+        `/api/dolls/${id}`,
+        {
+          method: 'PUT',
+          body: JSON.stringify(dollData),
+        },
+        accessToken
+      );
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['dolls'] });
+      queryClient.invalidateQueries({ queryKey: ['dolls', variables.id] });
+    },
+  });
+}
+
+export function useDeleteDollMutation() {
+  const { accessToken, isAuthenticated } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => {
+      if (!isAuthenticated || !accessToken) {
+        throw new Error('Admin authentication required');
+      }
+      return apiRequest(
+        `/api/dolls/${id}`,
+        {
+          method: 'DELETE',
+        },
+        accessToken
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dolls'] });
     },
   });
 }
