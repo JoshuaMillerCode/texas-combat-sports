@@ -6,18 +6,18 @@ import Image from "next/image"
 import { Menu, X, Instagram, Youtube, Facebook } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useCurrentEvent } from "@/contexts/current-event-context"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 
 // Simple TikTok SVG icon
 const TikTokIcon = ({ size = 20, className = "" }: { size?: number; className?: string }) => (
-  <svg 
-    width={size} 
-    height={size} 
-    viewBox="0 0 24 24" 
-    fill="currentColor" 
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="currentColor"
     className={className}
   >
-    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
   </svg>
 )
 
@@ -25,6 +25,15 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { currentEvent } = useCurrentEvent();
   const router = useRouter();
+  const pathname = usePathname();
+  const isDollsPage = pathname?.includes('/dolls');
+
+  // Conditional color classes based on page
+  const accentColor = isDollsPage ? 'pink' : 'red';
+  const borderColor = isDollsPage ? 'border-pink-900/30' : 'border-red-900/30';
+  const logoColor = isDollsPage ? 'text-pink-500' : 'text-red-600';
+  const hoverColor = isDollsPage ? 'hover:text-pink-500' : 'hover:text-red-500';
+  const buttonBg = isDollsPage ? 'bg-pink-600 hover:bg-pink-700' : 'bg-red-600 hover:bg-red-700';
 
   const navItems = [
     { href: "/", label: "Home" },
@@ -34,16 +43,17 @@ export default function Header() {
     { href: "/streaming", label: "Streaming" },
     // { href: "/merch", label: "Merch" },
     { href: "/gallery", label: "Gallery" },
+    { href: "/dolls", label: "Dolls" },
     { href: "/contact", label: "Contact" },
   ]
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-sm border-b border-red-900/30">
+    <header className={`fixed top-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-sm border-b ${borderColor}`}>
       <div className="container mx-auto px-4">
         <div className="flex items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 flex-shrink-0 mr-8">
-            <Image 
+            <Image
               src="https://res.cloudinary.com/dujmomznj/image/upload/f_auto,q_auto:good,w_40,h_40/v1755476673/helmet_ouwsr5.jpg"
               alt="Texas Combat Sports Logo"
               width={40}
@@ -52,7 +62,7 @@ export default function Header() {
               priority
               loading="eager"
             />
-            <span className="text-2xl font-bold text-red-600">TXCS</span>
+            <span className={`text-2xl font-bold ${logoColor}`}>TXCS</span>
           </Link>
 
           {/* Desktop Navigation - Left aligned next to logo */}
@@ -62,7 +72,7 @@ export default function Header() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="text-white hover:text-red-500 transition-colors font-medium whitespace-nowrap"
+                  className={`text-white ${hoverColor} transition-colors font-medium whitespace-nowrap`}
                 >
                   {item.label}
                 </Link>
@@ -77,7 +87,7 @@ export default function Header() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="text-white hover:text-red-500 transition-colors font-medium text-sm whitespace-nowrap"
+                  className={`text-white ${hoverColor} transition-colors font-medium text-sm whitespace-nowrap`}
                 >
                   {item.label}
                 </Link>
@@ -89,44 +99,44 @@ export default function Header() {
           <div className="hidden lg:flex items-center space-x-4 flex-shrink-0 ml-auto">
             {/* Social Media Icons */}
             <div className="flex items-center space-x-3">
-              <Link 
-                href="https://www.instagram.com/texascombatsports?igsh=OWFnZmlpZWFzdmJw" 
-                className="text-gray-400 hover:text-red-500 transition-colors"
+              <Link
+                href="https://www.instagram.com/texascombatsports?igsh=OWFnZmlpZWFzdmJw"
+                className={`text-gray-400 ${hoverColor} transition-colors`}
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 <Instagram size={20} />
               </Link>
-              <Link 
-                href="https://youtube.com/@texascombatsports?si=Kpiup3NV3dD-TySi" 
-                className="text-gray-400 hover:text-red-500 transition-colors"
+              <Link
+                href="https://youtube.com/@texascombatsports?si=Kpiup3NV3dD-TySi"
+                className={`text-gray-400 ${hoverColor} transition-colors`}
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 <Youtube size={20} />
               </Link>
-              <Link 
-                href="https://www.facebook.com/share/1FfXuJtAuq/?mibextid=wwXIfr" 
-                className="text-gray-400 hover:text-red-500 transition-colors"
+              <Link
+                href="https://www.facebook.com/share/1FfXuJtAuq/?mibextid=wwXIfr"
+                className={`text-gray-400 ${hoverColor} transition-colors`}
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 <Facebook size={20} />
               </Link>
-              <Link 
-                href="https://www.tiktok.com/@texascombatsportshtx" 
-                className="text-gray-400 hover:text-red-500 transition-colors"
+              <Link
+                href="https://www.tiktok.com/@texascombatsportshtx"
+                className={`text-gray-400 ${hoverColor} transition-colors`}
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 <TikTokIcon size={20} />
               </Link>
             </div>
-            
+
             {/* Buy Tickets Button */}
-            <Button 
-              size="sm" 
-              className="bg-red-600 hover:bg-red-700 text-white font-bold px-4"
+            <Button
+              size="sm"
+              className={`${buttonBg} text-white font-bold px-4`}
               onClick={() => {
                 if (currentEvent) {
                   router.push(`/events/${currentEvent.slug}`);
@@ -139,9 +149,9 @@ export default function Header() {
 
           {/* Mobile Menu Button */}
           <div className="lg:hidden flex items-center space-x-3 flex-shrink-0 ml-auto">
-            <Button 
-              size="sm" 
-              className="bg-red-600 hover:bg-red-700 text-white font-bold px-4"
+            <Button
+              size="sm"
+              className={`${buttonBg} text-white font-bold px-4`}
               onClick={() => {
                 if (currentEvent) {
                   router.push(`/events/${currentEvent.slug}`);
@@ -158,13 +168,13 @@ export default function Header() {
 
         {/* Mobile/Tablet Dropdown Navigation */}
         {isMenuOpen && (
-          <nav className="lg:hidden py-4 border-t border-red-900/30 bg-black/95">
+          <nav className={`lg:hidden py-4 border-t ${borderColor} bg-black/95`}>
             <div className="flex flex-col items-center space-y-3">
               {navItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="text-white hover:text-red-500 transition-colors font-medium text-center py-1"
+                  className={`text-white ${hoverColor} transition-colors font-medium text-center py-1`}
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {item.label}
@@ -176,14 +186,14 @@ export default function Header() {
 
         {/* Tablet "More" items dropdown */}
         {isMenuOpen && (
-          <nav className="hidden lg:flex xl:hidden py-4 border-t border-red-900/30 bg-black/95">
+          <nav className={`hidden lg:flex xl:hidden py-4 border-t ${borderColor} bg-black/95`}>
             <div className="flex justify-center w-full">
               <div className="flex items-center space-x-6">
                 {navItems.slice(6).map((item) => (
                   <Link
                     key={item.href}
                     href={item.href}
-                    className="text-white hover:text-red-500 transition-colors font-medium"
+                    className={`text-white ${hoverColor} transition-colors font-medium`}
                     onClick={() => setIsMenuOpen(false)}
                   >
                     {item.label}

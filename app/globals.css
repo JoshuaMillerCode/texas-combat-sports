@@ -63,6 +63,7 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -94,6 +95,15 @@ html {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #b91c1c;
+}
+
+/* Pink scrollbar for dolls page */
+html.dolls-page ::-webkit-scrollbar-thumb {
+  background: #ec4899 !important;
+}
+
+html.dolls-page ::-webkit-scrollbar-thumb:hover {
+  background: #db2777 !important;
 }
 
 /* Text shadow for better readability */
