@@ -56,10 +56,10 @@ export default function TicketPurchaseModal({
   const [flashSales, setFlashSales] = useState<Record<string, any>>({})
   const [loadingFlashSales, setLoadingFlashSales] = useState(true)
 
-  // Filter active ticket tiers and sort by sortOrder
+  // Filter active ticket tiers and sort by price (cheapest first)
   const activeTicketTiers = ticketTiers
     .filter(tier => tier.isActive)
-    .sort((a, b) => a.sortOrder - b.sortOrder)
+    .sort((a, b) => a.price - b.price)
 
   // Fetch flash sale data for all ticket tiers
   useEffect(() => {
@@ -108,12 +108,12 @@ export default function TicketPurchaseModal({
     return Object.entries(selectedTickets).reduce((total, [tierId, quantity]) => {
       const tier = activeTicketTiers.find((t) => t._id === tierId)
       if (!tier) return total
-      
+
       // Use flash sale price if available, otherwise use regular price
       const flashSale = flashSales[tierId]
       // Both flash sale prices and regular tier prices are in cents
       const price = flashSale ? flashSale.salePrice : tier.price
-      
+
       return total + (price * quantity)
     }, 0)
   }
@@ -122,13 +122,13 @@ export default function TicketPurchaseModal({
     return Object.entries(selectedTickets).reduce((total, [tierId, quantity]) => {
       const tier = activeTicketTiers.find((t) => t._id === tierId)
       if (!tier) return total
-      
+
       // Check if this is a promo deal tier
-      const isPromoDeal = 
+      const isPromoDeal =
         tier.name?.toLowerCase().includes('promo') ||
         tier.name?.toLowerCase().includes('deal') ||
         tier.price === 11000 // $110 in cents
-      
+
       // Promo deals give 3 tickets per purchase
       return total + (isPromoDeal ? quantity * 3 : quantity)
     }, 0)
@@ -318,9 +318,8 @@ export default function TicketPurchaseModal({
                     return (
                       <div
                         key={tier._id}
-                        className={`bg-black/50 border border-red-900/30 rounded-lg p-4 transition-colors ${
-                          isSoldOut ? 'opacity-50' : 'hover:border-red-600/50'
-                        }`}
+                        className={`bg-black/50 border border-red-900/30 rounded-lg p-4 transition-colors ${isSoldOut ? 'opacity-50' : 'hover:border-red-600/50'
+                          }`}
                       >
                         <div className="flex items-center justify-between mb-3">
                           <div>

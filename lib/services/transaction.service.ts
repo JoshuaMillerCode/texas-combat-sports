@@ -787,7 +787,7 @@ export class TransactionService {
       const isPromoDeal =
         tierName?.toLowerCase().includes('promo') ||
         tierName?.toLowerCase().includes('deal') ||
-        price === 11000; // $110 in cents
+        price === 10000; // $100 in cents
 
       if (isPromoDeal) {
         // For promo deal, customer gets 3 GA tickets per promo deal purchased
