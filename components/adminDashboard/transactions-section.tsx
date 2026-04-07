@@ -429,16 +429,11 @@ export default function TransactionsSection({ searchTerm }: { searchTerm: string
                   </div>
                 </section>
 
-                {/* Stripe reference */}
+                {/* Order reference */}
                 <section>
                   <h3 className="text-xs font-semibold uppercase text-gray-500 mb-2">Reference</h3>
-                  <div className="bg-gray-800/60 rounded-lg px-4 py-3 space-y-1.5 text-xs font-mono text-gray-500 break-all">
-                    {viewing.stripeSessionId && (
-                      <p><span className="text-gray-600">Session </span>{viewing.stripeSessionId}</p>
-                    )}
-                    {viewing.stripePaymentIntentId && (
-                      <p><span className="text-gray-600">Payment </span>{viewing.stripePaymentIntentId}</p>
-                    )}
+                  <div className="bg-gray-800/60 rounded-lg px-4 py-3 text-xs font-mono text-gray-500 break-all">
+                    <p><span className="text-gray-600">Order ID </span>{viewing.orderId}</p>
                   </div>
                 </section>
               </div>

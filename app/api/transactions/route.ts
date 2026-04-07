@@ -53,6 +53,7 @@ export async function GET(req: NextRequest) {
 
     const projection = {
       'customerDetails.address': 0,
+      stripeSessionId: 0,
       stripePaymentIntentId: 0,
       serviceAccountTransfer: 0,
     };
