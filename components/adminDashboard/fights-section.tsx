@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Plus, Edit, Trash2, Eye, Loader2, CalendarPlus } from "lucide-react"
-import { useFightsQuery, useCreateFightMutation, useUpdateFightMutation, useDeleteFightMutation, useEventsQuery, useFightersQuery } from "@/hooks/use-queries"
+import { useFightsQuery, useCreateFightMutation, useUpdateFightMutation, usePatchFightMutation, useDeleteFightMutation, useEventsQuery, useFightersQuery } from "@/hooks/use-queries"
 import { LoadingCard, ErrorCard } from "./loading-card"
 
 interface FightsSectionProps {
@@ -21,6 +21,7 @@ export default function FightsSection({ searchTerm }: FightsSectionProps) {
   const { data: events = [] } = useEventsQuery()
   const { mutate: createFight, isPending: isCreating } = useCreateFightMutation()
   const { mutate: updateFight, isPending: isUpdating } = useUpdateFightMutation()
+  const { mutate: patchFight } = usePatchFightMutation()
   const { mutate: deleteFight } = useDeleteFightMutation()
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
@@ -166,7 +167,7 @@ export default function FightsSection({ searchTerm }: FightsSectionProps) {
                     {assigningEventFightId === fight._id ? (
                       <Select
                         onValueChange={(eventId) => {
-                          updateFight({ id: fight._id, event: eventId, fighter1: fight.fighter1?._id, fighter2: fight.fighter2?._id, title: fight.title, rounds: fight.rounds, isMainEvent: fight.isMainEvent } as any)
+                          patchFight({ id: fight._id, event: eventId })
                           setAssigningEventFightId(null)
                         }}
                         onOpenChange={(open) => { if (!open) setAssigningEventFightId(null) }}

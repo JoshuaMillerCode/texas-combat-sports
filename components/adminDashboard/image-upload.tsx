@@ -39,6 +39,9 @@ export function ImageUpload({ label, value, onChange, folder = 'uploads', requir
     setError(null)
     setIsUploading(true)
 
+    const signController = new AbortController()
+    const signTimeout = setTimeout(() => signController.abort(), 10_000)
+
     try {
       // Get upload signature from our API
       const signRes = await fetch('/api/cloudinary/sign', {
@@ -48,13 +51,18 @@ export function ImageUpload({ label, value, onChange, folder = 'uploads', requir
           Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify({ folder }),
+        signal: signController.signal,
       })
+      clearTimeout(signTimeout)
 
       if (!signRes.ok) throw new Error('Failed to get upload signature')
 
       const { signature, timestamp, apiKey, cloudName, folder: signedFolder } = await signRes.json()
 
       // Upload directly to Cloudinary
+      const uploadController = new AbortController()
+      const uploadTimeout = setTimeout(() => uploadController.abort(), 30_000)
+
       const formData = new FormData()
       formData.append('file', file)
       formData.append('api_key', apiKey)
@@ -64,15 +72,19 @@ export function ImageUpload({ label, value, onChange, folder = 'uploads', requir
 
       const uploadRes = await fetch(
         `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-        { method: 'POST', body: formData }
+        { method: 'POST', body: formData, signal: uploadController.signal }
       )
+      clearTimeout(uploadTimeout)
 
       if (!uploadRes.ok) throw new Error('Upload failed')
 
       const data = await uploadRes.json()
+      if (!data.secure_url) throw new Error('No URL in upload response')
       onChange(data.secure_url)
-    } catch (err) {
-      setError('Upload failed. Please try again or paste a URL below.')
+    } catch (err: any) {
+      clearTimeout(signTimeout)
+      const msg = err?.name === 'AbortError' ? 'Upload timed out. Please try again.' : 'Upload failed. Please try again or paste a URL below.'
+      setError(msg)
       console.error(err)
     } finally {
       setIsUploading(false)

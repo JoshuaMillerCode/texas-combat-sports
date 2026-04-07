@@ -227,8 +227,17 @@ export default function FightersSection({ searchTerm }: FightersSectionProps) {
               </Button>
               <Button
                 size="sm"
-                disabled={!assignFightId || isAssigning}
-                className="bg-red-600 hover:bg-red-700"
+                disabled={!assignFightId || isAssigning || (() => {
+                  const fight = (fights as any[]).find((f: any) => f._id === assignFightId)
+                  const otherSlot = assignSlot === 'fighter1' ? 'fighter2' : 'fighter1'
+                  return fight?.[otherSlot]?._id === assignFighter?._id
+                })()}
+                title={(() => {
+                  const fight = (fights as any[]).find((f: any) => f._id === assignFightId)
+                  const otherSlot = assignSlot === 'fighter1' ? 'fighter2' : 'fighter1'
+                  return fight?.[otherSlot]?._id === assignFighter?._id ? 'Fighter is already in the other slot' : undefined
+                })()}
+                className="bg-red-600 hover:bg-red-700 disabled:opacity-40"
                 onClick={() => {
                   const fight = (fights as any[]).find((f: any) => f._id === assignFightId)
                   if (!fight) return

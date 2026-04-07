@@ -20,8 +20,8 @@ export async function GET(req: NextRequest) {
     const endDate   = searchParams.get('endDate');
     const minAmount = searchParams.get('minAmount'); // in dollars
     const maxAmount = searchParams.get('maxAmount'); // in dollars
-    const page      = Math.max(1, parseInt(searchParams.get('page') || '1'));
-    const limit     = Math.min(100, parseInt(searchParams.get('limit') || '25'));
+    const page      = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
+    const limit     = Math.min(100, parseInt(searchParams.get('limit') || '25', 10));
 
     const query: any = {};
 

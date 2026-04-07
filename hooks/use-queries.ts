@@ -521,6 +521,21 @@ export function useCreateFightMutation() {
   });
 }
 
+export function usePatchFightMutation() {
+  const { accessToken, isAuthenticated } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, ...data }: { id: string; [key: string]: any }) => {
+      if (!isAuthenticated || !accessToken) throw new Error('Admin authentication required');
+      return apiRequest(`/api/fights/${id}`, { method: 'PATCH', body: JSON.stringify(data) }, accessToken);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['fights'] });
+    },
+  });
+}
+
 export function useUpdateFightMutation() {
   const { accessToken, isAuthenticated } = useAuth();
   const queryClient = useQueryClient();
@@ -1070,7 +1085,7 @@ export function useStatsQuery(days?: number | 'all') {
   const { accessToken } = useAuth();
 
   return useQuery({
-    queryKey: ['stats', days ?? 30],
+    queryKey: ['stats', days ?? 'default'],
     queryFn: () => {
       const params = new URLSearchParams();
       if (days !== undefined) params.set('days', String(days));
@@ -1078,6 +1093,6 @@ export function useStatsQuery(days?: number | 'all') {
       return apiRequest(url, {}, accessToken);
     },
     enabled: !!accessToken,
-    staleTime: 60 * 1000, // 1 minute
+    staleTime: 60 * 1000,
   });
 }
