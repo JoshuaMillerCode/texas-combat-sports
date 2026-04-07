@@ -31,7 +31,7 @@ async function getRevenueByEvent(startDate?: Date, endDate?: Date) {
         as: 'eventInfo',
       },
     },
-    { $unwind: { path: '$eventInfo', preserveNullAndEmpty: false } },
+    { $unwind: { path: '$eventInfo', preserveNullAndEmptyArrays: false } },
     {
       $project: {
         eventTitle: '$eventInfo.title',

@@ -158,7 +158,7 @@ export default function AnalyticsPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
             { label: 'Total Revenue', value: isLoading ? '—' : fmt(overview.totalRevenue ?? 0), sub: dateLabel, icon: DollarSign, color: 'text-green-400', bg: 'bg-green-400/10' },
-            { label: 'Ticket Revenue', value: isLoading ? '—' : fmt(tickets.totalRevenue ?? 0), sub: dateLabel, icon: Ticket, color: 'text-blue-400', bg: 'bg-blue-400/10' },
+            { label: 'Avg Order Value', value: isLoading ? '—' : fmt(overview.avgTransactionValue ?? 0), sub: dateLabel, icon: Ticket, color: 'text-blue-400', bg: 'bg-blue-400/10' },
             { label: 'Tickets Sold',   value: isLoading ? '—' : (overview.totalTickets ?? 0).toLocaleString(), sub: dateLabel, icon: Ticket, color: 'text-purple-400', bg: 'bg-purple-400/10' },
             { label: 'Total Orders',   value: isLoading ? '—' : (overview.totalTransactions ?? 0).toLocaleString(), sub: dateLabel, icon: ShoppingBag, color: 'text-red-400', bg: 'bg-red-400/10' },
           ].map((kpi) => (
@@ -176,12 +176,7 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Secondary stats */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          <div className="bg-gray-800/60 border border-gray-700 rounded-lg p-4">
-            <p className="text-xs text-gray-500 mb-1">Avg Order Value</p>
-            <p className="text-xl font-bold text-white">{isLoading ? '—' : fmt(overview.avgTransactionValue ?? 0)}</p>
-            <p className="text-xs text-gray-600 mt-0.5">{dateLabel}</p>
-          </div>
+        <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
           <div className="bg-gray-800/60 border border-gray-700 rounded-lg p-4">
             <p className="text-xs text-gray-500 mb-1">Taxes Collected</p>
             <p className="text-xl font-bold text-white">{isLoading ? '—' : fmt(overview.totalTaxes ?? 0)}</p>

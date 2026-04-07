@@ -1028,6 +1028,42 @@ export function useDeleteFlashSaleMutation() {
 }
 
 
+// ==================== TRANSACTIONS ====================
+
+export interface TransactionFilters {
+  status?: string;
+  eventId?: string;
+  search?: string;
+  startDate?: string;
+  endDate?: string;
+  minAmount?: string;
+  maxAmount?: string;
+  page?: number;
+}
+
+export function useTransactionsQuery(filters: TransactionFilters = {}) {
+  const { accessToken } = useAuth();
+
+  return useQuery({
+    queryKey: ['transactions', filters],
+    queryFn: () => {
+      const params = new URLSearchParams();
+      if (filters.status && filters.status !== 'all') params.set('status', filters.status);
+      if (filters.eventId && filters.eventId !== 'all') params.set('eventId', filters.eventId);
+      if (filters.search) params.set('search', filters.search);
+      if (filters.startDate) params.set('startDate', filters.startDate);
+      if (filters.endDate) params.set('endDate', filters.endDate);
+      if (filters.minAmount) params.set('minAmount', filters.minAmount);
+      if (filters.maxAmount) params.set('maxAmount', filters.maxAmount);
+      if (filters.page && filters.page > 1) params.set('page', String(filters.page));
+      const url = `/api/transactions${params.toString() ? '?' + params.toString() : ''}`;
+      return apiRequest(url, {}, accessToken);
+    },
+    enabled: !!accessToken,
+    staleTime: 30 * 1000,
+  });
+}
+
 // ==================== STATS ====================
 
 export function useStatsQuery(days?: number | 'all') {
