@@ -16,14 +16,21 @@ function fmt(cents: number) {
 
 function QRCodeImage({ ticketNumber }: { ticketNumber: string }) {
   const [src, setSrc] = useState<string>("")
+  const [error, setError] = useState(false)
 
   useEffect(() => {
     import("qrcode").then((QRCode) => {
       QRCode.toDataURL(ticketNumber, { width: 160, margin: 1, color: { dark: "#000000", light: "#ffffff" } })
         .then(setSrc)
-        .catch(console.error)
-    })
+        .catch(() => setError(true))
+    }).catch(() => setError(true))
   }, [ticketNumber])
+
+  if (error) return (
+    <div className="w-[160px] h-[160px] bg-gray-800 rounded flex items-center justify-center">
+      <p className="text-gray-500 text-xs text-center px-2">QR unavailable — use ticket number below</p>
+    </div>
+  )
 
   if (!src) return <div className="w-[160px] h-[160px] bg-gray-800 rounded animate-pulse" />
 

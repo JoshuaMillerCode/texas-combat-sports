@@ -7,7 +7,7 @@ export async function GET(req: NextRequest) {
   try {
     const rawToken = req.nextUrl.searchParams.get('token');
 
-    if (!rawToken || rawToken.length !== 64) {
+    if (!rawToken || !/^[a-f0-9]{64}$/.test(rawToken)) {
       return NextResponse.redirect(new URL('/my-tickets?error=invalid-link', req.url));
     }
 

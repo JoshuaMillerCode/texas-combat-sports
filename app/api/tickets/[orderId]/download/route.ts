@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { TicketGenerator } from '@/lib/utils/ticket-generator';
 import { TransactionService } from '@/lib/services/transaction.service';
 import { EventService } from '@/lib/services/event.service';
-import { OrderIDGenerator } from '@/lib/utils/order-id-generator';
 import { PDFDocument } from 'pdf-lib';
+import { authenticateCustomer } from '@/lib/middleware/customerAuth';
 
 export async function GET(
   request: NextRequest,
@@ -16,21 +16,22 @@ export async function GET(
     //   return NextResponse.json({ error: 'Invalid order ID' }, { status: 400 });
     // }
 
-    // Find the transaction by ticket ID (using Stripe session ID or payment intent ID)
-    const transaction = await TransactionService.findTransactionByOrderId(
-      orderId
-    );
+    // Require customer session
+    const customer = authenticateCustomer(request);
+    if (!customer) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    }
 
-    console.log('Transaction:', transaction);
+    const transaction = await TransactionService.findTransactionByOrderId(orderId);
 
     if (!transaction) {
       return NextResponse.json({ error: 'Ticket not found' }, { status: 404 });
     }
 
-    // Verify the user owns this ticket (using username as email for now)
-    // if (transaction.customerDetails.email !== user.username) {
-    //   return NextResponse.json({ error: 'Access denied' }, { status: 403 });
-    // }
+    // Ownership check — customer can only download their own tickets
+    if (transaction.customerDetails.email !== customer.email) {
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+    }
 
     // Get the associated event
     const event = await EventService.getEventById(

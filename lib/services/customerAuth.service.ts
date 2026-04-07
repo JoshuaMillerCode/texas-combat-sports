@@ -4,7 +4,7 @@ import dbConnect from '@/lib/dbConnect';
 import { CustomerMagicToken, Transaction } from '@/lib/models';
 import { CustomerEmailService } from './customerEmail.service';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-key';
+const CUSTOMER_JWT_SECRET = process.env.CUSTOMER_JWT_SECRET || 'your-customer-secret-key';
 const TOKEN_EXPIRY_MINUTES = 15;
 const RATE_LIMIT_MAX = 3;
 const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour rolling window
@@ -35,6 +35,12 @@ export class CustomerAuthService {
       'customerDetails.email': normalizedEmail,
       status: 'confirmed',
     });
+
+    // Invalidate any previous unused tokens for this email
+    await CustomerMagicToken.updateMany(
+      { email: normalizedEmail, isUsed: false, expiresAt: { $gt: new Date() } },
+      { isUsed: true }
+    );
 
     // Generate and store token regardless — prevents timing-based enumeration
     const rawToken = crypto.randomBytes(32).toString('hex');
@@ -78,8 +84,8 @@ export class CustomerAuthService {
   static buildSessionJWT(email: string): string {
     return jwt.sign(
       { email, type: 'customer' },
-      JWT_SECRET,
-      { expiresIn: '7d' }
+      CUSTOMER_JWT_SECRET,
+      { expiresIn: '24h' }
     );
   }
 }
