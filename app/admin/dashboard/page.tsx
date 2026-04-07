@@ -15,7 +15,8 @@ import {
   QrCode,
   Zap,
   Play,
-  Sparkles
+  Sparkles,
+  Receipt
 } from "lucide-react"
 import { useAuth } from "@/contexts/auth-context"
 import EventsSection from "@/components/adminDashboard/events-section"
@@ -26,10 +27,12 @@ import TicketTiersSection from "@/components/adminDashboard/ticket-tiers-section
 import FlashSalesSection from "@/components/adminDashboard/flash-sales-section"
 import VideosSection from "@/components/adminDashboard/videos-section"
 import DollsSection from "@/components/adminDashboard/dolls-section"
+import TransactionsSection from "@/components/adminDashboard/transactions-section"
+import StatsBar from "@/components/adminDashboard/stats-bar"
 
 
 export default function AdminDashboardPage() {
-  const [activeTab, setActiveTab] = useState("events")
+  const [activeTab, setActiveTab] = useState("orders")
   const [searchTerm, setSearchTerm] = useState("")
   const { user, logout, isAuthenticated, isLoading: authLoading } = useAuth()
 
@@ -119,6 +122,9 @@ export default function AdminDashboardPage() {
 
       {/* Main Content */}
       <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
+        {/* Stats Bar */}
+        <StatsBar />
+
         {/* Search Bar */}
         <div className="mb-6 sm:mb-8">
           <div className="relative max-w-md">
@@ -135,7 +141,11 @@ export default function AdminDashboardPage() {
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
           {/* Desktop tabs - 2x4 grid */}
-          <TabsList className="hidden md:grid md:grid-cols-7 bg-gray-800 border-gray-700 h-auto">
+          <TabsList className="hidden md:grid md:grid-cols-8 bg-gray-800 border-gray-700 h-auto">
+            <TabsTrigger value="orders" className="flex flex-col items-center gap-1 sm:flex-row sm:gap-2 py-3 data-[state=active]:bg-red-600 data-[state=active]:text-white text-xs sm:text-sm">
+              <Receipt className="h-4 w-4" />
+              Orders
+            </TabsTrigger>
             <TabsTrigger value="events" className="flex flex-col items-center gap-1 sm:flex-row sm:gap-2 py-3 data-[state=active]:bg-red-600 data-[state=active]:text-white text-xs sm:text-sm">
               <Calendar className="h-4 w-4" />
               Events
@@ -169,6 +179,10 @@ export default function AdminDashboardPage() {
           {/* Mobile/Tablet tabs - scrollable horizontal */}
           <div className="md:hidden overflow-x-auto pb-2">
             <TabsList className="inline-flex min-w-max bg-gray-800 border-gray-700 h-auto">
+              <TabsTrigger value="orders" className="flex items-center gap-1 px-3 py-2 data-[state=active]:bg-red-600 data-[state=active]:text-white text-xs whitespace-nowrap">
+                <Receipt className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                Orders
+              </TabsTrigger>
               <TabsTrigger value="events" className="flex items-center gap-1 px-3 py-2 data-[state=active]:bg-red-600 data-[state=active]:text-white text-xs whitespace-nowrap">
                 <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 Events
@@ -238,6 +252,11 @@ export default function AdminDashboardPage() {
           {/* Dolls Tab */}
           <TabsContent value="dolls">
             <DollsSection searchTerm={searchTerm} />
+          </TabsContent>
+
+          {/* Orders Tab */}
+          <TabsContent value="orders">
+            <TransactionsSection searchTerm={searchTerm} />
           </TabsContent>
         </Tabs>
       </div>

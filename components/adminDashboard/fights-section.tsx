@@ -2,15 +2,14 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Plus, Edit, Trash2, Eye, Loader2 } from "lucide-react"
-import { useFightsQuery, useCreateFightMutation, useUpdateFightMutation, useDeleteFightMutation, useEventsQuery, useFightersQuery } from "@/hooks/use-queries"
+import { Plus, Edit, Trash2, Eye, Loader2, CalendarPlus } from "lucide-react"
+import { useFightsQuery, useCreateFightMutation, useUpdateFightMutation, usePatchFightMutation, useDeleteFightMutation, useEventsQuery, useFightersQuery } from "@/hooks/use-queries"
 import { LoadingCard, ErrorCard } from "./loading-card"
 
 interface FightsSectionProps {
@@ -19,23 +18,30 @@ interface FightsSectionProps {
 
 export default function FightsSection({ searchTerm }: FightsSectionProps) {
   const { data: fights = [], isLoading, error } = useFightsQuery()
+  const { data: events = [] } = useEventsQuery()
   const { mutate: createFight, isPending: isCreating } = useCreateFightMutation()
   const { mutate: updateFight, isPending: isUpdating } = useUpdateFightMutation()
-  const { mutate: deleteFight, isPending: isDeleting } = useDeleteFightMutation()
+  const { mutate: patchFight } = usePatchFightMutation()
+  const { mutate: deleteFight } = useDeleteFightMutation()
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
   const [selectedFight, setSelectedFight] = useState<any>(null)
+  const [eventFilter, setEventFilter] = useState<string>('all')
+  const [assigningEventFightId, setAssigningEventFightId] = useState<string | null>(null)
 
   if (isLoading) return <LoadingCard />
   if (error) return <ErrorCard />
 
-  const filteredFights = fights.filter((fight: any) => 
-    fight.event?.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    fight.fighter1?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    fight.fighter2?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    fight.title?.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const filteredFights = fights.filter((fight: any) => {
+    const matchesSearch =
+      fight.event?.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      fight.fighter1?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      fight.fighter2?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      fight.title?.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesEvent = eventFilter === 'all' ? true : fight.event?._id === eventFilter
+    return matchesSearch && matchesEvent
+  })
 
   return (
     <div className="space-y-6">
@@ -111,81 +117,135 @@ export default function FightsSection({ searchTerm }: FightsSectionProps) {
         </Dialog>
       </div>
 
-      {/* Fights Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredFights.map((fight: any) => (
-          <Card key={fight._id} className="bg-gray-800 border-gray-700 hover:bg-gray-750 transition-colors">
-            <CardContent className="p-6">
-              <div className="space-y-4">
-                <div className="text-center">
-                  <h3 className="text-white font-semibold">{fight.title || 'Fight Card'}</h3>
-                  {fight.isMainEvent && (
-                    <Badge className="bg-red-600 text-white text-xs mt-1">MAIN EVENT</Badge>
-                  )}
-                </div>
-                
-                <div className="text-center">
-                  <div className="text-white font-medium">{fight.fighter1?.name || 'TBD'}</div>
-                  <div className="text-gray-400 text-sm">vs</div>
-                  <div className="text-white font-medium">{fight.fighter2?.name || 'TBD'}</div>
-                </div>
-                
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Event:</span>
-                    <span className="text-white">{fight.event?.title || 'N/A'}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Rounds:</span>
-                    <span className="text-white">{fight.rounds || 'N/A'}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Weight Class:</span>
-                    <span className="text-white">{fight.weightClass || 'N/A'}</span>
-                  </div>
-                </div>
-                
-                <div className="flex gap-2 mt-4">
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
-                    className="border-gray-600 text-gray-300 hover:bg-gray-700"
-                    onClick={() => {
-                      setSelectedFight(fight)
-                      setIsViewDialogOpen(true)
-                    }}
-                  >
-                    <Eye className="h-4 w-4 mr-1" />
-                    View
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
-                    className="border-gray-600 text-gray-300 hover:bg-gray-700"
-                    onClick={() => {
-                      setSelectedFight(fight)
-                      setIsEditDialogOpen(true)
-                    }}
-                  >
-                    <Edit className="h-4 w-4 mr-1" />
-                    Edit
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
-                    className="border-red-600 text-red-400 hover:bg-red-900/20"
-                    onClick={() => {
-                      deleteFight(fight._id)
-                    }}
-                  >
-                    <Trash2 className="h-4 w-4 mr-1" />
-                    Delete
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+      {/* Event Filter */}
+      <div className="flex items-center gap-3 flex-wrap">
+        <Select value={eventFilter} onValueChange={setEventFilter}>
+          <SelectTrigger className="bg-gray-800 border-gray-700 text-gray-300 h-8 w-56 text-xs">
+            <SelectValue placeholder="Filter by event" />
+          </SelectTrigger>
+          <SelectContent className="bg-gray-800 border-gray-700">
+            <SelectItem value="all" className="text-white text-xs">All Events</SelectItem>
+            {(events as any[])
+              .sort((a, b) => new Date(b.date ?? 0).getTime() - new Date(a.date ?? 0).getTime())
+              .map((event: any) => (
+                <SelectItem key={event._id} value={event._id} className="text-white text-xs">
+                  {event.title}
+                </SelectItem>
+              ))}
+          </SelectContent>
+        </Select>
+        <span className="text-gray-500 text-xs ml-auto">
+          {filteredFights.length} fight{filteredFights.length !== 1 ? 's' : ''}
+        </span>
+      </div>
+
+      {/* Fights Table */}
+      <div className="overflow-x-auto rounded-md border border-gray-700">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-gray-700 bg-gray-800/50">
+              <th className="text-left py-3 px-4 text-xs font-medium uppercase text-gray-400">Matchup</th>
+              <th className="text-left py-3 px-4 text-xs font-medium uppercase text-gray-400">Event</th>
+              <th className="text-left py-3 px-4 text-xs font-medium uppercase text-gray-400">Weight Class</th>
+              <th className="text-left py-3 px-4 text-xs font-medium uppercase text-gray-400">Rounds</th>
+              <th className="text-left py-3 px-4 text-xs font-medium uppercase text-gray-400">Type</th>
+              <th className="text-right py-3 px-4 text-xs font-medium uppercase text-gray-400">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredFights.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="py-8 text-center text-gray-500">No fights found</td>
+              </tr>
+            ) : (
+              filteredFights.map((fight: any) => (
+                <tr key={fight._id} className="border-b border-gray-800 last:border-0 hover:bg-gray-800/40 transition-colors">
+                  <td className="py-3 px-4 text-white font-medium">
+                    {fight.fighter1?.name || 'TBD'} <span className="text-gray-500 font-normal">vs</span> {fight.fighter2?.name || 'TBD'}
+                  </td>
+                  <td className="py-3 px-4">
+                    {assigningEventFightId === fight._id ? (
+                      <Select
+                        onValueChange={(eventId) => {
+                          patchFight({ id: fight._id, event: eventId })
+                          setAssigningEventFightId(null)
+                        }}
+                        onOpenChange={(open) => { if (!open) setAssigningEventFightId(null) }}
+                        defaultOpen
+                      >
+                        <SelectTrigger className="bg-gray-700 border-gray-600 text-white h-7 text-xs w-44">
+                          <SelectValue placeholder="Pick event…" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-gray-800 border-gray-700">
+                          {(events as any[])
+                            .sort((a, b) => new Date(b.date ?? 0).getTime() - new Date(a.date ?? 0).getTime())
+                            .map((e: any) => (
+                              <SelectItem key={e._id} value={e._id} className="text-white text-xs">{e.title}</SelectItem>
+                            ))}
+                        </SelectContent>
+                      </Select>
+                    ) : fight.event?.title ? (
+                      <span className="text-gray-300">{fight.event.title}</span>
+                    ) : (
+                      <button
+                        onClick={() => setAssigningEventFightId(fight._id)}
+                        className="flex items-center gap-1 text-xs text-gray-500 hover:text-red-400 transition-colors"
+                        title="Assign to event"
+                      >
+                        <CalendarPlus className="h-3.5 w-3.5" />
+                        Assign event
+                      </button>
+                    )}
+                  </td>
+                  <td className="py-3 px-4 text-gray-300">{fight.weightClass || '—'}</td>
+                  <td className="py-3 px-4 text-gray-300">{fight.rounds || '—'}</td>
+                  <td className="py-3 px-4">
+                    {fight.isMainEvent ? (
+                      <Badge className="bg-red-700/40 text-red-400 border-0 text-xs">Main Event</Badge>
+                    ) : (
+                      <span className="text-gray-600 text-xs">—</span>
+                    )}
+                  </td>
+                  <td className="py-3 px-4">
+                    <div className="flex gap-1 justify-end">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 w-7 p-0 text-gray-400 hover:text-white hover:bg-gray-700"
+                        title="View"
+                        onClick={() => { setSelectedFight(fight); setIsViewDialogOpen(true) }}
+                      >
+                        <Eye className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 w-7 p-0 text-gray-400 hover:text-white hover:bg-gray-700"
+                        title="Edit"
+                        onClick={() => { setSelectedFight(fight); setIsEditDialogOpen(true) }}
+                      >
+                        <Edit className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 w-7 p-0 text-gray-400 hover:text-red-400 hover:bg-red-900/20"
+                        title="Delete"
+                        onClick={() => {
+                          if (window.confirm(`Delete this fight? This cannot be undone.`)) {
+                            deleteFight(fight._id)
+                          }
+                        }}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   )
@@ -345,12 +405,12 @@ function EditFightForm({ fight, onSubmit, isLoading, onClose }: { fight: any, on
   const { data: events = [] } = useEventsQuery()
   const { data: fighters = [] } = useFightersQuery()
   const [formData, setFormData] = useState({
-    event: fight.event?._id,
-    fighter1: fight.fighter1?._id,
-    fighter2: fight.fighter2?._id,
-    title: fight.title,
-    rounds: fight.rounds,
-    isMainEvent: fight.isMainEvent
+    event: fight.event?._id ?? '',
+    fighter1: fight.fighter1?._id ?? '',
+    fighter2: fight.fighter2?._id ?? '',
+    title: fight.title ?? '',
+    rounds: fight.rounds?.toString() ?? '3',
+    isMainEvent: fight.isMainEvent ?? false,
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -491,35 +551,65 @@ function EditFightForm({ fight, onSubmit, isLoading, onClose }: { fight: any, on
   )
 }
 
+function FighterCard({ fighter, label }: { fighter: any; label: string }) {
+  return (
+    <div className="flex flex-col items-center gap-2 flex-1">
+      {fighter?.image ? (
+        <img
+          src={fighter.image}
+          alt={fighter.name}
+          className="w-24 h-24 rounded-full object-cover border-2 border-gray-700"
+        />
+      ) : (
+        <div className="w-24 h-24 rounded-full bg-gray-700 flex items-center justify-center border-2 border-gray-600">
+          <span className="text-3xl font-bold text-gray-500">{fighter?.name?.[0] ?? '?'}</span>
+        </div>
+      )}
+      <div className="text-center">
+        <p className="text-white font-semibold leading-tight">{fighter?.name || 'TBD'}</p>
+        {fighter?.nickname && <p className="text-gray-400 text-xs italic">"{fighter.nickname}"</p>}
+        {fighter?.record && <p className="text-gray-500 text-xs font-mono mt-0.5">{fighter.record}</p>}
+      </div>
+    </div>
+  )
+}
+
 function ViewFightModal({ fight }: { fight: any }) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
+      {/* Title + badge */}
       <div className="text-center">
-        <h3 className="text-white font-semibold">{fight.title || 'Fight Card'}</h3>
         {fight.isMainEvent && (
-          <Badge className="bg-red-600 text-white text-xs mt-1">MAIN EVENT</Badge>
+          <Badge className="bg-red-600 text-white text-xs mb-1">MAIN EVENT</Badge>
         )}
+        <p className="text-gray-400 text-sm">{fight.event?.title || 'No event'}</p>
       </div>
-      
-      <div className="text-center">
-        <div className="text-white font-medium">{fight.fighter1?.name || 'TBD'}</div>
-        <div className="text-gray-400 text-sm">vs</div>
-        <div className="text-white font-medium">{fight.fighter2?.name || 'TBD'}</div>
+
+      {/* Fighter images face-off */}
+      <div className="flex items-center gap-3">
+        <FighterCard fighter={fight.fighter1} label="Fighter 1" />
+        <div className="flex flex-col items-center gap-1 flex-shrink-0">
+          <span className="text-2xl font-bold text-gray-600">VS</span>
+        </div>
+        <FighterCard fighter={fight.fighter2} label="Fighter 2" />
       </div>
-      
-      <div className="space-y-2 text-sm">
+
+      {/* Fight details */}
+      <div className="bg-gray-800/60 rounded-lg px-4 py-3 space-y-2 text-sm">
         <div className="flex justify-between">
-          <span className="text-gray-400">Event:</span>
-          <span className="text-white">{fight.event?.title || 'N/A'}</span>
+          <span className="text-gray-400">Rounds</span>
+          <span className="text-white">{fight.rounds || '—'}</span>
         </div>
         <div className="flex justify-between">
-          <span className="text-gray-400">Rounds:</span>
-          <span className="text-white">{fight.rounds || 'N/A'}</span>
+          <span className="text-gray-400">Weight Class</span>
+          <span className="text-white">{fight.weightClass || '—'}</span>
         </div>
-        <div className="flex justify-between">
-          <span className="text-gray-400">Weight Class:</span>
-          <span className="text-white">{fight.weightClass || 'N/A'}</span>
-        </div>
+        {fight.title && (
+          <div className="flex justify-between">
+            <span className="text-gray-400">Title</span>
+            <span className="text-white">{fight.title}</span>
+          </div>
+        )}
       </div>
     </div>
   )

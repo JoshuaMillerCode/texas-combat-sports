@@ -1,5 +1,5 @@
 import dbConnect from '@/lib/dbConnect';
-import { TicketTier, Transaction, Event } from '@/lib/models';
+import { TicketTier, Transaction } from '@/lib/models';
 import { ITicketTier } from '@/lib/models/TicketTier';
 import mongoose from 'mongoose';
 
@@ -10,16 +10,7 @@ export class TicketTierService {
   ): Promise<ITicketTier> {
     await dbConnect();
     const tier = new TicketTier(tierData);
-    const savedTier = await tier.save();
-
-    // Add tier to event
-    if (tierData.event) {
-      await Event.findByIdAndUpdate(tierData.event, {
-        $addToSet: { ticketTiers: savedTier._id },
-      });
-    }
-
-    return savedTier;
+    return await tier.save();
   }
 
   static async getTicketTierById(id: string): Promise<ITicketTier | null> {
@@ -50,12 +41,6 @@ export class TicketTierService {
       }
     });
 
-    // Don't allow changing the event field via update (it's a core relationship)
-    // If you need to move a tier to a different event, delete and recreate
-    if ('event' in sanitizedData) {
-      delete sanitizedData.event;
-    }
-
     return await TicketTier.findByIdAndUpdate(id, sanitizedData, {
       new: true,
     }).populate('event');
@@ -66,9 +51,6 @@ export class TicketTierService {
 
     const tier = await TicketTier.findById(id);
     if (!tier) return false;
-
-    // Remove tier from event
-    await Event.findByIdAndUpdate(tier.event, { $pull: { ticketTiers: id } });
 
     const result = await TicketTier.findByIdAndDelete(id);
     return result !== null;

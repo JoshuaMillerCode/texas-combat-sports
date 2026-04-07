@@ -2,16 +2,18 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Plus, Edit, Trash2, Eye, Loader2 } from "lucide-react"
-import { useFightersQuery, useCreateFighterMutation, useUpdateFighterMutation, useDeleteFighterMutation } from "@/hooks/use-queries"
+import { Plus, Edit, Trash2, Eye, Loader2, UserPlus } from "lucide-react"
+import { useFightersQuery, useEventsQuery, useFightsQuery, useUpdateFightMutation, useCreateFighterMutation, useUpdateFighterMutation, useDeleteFighterMutation } from "@/hooks/use-queries"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { LoadingCard, ErrorCard } from "./loading-card"
+import { ImageUpload } from "./image-upload"
+import Image from "next/image"
 
 interface FightersSectionProps {
   searchTerm: string
@@ -19,22 +21,38 @@ interface FightersSectionProps {
 
 export default function FightersSection({ searchTerm }: FightersSectionProps) {
   const { data: fighters = [], isLoading, error } = useFightersQuery()
+  const { data: events = [] } = useEventsQuery()
+  const { data: fights = [] } = useFightsQuery()
   const { mutate: createFighter, isPending: isCreating } = useCreateFighterMutation()
   const { mutate: updateFighter, isPending: isUpdating } = useUpdateFighterMutation()
-  const { mutate: deleteFighter, isPending: isDeleting } = useDeleteFighterMutation()
+  const { mutate: updateFight, isPending: isAssigning } = useUpdateFightMutation()
+  const { mutate: deleteFighter } = useDeleteFighterMutation()
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
   const [selectedFighter, setSelectedFighter] = useState<any>(null)
+  const [eventFilter, setEventFilter] = useState<string>('all')
+  const [assignFighter, setAssignFighter] = useState<any>(null)
+  const [assignFightId, setAssignFightId] = useState('')
+  const [assignSlot, setAssignSlot] = useState<'fighter1' | 'fighter2'>('fighter1')
 
   if (isLoading) return <LoadingCard />
   if (error) return <ErrorCard />
 
-  const filteredFighters = fighters.filter((fighter: any) => 
-    fighter.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    fighter.nickname.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    fighter.hometown.toLowerCase().includes(searchTerm.toLowerCase())
+  // Build set of fighter IDs appearing in the selected event's fights
+  const selectedEvent = events.find((e: any) => e._id === eventFilter)
+  const fighterIdsInEvent = eventFilter === 'all' ? null : new Set(
+    (selectedEvent?.fights || []).flatMap((f: any) => [f.fighter1?._id, f.fighter2?._id].filter(Boolean))
   )
+
+  const filteredFighters = fighters.filter((fighter: any) => {
+    const matchesSearch =
+      fighter.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      fighter.nickname?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      fighter.hometown?.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesEvent = fighterIdsInEvent === null ? true : fighterIdsInEvent.has(fighter._id)
+    return matchesSearch && matchesEvent
+  })
 
   return (
     <div className="space-y-6">
@@ -110,71 +128,225 @@ export default function FightersSection({ searchTerm }: FightersSectionProps) {
         </Dialog>
       </div>
 
-      {/* Fighters Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredFighters.map((fighter: any) => (
-          <Card key={fighter._id} className="bg-gray-800 border-gray-700 hover:bg-gray-750 transition-colors">
-            <CardHeader>
-              <CardTitle className="text-white">{fighter.name}</CardTitle>
-              <CardDescription className="text-gray-400">
-                {fighter.nickname && `"${fighter.nickname}"`}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-300">Weight Class:</span>
-                  <span className="text-white">{fighter.weightClass}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-300">Record:</span>
-                  <span className="text-white">{fighter.record}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-300">Hometown:</span>
-                  <span className="text-white">{fighter.hometown}</span>
-                </div>
+      {/* Event Filter */}
+      <div className="flex items-center gap-3 flex-wrap">
+        <Select value={eventFilter} onValueChange={setEventFilter}>
+          <SelectTrigger className="bg-gray-800 border-gray-700 text-gray-300 h-8 w-56 text-xs">
+            <SelectValue placeholder="Filter by event" />
+          </SelectTrigger>
+          <SelectContent className="bg-gray-800 border-gray-700">
+            <SelectItem value="all" className="text-white text-xs">All Fighters</SelectItem>
+            {(events as any[])
+              .sort((a, b) => new Date(b.date ?? 0).getTime() - new Date(a.date ?? 0).getTime())
+              .map((event: any) => (
+                <SelectItem key={event._id} value={event._id} className="text-white text-xs">
+                  {event.title}
+                </SelectItem>
+              ))}
+          </SelectContent>
+        </Select>
+        <span className="text-gray-500 text-xs ml-auto">
+          {filteredFighters.length} fighter{filteredFighters.length !== 1 ? 's' : ''}
+        </span>
+      </div>
+
+      {/* Quick-assign to fight dialog */}
+      <Dialog open={!!assignFighter} onOpenChange={(open) => { if (!open) { setAssignFighter(null); setAssignFightId(''); setAssignSlot('fighter1') } }}>
+        <DialogContent className="bg-gray-900 border-gray-800 text-white max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-base">Assign to Fight</DialogTitle>
+            <DialogDescription className="text-gray-400 text-xs">
+              Assign <span className="text-white font-medium">{assignFighter?.name}</span> to a fight slot
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 pt-1">
+            <div className="space-y-1.5">
+              <label className="text-xs text-gray-400 uppercase font-medium">Fight</label>
+              <Select value={assignFightId} onValueChange={setAssignFightId}>
+                <SelectTrigger className="bg-gray-800 border-gray-700 text-white text-sm h-auto min-h-9 py-1.5">
+                  <SelectValue placeholder="Select a fight…">
+                    {assignFightId && (() => {
+                      const f = (fights as any[]).find((x: any) => x._id === assignFightId)
+                      if (!f) return null
+                      const matchup = f.fighter1?.name && f.fighter2?.name
+                        ? `${f.fighter1.name} vs ${f.fighter2.name}`
+                        : f.title || 'Unassigned fight'
+                      return <span className="text-sm">{matchup}</span>
+                    })()}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent className="bg-gray-800 border-gray-700">
+                  {(fights as any[])
+                    .sort((a, b) => (a.event?.title ?? '').localeCompare(b.event?.title ?? ''))
+                    .map((f: any) => {
+                      const matchup = f.fighter1?.name && f.fighter2?.name
+                        ? `${f.fighter1.name} vs ${f.fighter2.name}`
+                        : f.fighter1?.name
+                        ? `${f.fighter1.name} vs TBD`
+                        : f.fighter2?.name
+                        ? `TBD vs ${f.fighter2.name}`
+                        : f.title || 'Unassigned fight'
+                      return (
+                        <SelectItem key={f._id} value={f._id} className="text-white text-xs py-2">
+                          <div>
+                            <div className="font-medium">{matchup}</div>
+                            <div className="text-gray-400 text-[11px]">
+                              {f.event?.title ?? 'No event'}{f.isMainEvent ? ' · Main Event' : ''}
+                            </div>
+                          </div>
+                        </SelectItem>
+                      )
+                    })}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs text-gray-400 uppercase font-medium">Slot</label>
+              <div className="flex rounded-md overflow-hidden border border-gray-700">
+                {(['fighter1', 'fighter2'] as const).map((slot) => {
+                  const fight = (fights as any[]).find((f: any) => f._id === assignFightId)
+                  const current = fight?.[slot]?.name
+                  return (
+                    <button
+                      key={slot}
+                      onClick={() => setAssignSlot(slot)}
+                      className={`flex-1 py-2 text-xs font-medium transition-colors ${assignSlot === slot ? 'bg-red-600 text-white' : 'bg-gray-800 text-gray-400 hover:text-white'}`}
+                    >
+                      {slot === 'fighter1' ? 'Fighter 1' : 'Fighter 2'}
+                      {current && <span className="block text-[10px] opacity-60 truncate px-1">{current}</span>}
+                    </button>
+                  )
+                })}
               </div>
-              <div className="flex gap-2 mt-4">
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  className="border-gray-600 text-gray-300 hover:bg-gray-700"
-                  onClick={() => {
-                    setSelectedFighter(fighter)
-                    setIsViewDialogOpen(true)
-                  }}
-                >
-                  <Eye className="h-4 w-4 mr-1" />
-                  View
-                </Button>
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  className="border-gray-600 text-gray-300 hover:bg-gray-700"
-                  onClick={() => {
-                    setSelectedFighter(fighter)
-                    setIsEditDialogOpen(true)
-                  }}
-                >
-                  <Edit className="h-4 w-4 mr-1" />
-                  Edit
-                </Button>
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  className="border-red-600 text-red-400 hover:bg-red-900/20"
-                  onClick={() => {
-                    deleteFighter(fighter._id)
-                  }}
-                >
-                  <Trash2 className="h-4 w-4 mr-1" />
-                  Delete
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+            </div>
+
+            <div className="flex justify-end gap-2 pt-1">
+              <Button variant="outline" size="sm" onClick={() => setAssignFighter(null)} className="border-gray-700 text-gray-300">
+                Cancel
+              </Button>
+              <Button
+                size="sm"
+                disabled={!assignFightId || isAssigning || (() => {
+                  const fight = (fights as any[]).find((f: any) => f._id === assignFightId)
+                  const otherSlot = assignSlot === 'fighter1' ? 'fighter2' : 'fighter1'
+                  return fight?.[otherSlot]?._id === assignFighter?._id
+                })()}
+                title={(() => {
+                  const fight = (fights as any[]).find((f: any) => f._id === assignFightId)
+                  const otherSlot = assignSlot === 'fighter1' ? 'fighter2' : 'fighter1'
+                  return fight?.[otherSlot]?._id === assignFighter?._id ? 'Fighter is already in the other slot' : undefined
+                })()}
+                className="bg-red-600 hover:bg-red-700 disabled:opacity-40"
+                onClick={() => {
+                  const fight = (fights as any[]).find((f: any) => f._id === assignFightId)
+                  if (!fight) return
+                  updateFight({
+                    id: fight._id,
+                    event: fight.event?._id,
+                    fighter1: assignSlot === 'fighter1' ? assignFighter._id : fight.fighter1?._id,
+                    fighter2: assignSlot === 'fighter2' ? assignFighter._id : fight.fighter2?._id,
+                    title: fight.title,
+                    rounds: fight.rounds,
+                    isMainEvent: fight.isMainEvent,
+                  } as any)
+                  setAssignFighter(null)
+                  setAssignFightId('')
+                  setAssignSlot('fighter1')
+                }}
+              >
+                {isAssigning ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Assign'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Fighters Table */}
+      <div className="overflow-x-auto rounded-md border border-gray-700">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-gray-700 bg-gray-800/50">
+              <th className="text-left py-3 px-4 text-xs font-medium uppercase text-gray-400">Name</th>
+              <th className="text-left py-3 px-4 text-xs font-medium uppercase text-gray-400">Nickname</th>
+              <th className="text-left py-3 px-4 text-xs font-medium uppercase text-gray-400">Record</th>
+              <th className="text-left py-3 px-4 text-xs font-medium uppercase text-gray-400">Weight</th>
+              <th className="text-left py-3 px-4 text-xs font-medium uppercase text-gray-400">Hometown</th>
+              <th className="text-left py-3 px-4 text-xs font-medium uppercase text-gray-400">Featured</th>
+              <th className="text-right py-3 px-4 text-xs font-medium uppercase text-gray-400">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredFighters.length === 0 ? (
+              <tr>
+                <td colSpan={7} className="py-8 text-center text-gray-500">No fighters found</td>
+              </tr>
+            ) : (
+              filteredFighters.map((fighter: any) => (
+                <tr key={fighter._id} className="border-b border-gray-800 last:border-0 hover:bg-gray-800/40 transition-colors">
+                  <td className="py-3 px-4 text-white font-medium">{fighter.name}</td>
+                  <td className="py-3 px-4 text-gray-400 italic">
+                    {fighter.nickname ? `"${fighter.nickname}"` : '—'}
+                  </td>
+                  <td className="py-3 px-4 text-gray-300 font-mono">{fighter.record || '—'}</td>
+                  <td className="py-3 px-4 text-gray-300">{fighter.weight || '—'}</td>
+                  <td className="py-3 px-4 text-gray-300">{fighter.hometown || '—'}</td>
+                  <td className="py-3 px-4">
+                    {fighter.featured ? (
+                      <Badge className="bg-yellow-700/30 text-yellow-400 border-0 text-xs">Featured</Badge>
+                    ) : (
+                      <span className="text-gray-600 text-xs">—</span>
+                    )}
+                  </td>
+                  <td className="py-3 px-4">
+                    <div className="flex gap-1 justify-end">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 w-7 p-0 text-gray-400 hover:text-blue-400 hover:bg-blue-900/20"
+                        title="Assign to fight"
+                        onClick={() => { setAssignFighter(fighter); setAssignFightId(''); setAssignSlot('fighter1') }}
+                      >
+                        <UserPlus className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 w-7 p-0 text-gray-400 hover:text-white hover:bg-gray-700"
+                        title="View"
+                        onClick={() => { setSelectedFighter(fighter); setIsViewDialogOpen(true) }}
+                      >
+                        <Eye className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 w-7 p-0 text-gray-400 hover:text-white hover:bg-gray-700"
+                        title="Edit"
+                        onClick={() => { setSelectedFighter(fighter); setIsEditDialogOpen(true) }}
+                      >
+                        <Edit className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 w-7 p-0 text-gray-400 hover:text-red-400 hover:bg-red-900/20"
+                        title="Delete"
+                        onClick={() => {
+                          if (window.confirm(`Delete "${fighter.name}"? This cannot be undone.`)) {
+                            deleteFighter(fighter._id)
+                          }
+                        }}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   )
@@ -209,7 +381,7 @@ function CreateFighterForm({ onSubmit, isLoading, onClose }: { onSubmit: (data: 
       name: formData.name,
       nickname: formData.nickname,
       record: formData.record,
-      age: parseInt(formData.age),
+      age: parseInt(formData.age, 10) || 0,
       height: formData.height,
       reach: formData.reach,
       weight: formData.weight,
@@ -333,16 +505,13 @@ function CreateFighterForm({ onSubmit, isLoading, onClose }: { onSubmit: (data: 
         />
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="image" className="text-gray-300">Image URL (Optional)</Label>
-        <Input
-          id="image"
-          value={formData.image}
-          onChange={(e) => setFormData(prev => ({ ...prev, image: e.target.value }))}
-          className="bg-gray-800 border-gray-700 text-white"
-          placeholder="https://example.com/fighter-image.jpg"
-        />
-      </div>
+      <ImageUpload
+        label="Fighter Image"
+        value={formData.image}
+        onChange={(url) => setFormData(prev => ({ ...prev, image: url }))}
+        folder="fighters"
+        optional
+      />
 
       <div className="space-y-4">
         <Label className="text-gray-300 text-base font-medium">Fight Statistics</Label>
@@ -470,7 +639,7 @@ function EditFighterForm({ fighter, onSubmit, isLoading, onClose }: { fighter: a
       decisions: fighter.stats.decisions,
       winStreak: fighter.stats.winStreak,
     },
-    achievements: fighter.achievements.join('\n')
+    achievements: (fighter.achievements ?? []).join('\n')
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -481,7 +650,7 @@ function EditFighterForm({ fighter, onSubmit, isLoading, onClose }: { fighter: a
       name: formData.name,
       nickname: formData.nickname,
       record: formData.record,
-      age: parseInt(formData.age),
+      age: parseInt(formData.age, 10) || 0,
       height: formData.height,
       reach: formData.reach,
       weight: formData.weight,
@@ -605,16 +774,13 @@ function EditFighterForm({ fighter, onSubmit, isLoading, onClose }: { fighter: a
         />
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="image" className="text-gray-300">Image URL (Optional)</Label>
-        <Input
-          id="image"
-          value={formData.image}
-          onChange={(e) => setFormData(prev => ({ ...prev, image: e.target.value }))}
-          className="bg-gray-800 border-gray-700 text-white"
-          placeholder="https://example.com/fighter-image.jpg"
-        />
-      </div>
+      <ImageUpload
+        label="Fighter Image"
+        value={formData.image}
+        onChange={(url) => setFormData(prev => ({ ...prev, image: url }))}
+        folder="fighters"
+        optional
+      />
 
       <div className="space-y-4">
         <Label className="text-gray-300 text-base font-medium">Fight Statistics</Label>
@@ -727,6 +893,15 @@ function EditFighterForm({ fighter, onSubmit, isLoading, onClose }: { fighter: a
 function ViewFighterModal({ fighter }: { fighter: any }) {
   return (
     <div className="space-y-4">
+      {fighter.image && (
+        <div className="flex justify-center">
+          <img
+            src={fighter.image}
+            alt={fighter.name}
+            className="max-h-48 w-auto rounded-md border border-gray-700 object-contain"
+          />
+        </div>
+      )}
       <div className="grid grid-cols-2 gap-4">
         <div>
           <h3 className="text-lg font-semibold text-white">Name:</h3>

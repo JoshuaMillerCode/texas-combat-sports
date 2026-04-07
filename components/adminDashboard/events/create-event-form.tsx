@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox"
 import { Loader2 } from "lucide-react"
 import { formatAmountForDisplay } from "@/lib/stripe"
+import { ImageUpload } from "@/components/adminDashboard/image-upload"
 
 interface CreateEventFormProps {
   onSubmit: (data: any) => void
@@ -47,7 +48,7 @@ export function CreateEventForm({ onSubmit, isLoading, onClose }: CreateEventFor
       slug: formData.slug || formData.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, ''),
       title: formData.title,
       subtitle: formData.subtitle,
-      date: formData.date,
+      date: new Date(formData.date).toISOString(),
       isPastEvent: formData.isPastEvent,
       isActive: formData.isActive,
       location: formData.location,
@@ -200,27 +201,23 @@ export function CreateEventForm({ onSubmit, isLoading, onClose }: CreateEventFor
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="posterImage" className="text-gray-300">Poster Image URL (Optional)</Label>
-          <Input
-            id="posterImage"
-            value={formData.posterImage}
-            onChange={(e) => setFormData(prev => ({ ...prev, posterImage: e.target.value }))}
-            className="bg-gray-800 border-gray-700 text-white"
-            placeholder="https://example.com/poster.jpg"
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="heroVideo" className="text-gray-300">Hero Video URL (Optional)</Label>
-          <Input
-            id="heroVideo"
-            value={formData.heroVideo}
-            onChange={(e) => setFormData(prev => ({ ...prev, heroVideo: e.target.value }))}
-            className="bg-gray-800 border-gray-700 text-white"
-            placeholder="https://example.com/video.mp4"
-          />
-        </div>
+      <ImageUpload
+        label="Poster Image"
+        value={formData.posterImage}
+        onChange={(url) => setFormData(prev => ({ ...prev, posterImage: url }))}
+        folder="events"
+        optional
+      />
+
+      <div className="space-y-2">
+        <Label htmlFor="heroVideo" className="text-gray-300">Hero Video URL <span className="text-gray-500 font-normal">(Optional)</span></Label>
+        <Input
+          id="heroVideo"
+          value={formData.heroVideo}
+          onChange={(e) => setFormData(prev => ({ ...prev, heroVideo: e.target.value }))}
+          className="bg-gray-800 border-gray-700 text-white"
+          placeholder="https://example.com/video.mp4"
+        />
       </div>
 
       <div className="space-y-2">

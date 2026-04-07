@@ -2,15 +2,15 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Plus, Edit, Trash2, Eye, Loader2 } from "lucide-react"
-import { useTicketTiersQuery, useCreateTicketTierMutation, useUpdateTicketTierMutation, useDeleteTicketTierMutation, useEventsQuery } from "@/hooks/use-queries"
+import { Plus, Edit, Trash2, Eye, Loader2, Tag, PlusCircle } from "lucide-react"
+import { useTicketTiersQuery, useCreateTicketTierMutation, useUpdateTicketTierMutation, useDeleteTicketTierMutation, useStripePricesQuery } from "@/hooks/use-queries"
 import { formatAmountForDisplay } from "@/lib/stripe"
 import { LoadingCard, ErrorCard } from "./loading-card"
 
@@ -31,9 +31,8 @@ export default function TicketTiersSection({ searchTerm }: TicketTiersSectionPro
   if (isLoading) return <LoadingCard />
   if (error) return <ErrorCard />
 
-  const filteredTicketTiers = ticketTiers.filter((tier: any) => 
-    tier.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    tier.event?.title?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredTicketTiers = ticketTiers.filter((tier: any) =>
+    tier.name.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   return (
@@ -110,84 +109,85 @@ export default function TicketTiersSection({ searchTerm }: TicketTiersSectionPro
         </Dialog>
       </div>
 
-      {/* Ticket Tiers Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredTicketTiers.map((tier: any) => (
-          <Card key={tier._id} className="bg-gray-800 border-gray-700 hover:bg-gray-750 transition-colors">
-            <CardContent className="p-6">
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-white font-semibold">{tier.name}</h3>
-                  <p className="text-gray-400 text-sm">{tier.event?.title || 'No event assigned'}</p>
-                </div>
-                
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Price:</span>
-                    <span className="text-white font-medium">{formatAmountForDisplay(tier.price, 'USD')}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Available:</span>
-                    <span className="text-white">{tier.quantity}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Status:</span>
-                    <span className={tier.isActive ? 'text-green-400' : 'text-red-400'}>
-                      {tier.isActive ? 'Active' : 'Inactive'}
-                    </span>
-                  </div>
-                </div>
-                
-                <div className="flex gap-2 mt-4">
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
-                    className="border-gray-600 text-gray-300 hover:bg-gray-700"
-                    onClick={() => {
-                      setSelectedTier(tier)
-                      setIsViewDialogOpen(true)
-                    }}
-                  >
-                    <Eye className="h-4 w-4 mr-1" />
-                    View
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
-                    className="border-gray-600 text-gray-300 hover:bg-gray-700"
-                    onClick={() => {
-                      setSelectedTier(tier)
-                      setIsEditDialogOpen(true)
-                    }}
-                  >
-                    <Edit className="h-4 w-4 mr-1" />
-                    Edit
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
-                    className="border-red-600 text-red-400 hover:bg-red-900/20"
-                    onClick={() => {
-                      deleteTicketTier(tier._id)
-                    }}
-                  >
-                    <Trash2 className="h-4 w-4 mr-1" />
-                    Delete
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+      {/* Ticket Tiers Table */}
+      <div className="overflow-x-auto rounded-md border border-gray-700">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-gray-700 bg-gray-800/50">
+              <th className="text-left py-3 px-4 text-xs font-medium uppercase text-gray-400">Name</th>
+              <th className="text-left py-3 px-4 text-xs font-medium uppercase text-gray-400">Price</th>
+              <th className="text-left py-3 px-4 text-xs font-medium uppercase text-gray-400">Available</th>
+              <th className="text-left py-3 px-4 text-xs font-medium uppercase text-gray-400">Sort</th>
+              <th className="text-left py-3 px-4 text-xs font-medium uppercase text-gray-400">Status</th>
+              <th className="text-right py-3 px-4 text-xs font-medium uppercase text-gray-400">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredTicketTiers.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="py-8 text-center text-gray-500">No ticket tiers found</td>
+              </tr>
+            ) : (
+              filteredTicketTiers.map((tier: any) => (
+                <tr key={tier._id} className="border-b border-gray-800 last:border-0 hover:bg-gray-800/40 transition-colors">
+                  <td className="py-3 px-4 text-white font-medium">{tier.name}</td>
+                  <td className="py-3 px-4 text-gray-300 font-mono">{formatAmountForDisplay(tier.price, 'USD')}</td>
+                  <td className="py-3 px-4 text-gray-300">
+                    {tier.availableQuantity ?? tier.quantity ?? '—'}
+                    {tier.maxQuantity ? <span className="text-gray-600"> / {tier.maxQuantity}</span> : ''}
+                  </td>
+                  <td className="py-3 px-4 text-gray-500">{tier.sortOrder ?? '—'}</td>
+                  <td className="py-3 px-4">
+                    {tier.isActive ? (
+                      <Badge className="bg-green-700/30 text-green-400 border-0 text-xs">Active</Badge>
+                    ) : (
+                      <Badge variant="outline" className="border-gray-600 text-gray-500 text-xs">Inactive</Badge>
+                    )}
+                  </td>
+                  <td className="py-3 px-4">
+                    <div className="flex gap-1 justify-end">
+                      <Button
+                        size="sm" variant="ghost"
+                        className="h-7 w-7 p-0 text-gray-400 hover:text-white hover:bg-gray-700"
+                        title="View"
+                        onClick={() => { setSelectedTier(tier); setIsViewDialogOpen(true) }}
+                      >
+                        <Eye className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        size="sm" variant="ghost"
+                        className="h-7 w-7 p-0 text-gray-400 hover:text-white hover:bg-gray-700"
+                        title="Edit"
+                        onClick={() => { setSelectedTier(tier); setIsEditDialogOpen(true) }}
+                      >
+                        <Edit className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        size="sm" variant="ghost"
+                        className="h-7 w-7 p-0 text-gray-400 hover:text-red-400 hover:bg-red-900/20"
+                        title="Delete"
+                        onClick={() => {
+                          if (window.confirm(`Delete tier "${tier.name}"? This cannot be undone.`)) {
+                            deleteTicketTier(tier._id)
+                          }
+                        }}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   )
 }
 
 function CreateTicketTierForm({ onSubmit, isLoading, onClose }: { onSubmit: (data: any) => void, isLoading: boolean, onClose: () => void }) {
-  const { data: events = [] } = useEventsQuery()
   const [formData, setFormData] = useState({
-    event: '',
     tierId: '',
     name: '',
     description: '',
@@ -203,49 +203,30 @@ function CreateTicketTierForm({ onSubmit, isLoading, onClose }: { onSubmit: (dat
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
-    // Transform the data to match the schema
+
     const submitData: any = {
-      event: formData.event,
-      tierId: formData.tierId || formData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, ''),
+      tierId: formData.tierId || formData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
       name: formData.name,
-      price: parseFloat(formData.price), // Store price as entered
+      price: parseFloat(formData.price),
       currency: formData.currency,
-      features: formData.features.split('\n').map(feature => feature.trim()).filter(feature => feature.length > 0),
+      features: formData.features.split('\n').map(f => f.trim()).filter(f => f.length > 0),
       stripePriceId: formData.stripePriceId,
-      maxQuantity: parseInt(formData.maxQuantity),
-      availableQuantity: parseInt(formData.availableQuantity),
+      maxQuantity: parseInt(formData.maxQuantity, 10),
+      availableQuantity: parseInt(formData.availableQuantity, 10),
       isActive: formData.isActive,
-      sortOrder: parseInt(formData.sortOrder)
+      sortOrder: parseInt(formData.sortOrder, 10)
     }
-    
-    // Only include description if provided
+
     if (formData.description && formData.description.trim()) {
       submitData.description = formData.description.trim()
     }
-    
+
     await onSubmit(submitData)
     onClose()
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="event" className="text-gray-300">Event</Label>
-        <Select value={formData.event} onValueChange={(value) => setFormData(prev => ({ ...prev, event: value }))}>
-          <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
-            <SelectValue placeholder="Select an event" />
-          </SelectTrigger>
-          <SelectContent className="bg-gray-800 border-gray-700">
-            {events.map((event: any) => (
-              <SelectItem key={event._id} value={event._id} className="text-white">
-                {event.title}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="name" className="text-gray-300">Tier Name</Label>
@@ -404,97 +385,174 @@ function CreateTicketTierForm({ onSubmit, isLoading, onClose }: { onSubmit: (dat
 }
 
 function EditTicketTierForm({ tier, onSubmit, isLoading, onClose }: { tier: any, onSubmit: (data: any) => void, isLoading: boolean, onClose: () => void }) {
-  const { data: events = [] } = useEventsQuery()
+  const { data: stripePricesData, isLoading: isLoadingPrices, isError: isPricesError } = useStripePricesQuery(tier._id)
+
+  // 'existing' = pick from list, 'new' = enter custom amount
+  const [priceMode, setPriceMode] = useState<'existing' | 'new'>('existing')
+  const [selectedPriceId, setSelectedPriceId] = useState<string>(tier.stripePriceId || '')
+  const [newPriceAmount, setNewPriceAmount] = useState('')
+
   const [formData, setFormData] = useState({
-    event: tier.event?._id || '',
     name: tier.name || '',
     description: tier.description || '',
-    price: tier.price ? tier.price.toString() : '', // Display price as stored
-    quantity: tier.quantity || '',
+    quantity: tier.availableQuantity?.toString() || '',
     features: Array.isArray(tier.features) ? tier.features.join('\n') : '',
     isActive: tier.isActive !== undefined ? tier.isActive : true
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
-    // Transform the data to match the schema
-    const submitData = {
-      event: formData.event,
+
+    const base: any = {
       name: formData.name,
       description: formData.description,
-      price: parseFloat(formData.price), // Store price as entered
-      quantity: parseInt(formData.quantity),
+      availableQuantity: parseInt(formData.quantity, 10),
       features: formData.features
         .split('\n')
-        .map((feature: string) => feature.trim())
-        .filter((feature: string) => feature.length > 0),
-      isActive: formData.isActive
+        .map((f: string) => f.trim())
+        .filter((f: string) => f.length > 0),
+      isActive: formData.isActive,
     }
-    
-    await onSubmit(submitData)
-    onClose()
+
+    if (priceMode === 'new') {
+      const amount = parseFloat(newPriceAmount)
+      if (isNaN(amount) || amount <= 0) return
+      base.newPriceAmount = amount
+    } else {
+      base.stripePriceId = selectedPriceId
+    }
+
+    await onSubmit(base)
+  }
+
+  const prices: any[] = stripePricesData?.prices ?? []
+
+  const formatPrice = (unitAmount: number, currency: string) => {
+    const dollars = unitAmount / 100
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: currency.toUpperCase() }).format(dollars)
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="event" className="text-gray-300">Event</Label>
-        <Select value={formData.event} onValueChange={(value) => setFormData(prev => ({ ...prev, event: value }))}>
-          <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
-            <SelectValue placeholder="Select an event" />
-          </SelectTrigger>
-          <SelectContent className="bg-gray-800 border-gray-700">
-            {events.map((event: any) => (
-              <SelectItem key={event._id} value={event._id} className="text-white">
-                {event.title}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="name" className="text-gray-300">Tier Name</Label>
-          <Input
-            id="name"
-            value={formData.name}
-            onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-            className="bg-gray-800 border-gray-700 text-white"
-            required
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="price" className="text-gray-300">Price ($)</Label>
-          <Input
-            id="price"
-            type="number"
-            step="0.01"
-            value={formData.price}
-            onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
-            className="bg-gray-800 border-gray-700 text-white"
-            placeholder="50.00"
-            required
-          />
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="description" className="text-gray-300">Description</Label>
+        <Label className="text-gray-300">Tier Name</Label>
         <Input
-          id="description"
-          value={formData.description}
-          onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+          value={formData.name}
+          onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
           className="bg-gray-800 border-gray-700 text-white"
           required
         />
       </div>
 
+      {/* Price section */}
+      <div className="space-y-3 rounded-md border border-gray-700 p-4 bg-gray-800/40">
+        <div className="flex items-center justify-between">
+          <Label className="text-gray-300 flex items-center gap-1.5">
+            <Tag className="h-3.5 w-3.5" /> Price
+          </Label>
+          <div className="flex gap-1">
+            <button
+              type="button"
+              onClick={() => setPriceMode('existing')}
+              className={`text-xs px-2.5 py-1 rounded-md transition-colors ${
+                priceMode === 'existing'
+                  ? 'bg-red-600 text-white'
+                  : 'bg-gray-700 text-gray-400 hover:text-white'
+              }`}
+            >
+              Existing
+            </button>
+            <button
+              type="button"
+              onClick={() => setPriceMode('new')}
+              className={`text-xs px-2.5 py-1 rounded-md transition-colors flex items-center gap-1 ${
+                priceMode === 'new'
+                  ? 'bg-red-600 text-white'
+                  : 'bg-gray-700 text-gray-400 hover:text-white'
+              }`}
+            >
+              <PlusCircle className="h-3 w-3" /> New
+            </button>
+          </div>
+        </div>
+
+        {priceMode === 'existing' ? (
+          <div className="space-y-1.5">
+            {isLoadingPrices ? (
+              <div className="flex items-center gap-2 text-gray-500 text-sm py-1">
+                <Loader2 className="h-3.5 w-3.5 animate-spin" /> Loading prices from Stripe…
+              </div>
+            ) : isPricesError ? (
+              <p className="text-xs text-red-400">Failed to load prices from Stripe. Use "New" to create one or try reopening.</p>
+            ) : prices.length === 0 ? (
+              <p className="text-xs text-gray-500">No active prices found in Stripe. Use "New" to create one.</p>
+            ) : (
+              prices.map((p: any) => {
+                const isCurrent = p.id === (stripePricesData?.currentPriceId ?? tier.stripePriceId)
+                const isSelected = p.id === selectedPriceId
+                return (
+                  <label
+                    key={p.id}
+                    className={`flex items-center gap-3 rounded-md border px-3 py-2 cursor-pointer transition-colors ${
+                      isSelected
+                        ? 'border-red-500 bg-red-900/20'
+                        : 'border-gray-700 hover:border-gray-500'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="stripePrice"
+                      value={p.id}
+                      checked={isSelected}
+                      onChange={() => setSelectedPriceId(p.id)}
+                      className="accent-red-500"
+                    />
+                    <span className="flex-1 text-white font-medium">
+                      {formatPrice(p.unit_amount, p.currency)}
+                    </span>
+                    <span className="font-mono text-xs text-gray-500">{p.id}</span>
+                    {isCurrent && (
+                      <span className="text-xs bg-green-700/30 text-green-400 px-1.5 py-0.5 rounded">current</span>
+                    )}
+                  </label>
+                )
+              })
+            )}
+          </div>
+        ) : (
+          <div className="space-y-1.5">
+            <p className="text-xs text-gray-400">
+              A new Stripe price will be created and the current one archived.
+            </p>
+            <div className="flex items-center gap-2">
+              <span className="text-gray-400 text-sm">$</span>
+              <Input
+                type="number"
+                step="0.01"
+                min="0.01"
+                value={newPriceAmount}
+                onChange={(e) => setNewPriceAmount(e.target.value)}
+                className="bg-gray-800 border-gray-700 text-white"
+                placeholder="50.00"
+                required={priceMode === 'new'}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
       <div className="space-y-2">
-        <Label htmlFor="quantity" className="text-gray-300">Available Quantity</Label>
+        <Label className="text-gray-300">Description</Label>
         <Input
-          id="quantity"
+          value={formData.description}
+          onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+          className="bg-gray-800 border-gray-700 text-white"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label className="text-gray-300">Available Quantity</Label>
+        <Input
           type="number"
           value={formData.quantity}
           onChange={(e) => setFormData(prev => ({ ...prev, quantity: e.target.value }))}
@@ -504,9 +562,8 @@ function EditTicketTierForm({ tier, onSubmit, isLoading, onClose }: { tier: any,
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="features" className="text-gray-300">Features & Benefits</Label>
+        <Label className="text-gray-300">Features & Benefits</Label>
         <Textarea
-          id="features"
           value={formData.features}
           onChange={(e) => setFormData(prev => ({ ...prev, features: e.target.value }))}
           className="bg-gray-800 border-gray-700 text-white"
@@ -534,7 +591,7 @@ function EditTicketTierForm({ tier, onSubmit, isLoading, onClose }: { tier: any,
           {isLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Updating...
+              Updating…
             </>
           ) : (
             'Update Tier'
@@ -558,19 +615,19 @@ function ViewTicketTierModal({ tier }: { tier: any }) {
           <p className="text-white font-medium">{tier.name}</p>
         </div>
         <div>
-          <Label className="text-gray-400 text-sm">Event</Label>
-          <p className="text-white font-medium">{tier.event?.title || 'No event assigned'}</p>
+          <Label className="text-gray-400 text-sm">Price</Label>
+          <p className="text-white font-medium">{formatAmountForDisplay(tier.price, 'USD')}</p>
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <Label className="text-gray-400 text-sm">Price</Label>
-          <p className="text-white font-medium">{formatAmountForDisplay(tier.price, 'USD')}</p>
+          <Label className="text-gray-400 text-sm">Stripe Price ID</Label>
+          <p className="text-white font-mono text-xs break-all">{tier.stripePriceId || '—'}</p>
         </div>
         <div>
           <Label className="text-gray-400 text-sm">Available Quantity</Label>
-          <p className="text-white font-medium">{tier.quantity}</p>
+          <p className="text-white font-medium">{tier.availableQuantity ?? '—'}</p>
         </div>
       </div>
 

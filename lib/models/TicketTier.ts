@@ -2,7 +2,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 
 export interface ITicketTier extends Document {
   _id: mongoose.Types.ObjectId;
-  event: mongoose.Types.ObjectId;
+  event?: mongoose.Types.ObjectId;
   tierId: string; // The string ID used in the frontend (e.g., "general", "premium")
   name: string;
   description?: string;
@@ -23,7 +23,7 @@ const TicketTierSchema: Schema = new Schema(
     event: {
       type: Schema.Types.ObjectId,
       ref: 'Event',
-      required: true,
+      required: false,
     },
     tierId: {
       type: String,
@@ -76,10 +76,8 @@ const TicketTierSchema: Schema = new Schema(
   }
 );
 
-// Compound index to ensure unique ticket tiers per event
-TicketTierSchema.index({ event: 1, tierId: 1 }, { unique: true });
-TicketTierSchema.index({ event: 1, isActive: 1 });
-TicketTierSchema.index({ event: 1, sortOrder: 1 });
+// Unique tier identifier across all tiers
+TicketTierSchema.index({ tierId: 1 }, { unique: true });
 
 // Virtual to get sold quantity from transactions
 TicketTierSchema.virtual('soldQuantity', {

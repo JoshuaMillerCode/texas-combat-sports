@@ -51,6 +51,30 @@ export async function PUT(
   }
 }
 
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const authUser = authenticateToken(req);
+    if (!authUser || !requireAdmin(authUser)) {
+      return createAuthErrorResponse('Admin access required', 403);
+    }
+
+    const partialData = await req.json();
+    const fight = await FightService.updateFight(params.id, partialData);
+
+    if (!fight) {
+      return NextResponse.json({ error: 'Fight not found' }, { status: 404 });
+    }
+
+    return NextResponse.json(fight);
+  } catch (error) {
+    console.error('Patch fight error:', error);
+    return NextResponse.json({ error: 'Failed to update fight' }, { status: 500 });
+  }
+}
+
 export async function DELETE(
   req: NextRequest,
   { params }: { params: { id: string } }
