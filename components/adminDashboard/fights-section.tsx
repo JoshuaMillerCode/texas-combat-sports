@@ -550,35 +550,65 @@ function EditFightForm({ fight, onSubmit, isLoading, onClose }: { fight: any, on
   )
 }
 
+function FighterCard({ fighter, label }: { fighter: any; label: string }) {
+  return (
+    <div className="flex flex-col items-center gap-2 flex-1">
+      {fighter?.image ? (
+        <img
+          src={fighter.image}
+          alt={fighter.name}
+          className="w-24 h-24 rounded-full object-cover border-2 border-gray-700"
+        />
+      ) : (
+        <div className="w-24 h-24 rounded-full bg-gray-700 flex items-center justify-center border-2 border-gray-600">
+          <span className="text-3xl font-bold text-gray-500">{fighter?.name?.[0] ?? '?'}</span>
+        </div>
+      )}
+      <div className="text-center">
+        <p className="text-white font-semibold leading-tight">{fighter?.name || 'TBD'}</p>
+        {fighter?.nickname && <p className="text-gray-400 text-xs italic">"{fighter.nickname}"</p>}
+        {fighter?.record && <p className="text-gray-500 text-xs font-mono mt-0.5">{fighter.record}</p>}
+      </div>
+    </div>
+  )
+}
+
 function ViewFightModal({ fight }: { fight: any }) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
+      {/* Title + badge */}
       <div className="text-center">
-        <h3 className="text-white font-semibold">{fight.title || 'Fight Card'}</h3>
         {fight.isMainEvent && (
-          <Badge className="bg-red-600 text-white text-xs mt-1">MAIN EVENT</Badge>
+          <Badge className="bg-red-600 text-white text-xs mb-1">MAIN EVENT</Badge>
         )}
+        <p className="text-gray-400 text-sm">{fight.event?.title || 'No event'}</p>
       </div>
-      
-      <div className="text-center">
-        <div className="text-white font-medium">{fight.fighter1?.name || 'TBD'}</div>
-        <div className="text-gray-400 text-sm">vs</div>
-        <div className="text-white font-medium">{fight.fighter2?.name || 'TBD'}</div>
+
+      {/* Fighter images face-off */}
+      <div className="flex items-center gap-3">
+        <FighterCard fighter={fight.fighter1} label="Fighter 1" />
+        <div className="flex flex-col items-center gap-1 flex-shrink-0">
+          <span className="text-2xl font-bold text-gray-600">VS</span>
+        </div>
+        <FighterCard fighter={fight.fighter2} label="Fighter 2" />
       </div>
-      
-      <div className="space-y-2 text-sm">
+
+      {/* Fight details */}
+      <div className="bg-gray-800/60 rounded-lg px-4 py-3 space-y-2 text-sm">
         <div className="flex justify-between">
-          <span className="text-gray-400">Event:</span>
-          <span className="text-white">{fight.event?.title || 'N/A'}</span>
+          <span className="text-gray-400">Rounds</span>
+          <span className="text-white">{fight.rounds || '—'}</span>
         </div>
         <div className="flex justify-between">
-          <span className="text-gray-400">Rounds:</span>
-          <span className="text-white">{fight.rounds || 'N/A'}</span>
+          <span className="text-gray-400">Weight Class</span>
+          <span className="text-white">{fight.weightClass || '—'}</span>
         </div>
-        <div className="flex justify-between">
-          <span className="text-gray-400">Weight Class:</span>
-          <span className="text-white">{fight.weightClass || 'N/A'}</span>
-        </div>
+        {fight.title && (
+          <div className="flex justify-between">
+            <span className="text-gray-400">Title</span>
+            <span className="text-white">{fight.title}</span>
+          </div>
+        )}
       </div>
     </div>
   )

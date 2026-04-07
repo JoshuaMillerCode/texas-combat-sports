@@ -163,18 +163,40 @@ export default function FightersSection({ searchTerm }: FightersSectionProps) {
             <div className="space-y-1.5">
               <label className="text-xs text-gray-400 uppercase font-medium">Fight</label>
               <Select value={assignFightId} onValueChange={setAssignFightId}>
-                <SelectTrigger className="bg-gray-800 border-gray-700 text-white text-sm">
-                  <SelectValue placeholder="Select a fight…" />
+                <SelectTrigger className="bg-gray-800 border-gray-700 text-white text-sm h-auto min-h-9 py-1.5">
+                  <SelectValue placeholder="Select a fight…">
+                    {assignFightId && (() => {
+                      const f = (fights as any[]).find((x: any) => x._id === assignFightId)
+                      if (!f) return null
+                      const matchup = f.fighter1?.name && f.fighter2?.name
+                        ? `${f.fighter1.name} vs ${f.fighter2.name}`
+                        : f.title || 'Unassigned fight'
+                      return <span className="text-sm">{matchup}</span>
+                    })()}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent className="bg-gray-800 border-gray-700">
                   {(fights as any[])
                     .sort((a, b) => (a.event?.title ?? '').localeCompare(b.event?.title ?? ''))
-                    .map((f: any) => (
-                      <SelectItem key={f._id} value={f._id} className="text-white text-xs">
-                        <span className="font-medium">{f.title || `${f.fighter1?.name ?? 'TBD'} vs ${f.fighter2?.name ?? 'TBD'}`}</span>
-                        {f.event?.title && <span className="text-gray-400 ml-1">· {f.event.title}</span>}
-                      </SelectItem>
-                    ))}
+                    .map((f: any) => {
+                      const matchup = f.fighter1?.name && f.fighter2?.name
+                        ? `${f.fighter1.name} vs ${f.fighter2.name}`
+                        : f.fighter1?.name
+                        ? `${f.fighter1.name} vs TBD`
+                        : f.fighter2?.name
+                        ? `TBD vs ${f.fighter2.name}`
+                        : f.title || 'Unassigned fight'
+                      return (
+                        <SelectItem key={f._id} value={f._id} className="text-white text-xs py-2">
+                          <div>
+                            <div className="font-medium">{matchup}</div>
+                            <div className="text-gray-400 text-[11px]">
+                              {f.event?.title ?? 'No event'}{f.isMainEvent ? ' · Main Event' : ''}
+                            </div>
+                          </div>
+                        </SelectItem>
+                      )
+                    })}
                 </SelectContent>
               </Select>
             </div>
