@@ -51,8 +51,14 @@ export async function GET(req: NextRequest) {
 
     const skip = (page - 1) * limit;
 
+    const projection = {
+      'customerDetails.address': 0,
+      stripePaymentIntentId: 0,
+      serviceAccountTransfer: 0,
+    };
+
     const [transactions, total] = await Promise.all([
-      Transaction.find(query)
+      Transaction.find(query, projection)
         .populate('event', 'title date')
         .sort({ purchaseDate: -1 })
         .skip(skip)

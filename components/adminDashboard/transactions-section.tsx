@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useMemo } from "react"
 import { useTransactionsQuery, TransactionFilters, useEventsQuery } from "@/hooks/use-queries"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
@@ -82,7 +82,7 @@ export default function TransactionsSection({ searchTerm }: { searchTerm: string
   // Reset page when filters change
   useEffect(() => { setPage(1) }, [status, eventId, datePreset, minAmount, maxAmount])
 
-  const { startDate, endDate } = resolvePreset(datePreset)
+  const { startDate, endDate } = useMemo(() => resolvePreset(datePreset), [datePreset])
 
   const filters: TransactionFilters = {
     status,
