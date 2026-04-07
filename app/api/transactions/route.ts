@@ -40,7 +40,8 @@ export async function GET(req: NextRequest) {
       if (maxAmount) query['summary.totalAmount'].$lte = parseFloat(maxAmount) * 100;
     }
     if (search && search.trim()) {
-      const regex = new RegExp(search.trim(), 'i');
+      const escaped = search.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(escaped, 'i');
       query.$or = [
         { orderId: regex },
         { 'customerDetails.name': regex },

@@ -151,7 +151,7 @@ export default function FightersSection({ searchTerm }: FightersSectionProps) {
       </div>
 
       {/* Quick-assign to fight dialog */}
-      <Dialog open={!!assignFighter} onOpenChange={(open) => { if (!open) setAssignFighter(null) }}>
+      <Dialog open={!!assignFighter} onOpenChange={(open) => { if (!open) { setAssignFighter(null); setAssignFightId(''); setAssignSlot('fighter1') } }}>
         <DialogContent className="bg-gray-900 border-gray-800 text-white max-w-sm">
           <DialogHeader>
             <DialogTitle className="text-base">Assign to Fight</DialogTitle>
@@ -242,6 +242,8 @@ export default function FightersSection({ searchTerm }: FightersSectionProps) {
                     isMainEvent: fight.isMainEvent,
                   } as any)
                   setAssignFighter(null)
+                  setAssignFightId('')
+                  setAssignSlot('fighter1')
                 }}
               >
                 {isAssigning ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Assign'}

@@ -16,7 +16,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Cloudinary not configured' }, { status: 500 });
   }
 
-  const { folder = 'uploads' } = await req.json();
+  const ALLOWED_FOLDERS = ['events', 'fighters', 'uploads'];
+  const body = await req.json();
+  const folder = ALLOWED_FOLDERS.includes(body.folder) ? body.folder : 'uploads';
 
   const timestamp = Math.round(Date.now() / 1000);
   const paramsToSign: Record<string, string | number> = { folder, timestamp };
