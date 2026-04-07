@@ -87,12 +87,15 @@ export default function AnalyticsPage() {
       if (acc[name]) {
         acc[name].totalSold += tier.totalSold
         acc[name].revenue += tier.revenue
+        acc[name].promoRevenue += tier.promoRevenue ?? 0
       } else {
-        acc[name] = { name, totalSold: tier.totalSold, revenue: tier.revenue }
+        acc[name] = { name, totalSold: tier.totalSold, revenue: tier.revenue, promoRevenue: tier.promoRevenue ?? 0 }
       }
       return acc
     }, {})
   ).sort((a: any, b: any) => b.totalSold - a.totalSold) as any[]
+
+  const hasPromoRevenue = mergedTiers.some((t: any) => t.promoRevenue > 0)
 
   // Revenue by event chart data
   const eventChartData = revenueByEvent
@@ -356,25 +359,38 @@ export default function AnalyticsPage() {
                     <th className="text-left py-2 px-3 text-xs font-medium uppercase text-gray-400">Tier</th>
                     <th className="text-right py-2 px-3 text-xs font-medium uppercase text-gray-400">Sold</th>
                     <th className="text-right py-2 px-3 text-xs font-medium uppercase text-gray-400">Revenue</th>
+                    {hasPromoRevenue && (
+                      <th className="text-right py-2 px-3 text-xs font-medium uppercase text-gray-400">Promo Revenue</th>
+                    )}
+                    <th className="text-right py-2 px-3 text-xs font-medium uppercase text-gray-400">Total</th>
                     <th className="w-32 py-2 px-3"></th>
                   </tr>
                 </thead>
                 <tbody>
-                  {mergedTiers.map((tier: any) => {
-                    const max = mergedTiers[0]?.totalSold ?? 1
-                    return (
-                      <tr key={tier.name} className="border-b border-gray-800 last:border-0">
-                        <td className="py-2.5 px-3 text-white">{tier.name}</td>
-                        <td className="py-2.5 px-3 text-gray-300 text-right">{tier.totalSold}</td>
-                        <td className="py-2.5 px-3 text-gray-300 text-right">{fmt(tier.revenue)}</td>
-                        <td className="py-2.5 px-3">
-                          <div className="h-1.5 bg-gray-700 rounded-full overflow-hidden">
-                            <div className="h-full bg-red-500 rounded-full" style={{ width: `${(tier.totalSold / max) * 100}%` }} />
-                          </div>
-                        </td>
-                      </tr>
-                    )
-                  })}
+                  {(() => {
+                    const maxRevenue = Math.max(...mergedTiers.map((t: any) => t.revenue + t.promoRevenue), 1)
+                    return mergedTiers.map((tier: any) => {
+                      const total = tier.revenue + tier.promoRevenue
+                      return (
+                        <tr key={tier.name} className="border-b border-gray-800 last:border-0">
+                          <td className="py-2.5 px-3 text-white">{tier.name}</td>
+                          <td className="py-2.5 px-3 text-gray-300 text-right">{tier.totalSold}</td>
+                          <td className="py-2.5 px-3 text-gray-300 text-right">{fmt(tier.revenue)}</td>
+                          {hasPromoRevenue && (
+                            <td className="py-2.5 px-3 text-gray-300 text-right">
+                              {tier.promoRevenue > 0 ? fmt(tier.promoRevenue) : <span className="text-gray-600">—</span>}
+                            </td>
+                          )}
+                          <td className="py-2.5 px-3 text-white font-medium text-right">{fmt(total)}</td>
+                          <td className="py-2.5 px-3">
+                            <div className="h-1.5 bg-gray-700 rounded-full overflow-hidden">
+                              <div className="h-full bg-red-500 rounded-full" style={{ width: `${(total / maxRevenue) * 100}%` }} />
+                            </div>
+                          </td>
+                        </tr>
+                      )
+                    })
+                  })()}
                 </tbody>
               </table>
             </div>

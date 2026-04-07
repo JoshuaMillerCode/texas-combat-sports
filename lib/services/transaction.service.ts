@@ -610,19 +610,10 @@ export class TransactionService {
         { $sort: { '_id.year': -1, '_id.month': -1 } },
         { $limit: 12 },
       ]),
-      // Top selling ticket tiers (revenue calculated from tier price × quantity)
+      // Top selling ticket tiers (revenue from price actually charged at purchase)
       Transaction.aggregate([
-        { $unwind: '$ticketItems' },
         { $match: { status: 'confirmed' } },
-        {
-          $lookup: {
-            from: 'tickettiers',
-            localField: 'ticketItems.ticketTier',
-            foreignField: '_id',
-            as: 'tierInfo',
-          },
-        },
-        { $unwind: '$tierInfo' },
+        { $unwind: '$ticketItems' },
         {
           $group: {
             _id: {
@@ -632,7 +623,16 @@ export class TransactionService {
             totalSold: { $sum: '$ticketItems.quantity' },
             revenue: {
               $sum: {
-                $multiply: ['$ticketItems.quantity', '$tierInfo.price'],
+                $cond: [
+                  '$ticketItems.isPromoDeal',
+                  0,
+                  { $multiply: ['$ticketItems.quantity', '$ticketItems.price'] },
+                ],
+              },
+            },
+            promoRevenue: {
+              $sum: {
+                $cond: ['$ticketItems.isPromoDeal', '$ticketItems.price', 0],
               },
             },
           },
