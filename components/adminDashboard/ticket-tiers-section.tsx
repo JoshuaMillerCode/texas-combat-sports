@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Plus, Edit, Trash2, Eye, Loader2, Tag, PlusCircle } from "lucide-react"
-import { useTicketTiersQuery, useCreateTicketTierMutation, useUpdateTicketTierMutation, useDeleteTicketTierMutation, useEventsQuery, useStripePricesQuery } from "@/hooks/use-queries"
+import { useTicketTiersQuery, useCreateTicketTierMutation, useUpdateTicketTierMutation, useDeleteTicketTierMutation, useStripePricesQuery } from "@/hooks/use-queries"
 import { formatAmountForDisplay } from "@/lib/stripe"
 import { LoadingCard, ErrorCard } from "./loading-card"
 
@@ -31,9 +31,8 @@ export default function TicketTiersSection({ searchTerm }: TicketTiersSectionPro
   if (isLoading) return <LoadingCard />
   if (error) return <ErrorCard />
 
-  const filteredTicketTiers = ticketTiers.filter((tier: any) => 
-    tier.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    tier.event?.title?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredTicketTiers = ticketTiers.filter((tier: any) =>
+    tier.name.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   return (
@@ -116,7 +115,6 @@ export default function TicketTiersSection({ searchTerm }: TicketTiersSectionPro
           <thead>
             <tr className="border-b border-gray-700 bg-gray-800/50">
               <th className="text-left py-3 px-4 text-xs font-medium uppercase text-gray-400">Name</th>
-              <th className="text-left py-3 px-4 text-xs font-medium uppercase text-gray-400">Event</th>
               <th className="text-left py-3 px-4 text-xs font-medium uppercase text-gray-400">Price</th>
               <th className="text-left py-3 px-4 text-xs font-medium uppercase text-gray-400">Available</th>
               <th className="text-left py-3 px-4 text-xs font-medium uppercase text-gray-400">Sort</th>
@@ -127,13 +125,12 @@ export default function TicketTiersSection({ searchTerm }: TicketTiersSectionPro
           <tbody>
             {filteredTicketTiers.length === 0 ? (
               <tr>
-                <td colSpan={7} className="py-8 text-center text-gray-500">No ticket tiers found</td>
+                <td colSpan={6} className="py-8 text-center text-gray-500">No ticket tiers found</td>
               </tr>
             ) : (
               filteredTicketTiers.map((tier: any) => (
                 <tr key={tier._id} className="border-b border-gray-800 last:border-0 hover:bg-gray-800/40 transition-colors">
                   <td className="py-3 px-4 text-white font-medium">{tier.name}</td>
-                  <td className="py-3 px-4 text-gray-300">{tier.event?.title || <span className="text-gray-600">—</span>}</td>
                   <td className="py-3 px-4 text-gray-300 font-mono">{formatAmountForDisplay(tier.price, 'USD')}</td>
                   <td className="py-3 px-4 text-gray-300">
                     {tier.availableQuantity ?? tier.quantity ?? '—'}
@@ -190,9 +187,7 @@ export default function TicketTiersSection({ searchTerm }: TicketTiersSectionPro
 }
 
 function CreateTicketTierForm({ onSubmit, isLoading, onClose }: { onSubmit: (data: any) => void, isLoading: boolean, onClose: () => void }) {
-  const { data: events = [] } = useEventsQuery()
   const [formData, setFormData] = useState({
-    event: '',
     tierId: '',
     name: '',
     description: '',
@@ -208,49 +203,30 @@ function CreateTicketTierForm({ onSubmit, isLoading, onClose }: { onSubmit: (dat
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
-    // Transform the data to match the schema
+
     const submitData: any = {
-      event: formData.event,
-      tierId: formData.tierId || formData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, ''),
+      tierId: formData.tierId || formData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
       name: formData.name,
-      price: parseFloat(formData.price), // Store price as entered
+      price: parseFloat(formData.price),
       currency: formData.currency,
-      features: formData.features.split('\n').map(feature => feature.trim()).filter(feature => feature.length > 0),
+      features: formData.features.split('\n').map(f => f.trim()).filter(f => f.length > 0),
       stripePriceId: formData.stripePriceId,
-      maxQuantity: parseInt(formData.maxQuantity),
-      availableQuantity: parseInt(formData.availableQuantity),
+      maxQuantity: parseInt(formData.maxQuantity, 10),
+      availableQuantity: parseInt(formData.availableQuantity, 10),
       isActive: formData.isActive,
-      sortOrder: parseInt(formData.sortOrder)
+      sortOrder: parseInt(formData.sortOrder, 10)
     }
-    
-    // Only include description if provided
+
     if (formData.description && formData.description.trim()) {
       submitData.description = formData.description.trim()
     }
-    
+
     await onSubmit(submitData)
     onClose()
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="event" className="text-gray-300">Event</Label>
-        <Select value={formData.event} onValueChange={(value) => setFormData(prev => ({ ...prev, event: value }))}>
-          <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
-            <SelectValue placeholder="Select an event" />
-          </SelectTrigger>
-          <SelectContent className="bg-gray-800 border-gray-700">
-            {events.map((event: any) => (
-              <SelectItem key={event._id} value={event._id} className="text-white">
-                {event.title}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="name" className="text-gray-300">Tier Name</Label>
@@ -409,7 +385,6 @@ function CreateTicketTierForm({ onSubmit, isLoading, onClose }: { onSubmit: (dat
 }
 
 function EditTicketTierForm({ tier, onSubmit, isLoading, onClose }: { tier: any, onSubmit: (data: any) => void, isLoading: boolean, onClose: () => void }) {
-  const { data: events = [] } = useEventsQuery()
   const { data: stripePricesData, isLoading: isLoadingPrices, isError: isPricesError } = useStripePricesQuery(tier._id)
 
   // 'existing' = pick from list, 'new' = enter custom amount
@@ -418,10 +393,9 @@ function EditTicketTierForm({ tier, onSubmit, isLoading, onClose }: { tier: any,
   const [newPriceAmount, setNewPriceAmount] = useState('')
 
   const [formData, setFormData] = useState({
-    event: tier.event?._id || '',
     name: tier.name || '',
     description: tier.description || '',
-    quantity: tier.quantity?.toString() || '',
+    quantity: tier.availableQuantity?.toString() || '',
     features: Array.isArray(tier.features) ? tier.features.join('\n') : '',
     isActive: tier.isActive !== undefined ? tier.isActive : true
   })
@@ -430,10 +404,9 @@ function EditTicketTierForm({ tier, onSubmit, isLoading, onClose }: { tier: any,
     e.preventDefault()
 
     const base: any = {
-      event: formData.event,
       name: formData.name,
       description: formData.description,
-      quantity: parseInt(formData.quantity, 10),
+      availableQuantity: parseInt(formData.quantity, 10),
       features: formData.features
         .split('\n')
         .map((f: string) => f.trim())
@@ -461,22 +434,6 @@ function EditTicketTierForm({ tier, onSubmit, isLoading, onClose }: { tier: any,
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <Label className="text-gray-300">Event</Label>
-        <Select value={formData.event} onValueChange={(value) => setFormData(prev => ({ ...prev, event: value }))}>
-          <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
-            <SelectValue placeholder="Select an event" />
-          </SelectTrigger>
-          <SelectContent className="bg-gray-800 border-gray-700">
-            {events.map((event: any) => (
-              <SelectItem key={event._id} value={event._id} className="text-white">
-                {event.title}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
       <div className="space-y-2">
         <Label className="text-gray-300">Tier Name</Label>
         <Input
@@ -658,19 +615,19 @@ function ViewTicketTierModal({ tier }: { tier: any }) {
           <p className="text-white font-medium">{tier.name}</p>
         </div>
         <div>
-          <Label className="text-gray-400 text-sm">Event</Label>
-          <p className="text-white font-medium">{tier.event?.title || 'No event assigned'}</p>
+          <Label className="text-gray-400 text-sm">Price</Label>
+          <p className="text-white font-medium">{formatAmountForDisplay(tier.price, 'USD')}</p>
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <Label className="text-gray-400 text-sm">Price</Label>
-          <p className="text-white font-medium">{formatAmountForDisplay(tier.price, 'USD')}</p>
+          <Label className="text-gray-400 text-sm">Stripe Price ID</Label>
+          <p className="text-white font-mono text-xs break-all">{tier.stripePriceId || '—'}</p>
         </div>
         <div>
           <Label className="text-gray-400 text-sm">Available Quantity</Label>
-          <p className="text-white font-medium">{tier.quantity}</p>
+          <p className="text-white font-medium">{tier.availableQuantity ?? '—'}</p>
         </div>
       </div>
 

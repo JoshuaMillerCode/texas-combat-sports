@@ -36,7 +36,7 @@ const DATE_RANGES = [
 
 export default function AnalyticsPage() {
   const { isAuthenticated, isLoading: authLoading } = useAuth()
-  const [days, setDays] = useState<number | 'all'>(30)
+  const [days, setDays] = useState<number | 'all'>('all')
   const { data, isLoading, refetch } = useStatsQuery(days)
 
   useEffect(() => {
