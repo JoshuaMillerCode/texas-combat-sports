@@ -2,9 +2,8 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Plus, Edit, Trash2, Zap, Clock, CheckCircle, XCircle, Loader2 } from "lucide-react"
+import { Plus, Edit, Trash2, Zap, CheckCircle, XCircle, Loader2, Power } from "lucide-react"
 import { format } from "date-fns"
 import CreateFlashSaleModal from "./flash-sales/create-flash-sale-modal"
 import EditFlashSaleModal from "./flash-sales/edit-flash-sale-modal"
@@ -139,163 +138,102 @@ export default function FlashSalesSection({ searchTerm }: FlashSalesSectionProps
         ))}
       </div>
 
-      {/* Loading State */}
+      {/* Flash Sales Table */}
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="w-8 h-8 animate-spin text-red-500" />
         </div>
-      ) : filteredSales.length === 0 ? (
-        <Card className="bg-gray-800 border-gray-700">
-          <CardContent className="py-12">
-            <p className="text-center text-gray-400">
-              {searchTerm
-                ? "No flash sales match your search"
-                : "No flash sales yet. Create your first one!"}
-            </p>
-          </CardContent>
-        </Card>
       ) : (
-        <div className="grid gap-4">
-          {filteredSales.map((sale: FlashSale) => {
-            const status = getStatus(sale)
-            const now = new Date()
-            const start = new Date(sale.startAt)
-            const end = new Date(sale.endAt)
-            const isCurrentlyActive = sale.isActive && now >= start && now <= end
-
-            return (
-              <Card
-                key={sale._id}
-                className={`bg-gray-800 border-gray-700 ${
-                  isCurrentlyActive ? "ring-2 ring-red-500" : ""
-                }`}
-              >
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <CardTitle className="text-xl text-white flex items-center gap-2">
-                          {isCurrentlyActive && <Zap className="w-5 h-5 text-red-500 fill-red-500" />}
+        <div className="overflow-x-auto rounded-md border border-gray-700">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-gray-700 bg-gray-800/50">
+                <th className="text-left py-3 px-4 text-xs font-medium uppercase text-gray-400">Title</th>
+                <th className="text-left py-3 px-4 text-xs font-medium uppercase text-gray-400">Status</th>
+                <th className="text-left py-3 px-4 text-xs font-medium uppercase text-gray-400">Start</th>
+                <th className="text-left py-3 px-4 text-xs font-medium uppercase text-gray-400">End</th>
+                <th className="text-left py-3 px-4 text-xs font-medium uppercase text-gray-400">Enabled</th>
+                <th className="text-right py-3 px-4 text-xs font-medium uppercase text-gray-400">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredSales.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-8 text-center text-gray-500">
+                    {searchTerm ? "No flash sales match your search" : "No flash sales yet"}
+                  </td>
+                </tr>
+              ) : (
+                filteredSales.map((sale: FlashSale) => {
+                  const status = getStatus(sale)
+                  const now = new Date()
+                  const isCurrentlyActive = sale.isActive && now >= new Date(sale.startAt) && now <= new Date(sale.endAt)
+                  return (
+                    <tr
+                      key={sale._id}
+                      className={`border-b border-gray-800 last:border-0 hover:bg-gray-800/40 transition-colors ${isCurrentlyActive ? 'ring-1 ring-inset ring-red-500/30' : ''}`}
+                    >
+                      <td className="py-3 px-4 text-white font-medium">
+                        <div className="flex items-center gap-2">
+                          {isCurrentlyActive && <Zap className="w-3.5 h-3.5 text-red-500 fill-red-500 flex-shrink-0" />}
                           {sale.title}
-                        </CardTitle>
-                        <Badge className={`${status.color} text-white`}>
-                          {status.label}
-                        </Badge>
-                        <Badge
-                          variant="outline"
-                          className={
-                            sale.isActive
-                              ? "border-green-500 text-green-500"
-                              : "border-gray-500 text-gray-500"
-                          }
-                        >
-                          {sale.isActive ? (
-                            <>
-                              <CheckCircle className="w-3 h-3 mr-1" />
-                              Enabled
-                            </>
-                          ) : (
-                            <>
-                              <XCircle className="w-3 h-3 mr-1" />
-                              Disabled
-                            </>
-                          )}
-                        </Badge>
-                      </div>
-                      {sale.description && (
-                        <CardDescription className="text-gray-400">
-                          {sale.description}
-                        </CardDescription>
-                      )}
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid gap-4">
-                    {/* Time Information */}
-                    <div className="flex items-center gap-6 text-sm">
-                      <div className="flex items-center gap-2 text-gray-300">
-                        <Clock className="w-4 h-4 text-gray-400" />
-                        <span>Start: {format(new Date(sale.startAt), "MMM d, yyyy 'at' h:mm a")}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-gray-300">
-                        <Clock className="w-4 h-4 text-gray-400" />
-                        <span>End: {format(new Date(sale.endAt), "MMM d, yyyy 'at' h:mm a")}</span>
-                      </div>
-                    </div>
-
-                    {/* Ticket Types */}
-                    <div>
-                      <p className="text-gray-400 text-sm mb-2">Target Ticket Types:</p>
-                      <div className="flex flex-wrap gap-2">
-                        {sale.targetTicketTypes.map((typeId: string, index: number) => (
-                          <Badge key={index} variant="secondary" className="bg-gray-700 text-gray-300">
-                            {typeId}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Stripe Price IDs */}
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <p className="text-gray-400">Sale Price ID:</p>
-                        <code className="text-xs text-green-400 bg-gray-900 px-2 py-1 rounded">
-                          {sale.stripePriceId}
-                        </code>
-                      </div>
-                      <div>
-                        <p className="text-gray-400">Original Price ID:</p>
-                        <code className="text-xs text-gray-400 bg-gray-900 px-2 py-1 rounded">
-                          {sale.originalStripePriceId}
-                        </code>
-                      </div>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex gap-2 pt-4 border-t border-gray-700">
-                      <Button
-                        onClick={() => handleToggleActive(sale._id, sale.isActive)}
-                        variant="outline"
-                        size="sm"
-                        className="border-gray-600 text-gray-300 hover:bg-gray-700"
-                      >
+                        </div>
+                        {sale.description && <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">{sale.description}</p>}
+                      </td>
+                      <td className="py-3 px-4">
+                        <Badge className={`${status.color} text-white border-0 text-xs`}>{status.label}</Badge>
+                      </td>
+                      <td className="py-3 px-4 text-gray-300 whitespace-nowrap text-xs">
+                        {format(new Date(sale.startAt), "MMM d, yyyy h:mm a")}
+                      </td>
+                      <td className="py-3 px-4 text-gray-300 whitespace-nowrap text-xs">
+                        {format(new Date(sale.endAt), "MMM d, yyyy h:mm a")}
+                      </td>
+                      <td className="py-3 px-4">
                         {sale.isActive ? (
-                          <>
-                            <XCircle className="w-4 h-4 mr-1" />
-                            Deactivate
-                          </>
+                          <Badge className="bg-green-700/30 text-green-400 border-0 text-xs">
+                            <CheckCircle className="w-3 h-3 mr-1" />Enabled
+                          </Badge>
                         ) : (
-                          <>
-                            <CheckCircle className="w-4 h-4 mr-1" />
-                            Activate
-                          </>
+                          <Badge variant="outline" className="border-gray-600 text-gray-500 text-xs">
+                            <XCircle className="w-3 h-3 mr-1" />Disabled
+                          </Badge>
                         )}
-                      </Button>
-                      <Button
-                        onClick={() => setEditingSale(sale)}
-                        variant="outline"
-                        size="sm"
-                        className="border-gray-600 text-gray-300 hover:bg-gray-700"
-                      >
-                        <Edit className="w-4 h-4 mr-1" />
-                        Edit
-                      </Button>
-                      <Button
-                        onClick={() => handleDelete(sale._id)}
-                        variant="outline"
-                        size="sm"
-                        className="border-red-600 text-red-400 hover:bg-red-600/10"
-                      >
-                        <Trash2 className="w-4 h-4 mr-1" />
-                        Delete
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )
-          })}
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="flex gap-1 justify-end">
+                          <Button
+                            size="sm" variant="ghost"
+                            className={`h-7 w-7 p-0 hover:bg-gray-700 ${sale.isActive ? 'text-green-400 hover:text-red-400' : 'text-gray-500 hover:text-green-400'}`}
+                            title={sale.isActive ? 'Deactivate' : 'Activate'}
+                            onClick={() => handleToggleActive(sale._id, sale.isActive)}
+                          >
+                            <Power className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button
+                            size="sm" variant="ghost"
+                            className="h-7 w-7 p-0 text-gray-400 hover:text-white hover:bg-gray-700"
+                            title="Edit"
+                            onClick={() => setEditingSale(sale)}
+                          >
+                            <Edit className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button
+                            size="sm" variant="ghost"
+                            className="h-7 w-7 p-0 text-gray-400 hover:text-red-400 hover:bg-red-900/20"
+                            title="Delete"
+                            onClick={() => handleDelete(sale._id)}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })
+              )}
+            </tbody>
+          </table>
         </div>
       )}
 

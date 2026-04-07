@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
@@ -19,23 +18,28 @@ interface FightsSectionProps {
 
 export default function FightsSection({ searchTerm }: FightsSectionProps) {
   const { data: fights = [], isLoading, error } = useFightsQuery()
+  const { data: events = [] } = useEventsQuery()
   const { mutate: createFight, isPending: isCreating } = useCreateFightMutation()
   const { mutate: updateFight, isPending: isUpdating } = useUpdateFightMutation()
-  const { mutate: deleteFight, isPending: isDeleting } = useDeleteFightMutation()
+  const { mutate: deleteFight } = useDeleteFightMutation()
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
   const [selectedFight, setSelectedFight] = useState<any>(null)
+  const [eventFilter, setEventFilter] = useState<string>('all')
 
   if (isLoading) return <LoadingCard />
   if (error) return <ErrorCard />
 
-  const filteredFights = fights.filter((fight: any) => 
-    fight.event?.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    fight.fighter1?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    fight.fighter2?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    fight.title?.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const filteredFights = fights.filter((fight: any) => {
+    const matchesSearch =
+      fight.event?.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      fight.fighter1?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      fight.fighter2?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      fight.title?.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesEvent = eventFilter === 'all' ? true : fight.event?._id === eventFilter
+    return matchesSearch && matchesEvent
+  })
 
   return (
     <div className="space-y-6">
@@ -111,81 +115,102 @@ export default function FightsSection({ searchTerm }: FightsSectionProps) {
         </Dialog>
       </div>
 
-      {/* Fights Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredFights.map((fight: any) => (
-          <Card key={fight._id} className="bg-gray-800 border-gray-700 hover:bg-gray-750 transition-colors">
-            <CardContent className="p-6">
-              <div className="space-y-4">
-                <div className="text-center">
-                  <h3 className="text-white font-semibold">{fight.title || 'Fight Card'}</h3>
-                  {fight.isMainEvent && (
-                    <Badge className="bg-red-600 text-white text-xs mt-1">MAIN EVENT</Badge>
-                  )}
-                </div>
-                
-                <div className="text-center">
-                  <div className="text-white font-medium">{fight.fighter1?.name || 'TBD'}</div>
-                  <div className="text-gray-400 text-sm">vs</div>
-                  <div className="text-white font-medium">{fight.fighter2?.name || 'TBD'}</div>
-                </div>
-                
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Event:</span>
-                    <span className="text-white">{fight.event?.title || 'N/A'}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Rounds:</span>
-                    <span className="text-white">{fight.rounds || 'N/A'}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Weight Class:</span>
-                    <span className="text-white">{fight.weightClass || 'N/A'}</span>
-                  </div>
-                </div>
-                
-                <div className="flex gap-2 mt-4">
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
-                    className="border-gray-600 text-gray-300 hover:bg-gray-700"
-                    onClick={() => {
-                      setSelectedFight(fight)
-                      setIsViewDialogOpen(true)
-                    }}
-                  >
-                    <Eye className="h-4 w-4 mr-1" />
-                    View
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
-                    className="border-gray-600 text-gray-300 hover:bg-gray-700"
-                    onClick={() => {
-                      setSelectedFight(fight)
-                      setIsEditDialogOpen(true)
-                    }}
-                  >
-                    <Edit className="h-4 w-4 mr-1" />
-                    Edit
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
-                    className="border-red-600 text-red-400 hover:bg-red-900/20"
-                    onClick={() => {
-                      deleteFight(fight._id)
-                    }}
-                  >
-                    <Trash2 className="h-4 w-4 mr-1" />
-                    Delete
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+      {/* Event Filter */}
+      <div className="flex items-center gap-3 flex-wrap">
+        <Select value={eventFilter} onValueChange={setEventFilter}>
+          <SelectTrigger className="bg-gray-800 border-gray-700 text-gray-300 h-8 w-56 text-xs">
+            <SelectValue placeholder="Filter by event" />
+          </SelectTrigger>
+          <SelectContent className="bg-gray-800 border-gray-700">
+            <SelectItem value="all" className="text-white text-xs">All Events</SelectItem>
+            {(events as any[])
+              .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+              .map((event: any) => (
+                <SelectItem key={event._id} value={event._id} className="text-white text-xs">
+                  {event.title}
+                </SelectItem>
+              ))}
+          </SelectContent>
+        </Select>
+        <span className="text-gray-500 text-xs ml-auto">
+          {filteredFights.length} fight{filteredFights.length !== 1 ? 's' : ''}
+        </span>
+      </div>
+
+      {/* Fights Table */}
+      <div className="overflow-x-auto rounded-md border border-gray-700">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-gray-700 bg-gray-800/50">
+              <th className="text-left py-3 px-4 text-xs font-medium uppercase text-gray-400">Matchup</th>
+              <th className="text-left py-3 px-4 text-xs font-medium uppercase text-gray-400">Event</th>
+              <th className="text-left py-3 px-4 text-xs font-medium uppercase text-gray-400">Weight Class</th>
+              <th className="text-left py-3 px-4 text-xs font-medium uppercase text-gray-400">Rounds</th>
+              <th className="text-left py-3 px-4 text-xs font-medium uppercase text-gray-400">Type</th>
+              <th className="text-right py-3 px-4 text-xs font-medium uppercase text-gray-400">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredFights.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="py-8 text-center text-gray-500">No fights found</td>
+              </tr>
+            ) : (
+              filteredFights.map((fight: any) => (
+                <tr key={fight._id} className="border-b border-gray-800 last:border-0 hover:bg-gray-800/40 transition-colors">
+                  <td className="py-3 px-4 text-white font-medium">
+                    {fight.fighter1?.name || 'TBD'} <span className="text-gray-500 font-normal">vs</span> {fight.fighter2?.name || 'TBD'}
+                  </td>
+                  <td className="py-3 px-4 text-gray-300">{fight.event?.title || '—'}</td>
+                  <td className="py-3 px-4 text-gray-300">{fight.weightClass || '—'}</td>
+                  <td className="py-3 px-4 text-gray-300">{fight.rounds || '—'}</td>
+                  <td className="py-3 px-4">
+                    {fight.isMainEvent ? (
+                      <Badge className="bg-red-700/40 text-red-400 border-0 text-xs">Main Event</Badge>
+                    ) : (
+                      <span className="text-gray-600 text-xs">—</span>
+                    )}
+                  </td>
+                  <td className="py-3 px-4">
+                    <div className="flex gap-1 justify-end">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 w-7 p-0 text-gray-400 hover:text-white hover:bg-gray-700"
+                        title="View"
+                        onClick={() => { setSelectedFight(fight); setIsViewDialogOpen(true) }}
+                      >
+                        <Eye className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 w-7 p-0 text-gray-400 hover:text-white hover:bg-gray-700"
+                        title="Edit"
+                        onClick={() => { setSelectedFight(fight); setIsEditDialogOpen(true) }}
+                      >
+                        <Edit className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 w-7 p-0 text-gray-400 hover:text-red-400 hover:bg-red-900/20"
+                        title="Delete"
+                        onClick={() => {
+                          if (window.confirm(`Delete this fight? This cannot be undone.`)) {
+                            deleteFight(fight._id)
+                          }
+                        }}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   )

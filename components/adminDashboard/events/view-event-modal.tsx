@@ -1,4 +1,5 @@
 import { Label } from "@/components/ui/label"
+import Image from "next/image"
 
 interface ViewEventModalProps {
   event: any
@@ -99,22 +100,28 @@ export function ViewEventModal({ event }: ViewEventModalProps) {
         </div>
       </div>
 
-      {/* Media URLs */}
+      {/* Media */}
       {(event.posterImage || event.heroVideo) && (
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-white">Media</h3>
-          
+
           {event.posterImage && (
-            <div>
-              <Label className="text-gray-400 text-sm">Poster Image URL</Label>
-              <p className="text-white font-medium break-all">{event.posterImage}</p>
+            <div className="space-y-2">
+              <Label className="text-gray-400 text-sm">Poster Image</Label>
+              <div className="flex justify-center">
+                <img
+                  src={event.posterImage}
+                  alt={event.title}
+                  className="max-h-48 w-auto rounded-md border border-gray-700 object-contain"
+                />
+              </div>
             </div>
           )}
-          
+
           {event.heroVideo && (
             <div>
               <Label className="text-gray-400 text-sm">Hero Video URL</Label>
-              <p className="text-white font-medium break-all">{event.heroVideo}</p>
+              <p className="text-gray-300 text-sm break-all mt-1">{event.heroVideo}</p>
             </div>
           )}
         </div>

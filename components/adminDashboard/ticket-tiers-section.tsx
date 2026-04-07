@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
@@ -110,75 +110,80 @@ export default function TicketTiersSection({ searchTerm }: TicketTiersSectionPro
         </Dialog>
       </div>
 
-      {/* Ticket Tiers Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredTicketTiers.map((tier: any) => (
-          <Card key={tier._id} className="bg-gray-800 border-gray-700 hover:bg-gray-750 transition-colors">
-            <CardContent className="p-6">
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-white font-semibold">{tier.name}</h3>
-                  <p className="text-gray-400 text-sm">{tier.event?.title || 'No event assigned'}</p>
-                </div>
-                
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Price:</span>
-                    <span className="text-white font-medium">{formatAmountForDisplay(tier.price, 'USD')}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Available:</span>
-                    <span className="text-white">{tier.quantity}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Status:</span>
-                    <span className={tier.isActive ? 'text-green-400' : 'text-red-400'}>
-                      {tier.isActive ? 'Active' : 'Inactive'}
-                    </span>
-                  </div>
-                </div>
-                
-                <div className="flex gap-2 mt-4">
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
-                    className="border-gray-600 text-gray-300 hover:bg-gray-700"
-                    onClick={() => {
-                      setSelectedTier(tier)
-                      setIsViewDialogOpen(true)
-                    }}
-                  >
-                    <Eye className="h-4 w-4 mr-1" />
-                    View
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
-                    className="border-gray-600 text-gray-300 hover:bg-gray-700"
-                    onClick={() => {
-                      setSelectedTier(tier)
-                      setIsEditDialogOpen(true)
-                    }}
-                  >
-                    <Edit className="h-4 w-4 mr-1" />
-                    Edit
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
-                    className="border-red-600 text-red-400 hover:bg-red-900/20"
-                    onClick={() => {
-                      deleteTicketTier(tier._id)
-                    }}
-                  >
-                    <Trash2 className="h-4 w-4 mr-1" />
-                    Delete
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+      {/* Ticket Tiers Table */}
+      <div className="overflow-x-auto rounded-md border border-gray-700">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-gray-700 bg-gray-800/50">
+              <th className="text-left py-3 px-4 text-xs font-medium uppercase text-gray-400">Name</th>
+              <th className="text-left py-3 px-4 text-xs font-medium uppercase text-gray-400">Event</th>
+              <th className="text-left py-3 px-4 text-xs font-medium uppercase text-gray-400">Price</th>
+              <th className="text-left py-3 px-4 text-xs font-medium uppercase text-gray-400">Available</th>
+              <th className="text-left py-3 px-4 text-xs font-medium uppercase text-gray-400">Sort</th>
+              <th className="text-left py-3 px-4 text-xs font-medium uppercase text-gray-400">Status</th>
+              <th className="text-right py-3 px-4 text-xs font-medium uppercase text-gray-400">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredTicketTiers.length === 0 ? (
+              <tr>
+                <td colSpan={7} className="py-8 text-center text-gray-500">No ticket tiers found</td>
+              </tr>
+            ) : (
+              filteredTicketTiers.map((tier: any) => (
+                <tr key={tier._id} className="border-b border-gray-800 last:border-0 hover:bg-gray-800/40 transition-colors">
+                  <td className="py-3 px-4 text-white font-medium">{tier.name}</td>
+                  <td className="py-3 px-4 text-gray-300">{tier.event?.title || <span className="text-gray-600">—</span>}</td>
+                  <td className="py-3 px-4 text-gray-300 font-mono">{formatAmountForDisplay(tier.price, 'USD')}</td>
+                  <td className="py-3 px-4 text-gray-300">
+                    {tier.availableQuantity ?? tier.quantity ?? '—'}
+                    {tier.maxQuantity ? <span className="text-gray-600"> / {tier.maxQuantity}</span> : ''}
+                  </td>
+                  <td className="py-3 px-4 text-gray-500">{tier.sortOrder ?? '—'}</td>
+                  <td className="py-3 px-4">
+                    {tier.isActive ? (
+                      <Badge className="bg-green-700/30 text-green-400 border-0 text-xs">Active</Badge>
+                    ) : (
+                      <Badge variant="outline" className="border-gray-600 text-gray-500 text-xs">Inactive</Badge>
+                    )}
+                  </td>
+                  <td className="py-3 px-4">
+                    <div className="flex gap-1 justify-end">
+                      <Button
+                        size="sm" variant="ghost"
+                        className="h-7 w-7 p-0 text-gray-400 hover:text-white hover:bg-gray-700"
+                        title="View"
+                        onClick={() => { setSelectedTier(tier); setIsViewDialogOpen(true) }}
+                      >
+                        <Eye className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        size="sm" variant="ghost"
+                        className="h-7 w-7 p-0 text-gray-400 hover:text-white hover:bg-gray-700"
+                        title="Edit"
+                        onClick={() => { setSelectedTier(tier); setIsEditDialogOpen(true) }}
+                      >
+                        <Edit className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        size="sm" variant="ghost"
+                        className="h-7 w-7 p-0 text-gray-400 hover:text-red-400 hover:bg-red-900/20"
+                        title="Delete"
+                        onClick={() => {
+                          if (window.confirm(`Delete tier "${tier.name}"? This cannot be undone.`)) {
+                            deleteTicketTier(tier._id)
+                          }
+                        }}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   )

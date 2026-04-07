@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
@@ -109,73 +108,76 @@ export default function DollsSection({ searchTerm }: DollsSectionProps) {
         </Dialog>
       </div>
 
-      {/* Dolls Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredDolls.map((doll: any) => (
-          <Card key={doll._id} className="bg-gray-800 border-gray-700 hover:bg-gray-750 transition-colors">
-            <CardHeader>
-              <CardTitle className="text-white">{doll.name}</CardTitle>
-              <CardDescription className="text-gray-400">
-                {doll.instagram}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {doll.image && (
-                <div className="relative w-full h-48 mb-4 rounded-lg overflow-hidden">
-                  <Image
-                    src={doll.image}
-                    alt={doll.name}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  />
-                </div>
-              )}
-              <div className="space-y-2">
-                <p className="text-sm text-gray-300 line-clamp-3">{doll.bio}</p>
-              </div>
-              <div className="flex gap-2 mt-4">
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  className="border-gray-600 text-gray-300 hover:bg-gray-700"
-                  onClick={() => {
-                    setSelectedDoll(doll)
-                    setIsViewDialogOpen(true)
-                  }}
-                >
-                  <Eye className="h-4 w-4 mr-1" />
-                  View
-                </Button>
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  className="border-gray-600 text-gray-300 hover:bg-gray-700"
-                  onClick={() => {
-                    setSelectedDoll(doll)
-                    setIsEditDialogOpen(true)
-                  }}
-                >
-                  <Edit className="h-4 w-4 mr-1" />
-                  Edit
-                </Button>
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  className="border-red-600 text-red-400 hover:bg-red-900/20"
-                  onClick={() => {
-                    if (confirm(`Are you sure you want to delete ${doll.name}?`)) {
-                      deleteDoll(doll._id)
-                    }
-                  }}
-                >
-                  <Trash2 className="h-4 w-4 mr-1" />
-                  Delete
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+      {/* Dolls Table */}
+      <div className="overflow-x-auto rounded-md border border-gray-700">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-gray-700 bg-gray-800/50">
+              <th className="text-left py-3 px-4 text-xs font-medium uppercase text-gray-400">Name</th>
+              <th className="text-left py-3 px-4 text-xs font-medium uppercase text-gray-400">Instagram</th>
+              <th className="text-left py-3 px-4 text-xs font-medium uppercase text-gray-400">Bio</th>
+              <th className="text-right py-3 px-4 text-xs font-medium uppercase text-gray-400">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredDolls.length === 0 ? (
+              <tr>
+                <td colSpan={4} className="py-8 text-center text-gray-500">No dolls found</td>
+              </tr>
+            ) : (
+              filteredDolls.map((doll: any) => (
+                <tr key={doll._id} className="border-b border-gray-800 last:border-0 hover:bg-gray-800/40 transition-colors">
+                  <td className="py-3 px-4">
+                    <div className="flex items-center gap-3">
+                      {doll.image && (
+                        <div className="relative h-8 w-8 rounded-full overflow-hidden flex-shrink-0">
+                          <Image src={doll.image} alt={doll.name} fill className="object-cover" sizes="32px" />
+                        </div>
+                      )}
+                      <span className="text-white font-medium">{doll.name}</span>
+                    </div>
+                  </td>
+                  <td className="py-3 px-4 text-gray-400">{doll.instagram || '—'}</td>
+                  <td className="py-3 px-4 text-gray-400 max-w-xs">
+                    <span className="line-clamp-1">{doll.bio || '—'}</span>
+                  </td>
+                  <td className="py-3 px-4">
+                    <div className="flex gap-1 justify-end">
+                      <Button
+                        size="sm" variant="ghost"
+                        className="h-7 w-7 p-0 text-gray-400 hover:text-white hover:bg-gray-700"
+                        title="View"
+                        onClick={() => { setSelectedDoll(doll); setIsViewDialogOpen(true) }}
+                      >
+                        <Eye className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        size="sm" variant="ghost"
+                        className="h-7 w-7 p-0 text-gray-400 hover:text-white hover:bg-gray-700"
+                        title="Edit"
+                        onClick={() => { setSelectedDoll(doll); setIsEditDialogOpen(true) }}
+                      >
+                        <Edit className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        size="sm" variant="ghost"
+                        className="h-7 w-7 p-0 text-gray-400 hover:text-red-400 hover:bg-red-900/20"
+                        title="Delete"
+                        onClick={() => {
+                          if (window.confirm(`Delete "${doll.name}"? This cannot be undone.`)) {
+                            deleteDoll(doll._id)
+                          }
+                        }}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   )

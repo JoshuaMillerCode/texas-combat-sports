@@ -3,9 +3,8 @@ import { useVideosQuery, useCreateVideoMutation, useUpdateVideoMutation, useDele
 import { LoadingCard, ErrorCard } from "./loading-card"
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Plus, Edit, Trash2, Eye, Play, Calendar, Users, Clock } from "lucide-react"
+import { Plus, Edit, Trash2, Eye, Play } from "lucide-react"
 import { CreateVideoForm, EditVideoForm, ViewVideoModal } from "./videos"
 
 export default function VideosSection({ searchTerm }: { searchTerm: string }) {
@@ -113,107 +112,84 @@ export default function VideosSection({ searchTerm }: { searchTerm: string }) {
         </Dialog>
       </div>
 
-      {/* Videos Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredVideos.map((video: any) => (
-          <Card key={video._id} className="bg-gray-800 border-gray-700 hover:bg-gray-750 transition-colors">
-            <CardHeader>
-              <div className="flex justify-between items-start">
-                <div className="flex-1">
-                  <CardTitle className="text-white text-lg">{video.title}</CardTitle>
-                  <CardDescription className="text-gray-400 mt-1">
-                    {video.associatedEvent ? video.associatedEvent.title : "No associated event"}
-                  </CardDescription>
-                </div>
-                <div className="flex flex-col gap-1">
-                  {video.isLiveEvent && (
-                    <Badge variant="destructive" className="text-xs bg-red-600 text-white border-red-600">
-                      <Play className="h-3 w-3 mr-1" />
-                      Live
-                    </Badge>
-                  )}
-                  {!video.isPublic && (
-                    <Badge variant="secondary" className="text-xs bg-gray-600 text-white border-gray-600">
-                      Private
-                    </Badge>
-                  )}
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-300">Duration:</span>
-                  <span className="text-white">{formatDuration(video.duration)}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-300">Views:</span>
-                  <span className="text-white">{video.viewCount || 0}</span>
-                </div>
-                {video.scheduledStartTime && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-300">Scheduled:</span>
-                    <span className="text-white">{formatDate(video.scheduledStartTime)}</span>
-                  </div>
-                )}
-                {video.date && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-300">Date:</span>
-                    <span className="text-white">{formatDate(video.date)}</span>
-                  </div>
-                )}
-              </div>
-              <div className="flex gap-2 mt-4">
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  className="border-gray-600 text-gray-300 hover:bg-gray-700"
-                  onClick={() => {
-                    setSelectedVideo(video)
-                    setIsViewDialogOpen(true)
-                  }}
-                >
-                  <Eye className="h-4 w-4 mr-1" />
-                  View
-                </Button>
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  className="border-gray-600 text-gray-300 hover:bg-gray-700"
-                  onClick={() => {
-                    setSelectedVideo(video)
-                    setIsEditDialogOpen(true)
-                  }}
-                >
-                  <Edit className="h-4 w-4 mr-1" />
-                  Edit
-                </Button>
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  className="border-red-600 text-red-400 hover:bg-red-900/20"
-                  onClick={() => {
-                    deleteVideo(video._id)
-                  }}
-                >
-                  <Trash2 className="h-4 w-4 mr-1" />
-                  Delete
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+      {/* Videos Table */}
+      <div className="overflow-x-auto rounded-md border border-gray-700">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-gray-700 bg-gray-800/50">
+              <th className="text-left py-3 px-4 text-xs font-medium uppercase text-gray-400">Title</th>
+              <th className="text-left py-3 px-4 text-xs font-medium uppercase text-gray-400">Event</th>
+              <th className="text-left py-3 px-4 text-xs font-medium uppercase text-gray-400">Type</th>
+              <th className="text-left py-3 px-4 text-xs font-medium uppercase text-gray-400">Views</th>
+              <th className="text-left py-3 px-4 text-xs font-medium uppercase text-gray-400">Visibility</th>
+              <th className="text-right py-3 px-4 text-xs font-medium uppercase text-gray-400">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredVideos.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="py-8 text-center text-gray-500">No videos found</td>
+              </tr>
+            ) : (
+              filteredVideos.map((video: any) => (
+                <tr key={video._id} className="border-b border-gray-800 last:border-0 hover:bg-gray-800/40 transition-colors">
+                  <td className="py-3 px-4 text-white font-medium">{video.title}</td>
+                  <td className="py-3 px-4 text-gray-300">{video.associatedEvent?.title || <span className="text-gray-600">—</span>}</td>
+                  <td className="py-3 px-4">
+                    {video.isLiveEvent ? (
+                      <Badge className="bg-red-700/40 text-red-400 border-0 text-xs">
+                        <Play className="h-3 w-3 mr-1" />Live
+                      </Badge>
+                    ) : (
+                      <span className="text-gray-500 text-xs">VOD</span>
+                    )}
+                  </td>
+                  <td className="py-3 px-4 text-gray-300">{video.viewCount || 0}</td>
+                  <td className="py-3 px-4">
+                    {video.isPublic ? (
+                      <Badge className="bg-green-700/30 text-green-400 border-0 text-xs">Public</Badge>
+                    ) : (
+                      <Badge variant="outline" className="border-gray-600 text-gray-500 text-xs">Private</Badge>
+                    )}
+                  </td>
+                  <td className="py-3 px-4">
+                    <div className="flex gap-1 justify-end">
+                      <Button
+                        size="sm" variant="ghost"
+                        className="h-7 w-7 p-0 text-gray-400 hover:text-white hover:bg-gray-700"
+                        title="View"
+                        onClick={() => { setSelectedVideo(video); setIsViewDialogOpen(true) }}
+                      >
+                        <Eye className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        size="sm" variant="ghost"
+                        className="h-7 w-7 p-0 text-gray-400 hover:text-white hover:bg-gray-700"
+                        title="Edit"
+                        onClick={() => { setSelectedVideo(video); setIsEditDialogOpen(true) }}
+                      >
+                        <Edit className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        size="sm" variant="ghost"
+                        className="h-7 w-7 p-0 text-gray-400 hover:text-red-400 hover:bg-red-900/20"
+                        title="Delete"
+                        onClick={() => {
+                          if (window.confirm(`Delete "${video.title}"? This cannot be undone.`)) {
+                            deleteVideo(video._id)
+                          }
+                        }}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
-
-      {filteredVideos.length === 0 && (
-        <div className="text-center py-12">
-          <Play className="h-12 w-12 text-gray-600 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-400 mb-2">No videos found</h3>
-          <p className="text-gray-500">
-            {searchTerm ? "Try adjusting your search terms" : "Get started by adding your first video"}
-          </p>
-        </div>
-      )}
     </div>
   )
 }
