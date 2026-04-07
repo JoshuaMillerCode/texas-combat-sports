@@ -9,8 +9,8 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Plus, Edit, Trash2, Eye, Loader2 } from "lucide-react"
-import { useTicketTiersQuery, useCreateTicketTierMutation, useUpdateTicketTierMutation, useDeleteTicketTierMutation, useEventsQuery } from "@/hooks/use-queries"
+import { Plus, Edit, Trash2, Eye, Loader2, Tag, PlusCircle } from "lucide-react"
+import { useTicketTiersQuery, useCreateTicketTierMutation, useUpdateTicketTierMutation, useDeleteTicketTierMutation, useEventsQuery, useStripePricesQuery } from "@/hooks/use-queries"
 import { formatAmountForDisplay } from "@/lib/stripe"
 import { LoadingCard, ErrorCard } from "./loading-card"
 
@@ -410,41 +410,59 @@ function CreateTicketTierForm({ onSubmit, isLoading, onClose }: { onSubmit: (dat
 
 function EditTicketTierForm({ tier, onSubmit, isLoading, onClose }: { tier: any, onSubmit: (data: any) => void, isLoading: boolean, onClose: () => void }) {
   const { data: events = [] } = useEventsQuery()
+  const { data: stripePricesData, isLoading: isLoadingPrices, isError: isPricesError } = useStripePricesQuery(tier._id)
+
+  // 'existing' = pick from list, 'new' = enter custom amount
+  const [priceMode, setPriceMode] = useState<'existing' | 'new'>('existing')
+  const [selectedPriceId, setSelectedPriceId] = useState<string>(tier.stripePriceId || '')
+  const [newPriceAmount, setNewPriceAmount] = useState('')
+
   const [formData, setFormData] = useState({
     event: tier.event?._id || '',
     name: tier.name || '',
     description: tier.description || '',
-    price: tier.price ? tier.price.toString() : '', // Display price as stored
-    quantity: tier.quantity || '',
+    quantity: tier.quantity?.toString() || '',
     features: Array.isArray(tier.features) ? tier.features.join('\n') : '',
     isActive: tier.isActive !== undefined ? tier.isActive : true
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
-    // Transform the data to match the schema
-    const submitData = {
+
+    const base: any = {
       event: formData.event,
       name: formData.name,
       description: formData.description,
-      price: parseFloat(formData.price), // Store price as entered
-      quantity: parseInt(formData.quantity),
+      quantity: parseInt(formData.quantity, 10),
       features: formData.features
         .split('\n')
-        .map((feature: string) => feature.trim())
-        .filter((feature: string) => feature.length > 0),
-      isActive: formData.isActive
+        .map((f: string) => f.trim())
+        .filter((f: string) => f.length > 0),
+      isActive: formData.isActive,
     }
-    
-    await onSubmit(submitData)
-    onClose()
+
+    if (priceMode === 'new') {
+      const amount = parseFloat(newPriceAmount)
+      if (isNaN(amount) || amount <= 0) return
+      base.newPriceAmount = amount
+    } else {
+      base.stripePriceId = selectedPriceId
+    }
+
+    await onSubmit(base)
+  }
+
+  const prices: any[] = stripePricesData?.prices ?? []
+
+  const formatPrice = (unitAmount: number, currency: string) => {
+    const dollars = unitAmount / 100
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: currency.toUpperCase() }).format(dollars)
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="event" className="text-gray-300">Event</Label>
+        <Label className="text-gray-300">Event</Label>
         <Select value={formData.event} onValueChange={(value) => setFormData(prev => ({ ...prev, event: value }))}>
           <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
             <SelectValue placeholder="Select an event" />
@@ -459,47 +477,125 @@ function EditTicketTierForm({ tier, onSubmit, isLoading, onClose }: { tier: any,
         </Select>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="name" className="text-gray-300">Tier Name</Label>
-          <Input
-            id="name"
-            value={formData.name}
-            onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-            className="bg-gray-800 border-gray-700 text-white"
-            required
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="price" className="text-gray-300">Price ($)</Label>
-          <Input
-            id="price"
-            type="number"
-            step="0.01"
-            value={formData.price}
-            onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
-            className="bg-gray-800 border-gray-700 text-white"
-            placeholder="50.00"
-            required
-          />
-        </div>
-      </div>
-
       <div className="space-y-2">
-        <Label htmlFor="description" className="text-gray-300">Description</Label>
+        <Label className="text-gray-300">Tier Name</Label>
         <Input
-          id="description"
-          value={formData.description}
-          onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+          value={formData.name}
+          onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
           className="bg-gray-800 border-gray-700 text-white"
           required
         />
       </div>
 
+      {/* Price section */}
+      <div className="space-y-3 rounded-md border border-gray-700 p-4 bg-gray-800/40">
+        <div className="flex items-center justify-between">
+          <Label className="text-gray-300 flex items-center gap-1.5">
+            <Tag className="h-3.5 w-3.5" /> Price
+          </Label>
+          <div className="flex gap-1">
+            <button
+              type="button"
+              onClick={() => setPriceMode('existing')}
+              className={`text-xs px-2.5 py-1 rounded-md transition-colors ${
+                priceMode === 'existing'
+                  ? 'bg-red-600 text-white'
+                  : 'bg-gray-700 text-gray-400 hover:text-white'
+              }`}
+            >
+              Existing
+            </button>
+            <button
+              type="button"
+              onClick={() => setPriceMode('new')}
+              className={`text-xs px-2.5 py-1 rounded-md transition-colors flex items-center gap-1 ${
+                priceMode === 'new'
+                  ? 'bg-red-600 text-white'
+                  : 'bg-gray-700 text-gray-400 hover:text-white'
+              }`}
+            >
+              <PlusCircle className="h-3 w-3" /> New
+            </button>
+          </div>
+        </div>
+
+        {priceMode === 'existing' ? (
+          <div className="space-y-1.5">
+            {isLoadingPrices ? (
+              <div className="flex items-center gap-2 text-gray-500 text-sm py-1">
+                <Loader2 className="h-3.5 w-3.5 animate-spin" /> Loading prices from Stripe…
+              </div>
+            ) : isPricesError ? (
+              <p className="text-xs text-red-400">Failed to load prices from Stripe. Use "New" to create one or try reopening.</p>
+            ) : prices.length === 0 ? (
+              <p className="text-xs text-gray-500">No active prices found in Stripe. Use "New" to create one.</p>
+            ) : (
+              prices.map((p: any) => {
+                const isCurrent = p.id === (stripePricesData?.currentPriceId ?? tier.stripePriceId)
+                const isSelected = p.id === selectedPriceId
+                return (
+                  <label
+                    key={p.id}
+                    className={`flex items-center gap-3 rounded-md border px-3 py-2 cursor-pointer transition-colors ${
+                      isSelected
+                        ? 'border-red-500 bg-red-900/20'
+                        : 'border-gray-700 hover:border-gray-500'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="stripePrice"
+                      value={p.id}
+                      checked={isSelected}
+                      onChange={() => setSelectedPriceId(p.id)}
+                      className="accent-red-500"
+                    />
+                    <span className="flex-1 text-white font-medium">
+                      {formatPrice(p.unit_amount, p.currency)}
+                    </span>
+                    <span className="font-mono text-xs text-gray-500">{p.id}</span>
+                    {isCurrent && (
+                      <span className="text-xs bg-green-700/30 text-green-400 px-1.5 py-0.5 rounded">current</span>
+                    )}
+                  </label>
+                )
+              })
+            )}
+          </div>
+        ) : (
+          <div className="space-y-1.5">
+            <p className="text-xs text-gray-400">
+              A new Stripe price will be created and the current one archived.
+            </p>
+            <div className="flex items-center gap-2">
+              <span className="text-gray-400 text-sm">$</span>
+              <Input
+                type="number"
+                step="0.01"
+                min="0.01"
+                value={newPriceAmount}
+                onChange={(e) => setNewPriceAmount(e.target.value)}
+                className="bg-gray-800 border-gray-700 text-white"
+                placeholder="50.00"
+                required={priceMode === 'new'}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
       <div className="space-y-2">
-        <Label htmlFor="quantity" className="text-gray-300">Available Quantity</Label>
+        <Label className="text-gray-300">Description</Label>
         <Input
-          id="quantity"
+          value={formData.description}
+          onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+          className="bg-gray-800 border-gray-700 text-white"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label className="text-gray-300">Available Quantity</Label>
+        <Input
           type="number"
           value={formData.quantity}
           onChange={(e) => setFormData(prev => ({ ...prev, quantity: e.target.value }))}
@@ -509,9 +605,8 @@ function EditTicketTierForm({ tier, onSubmit, isLoading, onClose }: { tier: any,
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="features" className="text-gray-300">Features & Benefits</Label>
+        <Label className="text-gray-300">Features & Benefits</Label>
         <Textarea
-          id="features"
           value={formData.features}
           onChange={(e) => setFormData(prev => ({ ...prev, features: e.target.value }))}
           className="bg-gray-800 border-gray-700 text-white"
@@ -539,7 +634,7 @@ function EditTicketTierForm({ tier, onSubmit, isLoading, onClose }: { tier: any,
           {isLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Updating...
+              Updating…
             </>
           ) : (
             'Update Tier'

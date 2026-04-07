@@ -777,6 +777,16 @@ export function useDeleteTicketTierMutation() {
   });
 }
 
+export function useStripePricesQuery(tierId: string | null) {
+  const { accessToken } = useAuth();
+  return useQuery({
+    queryKey: ['ticketTiers', tierId, 'stripePrices'],
+    queryFn: () => apiRequest(`/api/ticket-tiers/${tierId}/stripe-prices`, {}, accessToken),
+    enabled: !!tierId && !!accessToken,
+    staleTime: 30_000,
+  });
+}
+
 // ==================== VIDEOS ====================
 
 export function useVideosQuery(filters?: {
