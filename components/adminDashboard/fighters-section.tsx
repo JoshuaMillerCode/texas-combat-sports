@@ -8,8 +8,8 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Plus, Edit, Trash2, Eye, Loader2 } from "lucide-react"
-import { useFightersQuery, useEventsQuery, useCreateFighterMutation, useUpdateFighterMutation, useDeleteFighterMutation } from "@/hooks/use-queries"
+import { Plus, Edit, Trash2, Eye, Loader2, UserPlus } from "lucide-react"
+import { useFightersQuery, useEventsQuery, useFightsQuery, useUpdateFightMutation, useCreateFighterMutation, useUpdateFighterMutation, useDeleteFighterMutation } from "@/hooks/use-queries"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { LoadingCard, ErrorCard } from "./loading-card"
 import { ImageUpload } from "./image-upload"
@@ -22,14 +22,19 @@ interface FightersSectionProps {
 export default function FightersSection({ searchTerm }: FightersSectionProps) {
   const { data: fighters = [], isLoading, error } = useFightersQuery()
   const { data: events = [] } = useEventsQuery()
+  const { data: fights = [] } = useFightsQuery()
   const { mutate: createFighter, isPending: isCreating } = useCreateFighterMutation()
   const { mutate: updateFighter, isPending: isUpdating } = useUpdateFighterMutation()
+  const { mutate: updateFight, isPending: isAssigning } = useUpdateFightMutation()
   const { mutate: deleteFighter } = useDeleteFighterMutation()
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
   const [selectedFighter, setSelectedFighter] = useState<any>(null)
   const [eventFilter, setEventFilter] = useState<string>('all')
+  const [assignFighter, setAssignFighter] = useState<any>(null)
+  const [assignFightId, setAssignFightId] = useState('')
+  const [assignSlot, setAssignSlot] = useState<'fighter1' | 'fighter2'>('fighter1')
 
   if (isLoading) return <LoadingCard />
   if (error) return <ErrorCard />
@@ -145,6 +150,85 @@ export default function FightersSection({ searchTerm }: FightersSectionProps) {
         </span>
       </div>
 
+      {/* Quick-assign to fight dialog */}
+      <Dialog open={!!assignFighter} onOpenChange={(open) => { if (!open) setAssignFighter(null) }}>
+        <DialogContent className="bg-gray-900 border-gray-800 text-white max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-base">Assign to Fight</DialogTitle>
+            <DialogDescription className="text-gray-400 text-xs">
+              Assign <span className="text-white font-medium">{assignFighter?.name}</span> to a fight slot
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 pt-1">
+            <div className="space-y-1.5">
+              <label className="text-xs text-gray-400 uppercase font-medium">Fight</label>
+              <Select value={assignFightId} onValueChange={setAssignFightId}>
+                <SelectTrigger className="bg-gray-800 border-gray-700 text-white text-sm">
+                  <SelectValue placeholder="Select a fight…" />
+                </SelectTrigger>
+                <SelectContent className="bg-gray-800 border-gray-700">
+                  {(fights as any[])
+                    .sort((a, b) => (a.event?.title ?? '').localeCompare(b.event?.title ?? ''))
+                    .map((f: any) => (
+                      <SelectItem key={f._id} value={f._id} className="text-white text-xs">
+                        <span className="font-medium">{f.title || `${f.fighter1?.name ?? 'TBD'} vs ${f.fighter2?.name ?? 'TBD'}`}</span>
+                        {f.event?.title && <span className="text-gray-400 ml-1">· {f.event.title}</span>}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs text-gray-400 uppercase font-medium">Slot</label>
+              <div className="flex rounded-md overflow-hidden border border-gray-700">
+                {(['fighter1', 'fighter2'] as const).map((slot) => {
+                  const fight = (fights as any[]).find((f: any) => f._id === assignFightId)
+                  const current = fight?.[slot]?.name
+                  return (
+                    <button
+                      key={slot}
+                      onClick={() => setAssignSlot(slot)}
+                      className={`flex-1 py-2 text-xs font-medium transition-colors ${assignSlot === slot ? 'bg-red-600 text-white' : 'bg-gray-800 text-gray-400 hover:text-white'}`}
+                    >
+                      {slot === 'fighter1' ? 'Fighter 1' : 'Fighter 2'}
+                      {current && <span className="block text-[10px] opacity-60 truncate px-1">{current}</span>}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-1">
+              <Button variant="outline" size="sm" onClick={() => setAssignFighter(null)} className="border-gray-700 text-gray-300">
+                Cancel
+              </Button>
+              <Button
+                size="sm"
+                disabled={!assignFightId || isAssigning}
+                className="bg-red-600 hover:bg-red-700"
+                onClick={() => {
+                  const fight = (fights as any[]).find((f: any) => f._id === assignFightId)
+                  if (!fight) return
+                  updateFight({
+                    id: fight._id,
+                    event: fight.event?._id,
+                    fighter1: assignSlot === 'fighter1' ? assignFighter._id : fight.fighter1?._id,
+                    fighter2: assignSlot === 'fighter2' ? assignFighter._id : fight.fighter2?._id,
+                    title: fight.title,
+                    rounds: fight.rounds,
+                    isMainEvent: fight.isMainEvent,
+                  } as any)
+                  setAssignFighter(null)
+                }}
+              >
+                {isAssigning ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Assign'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Fighters Table */}
       <div className="overflow-x-auto rounded-md border border-gray-700">
         <table className="w-full text-sm">
@@ -183,6 +267,15 @@ export default function FightersSection({ searchTerm }: FightersSectionProps) {
                   </td>
                   <td className="py-3 px-4">
                     <div className="flex gap-1 justify-end">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 w-7 p-0 text-gray-400 hover:text-blue-400 hover:bg-blue-900/20"
+                        title="Assign to fight"
+                        onClick={() => { setAssignFighter(fighter); setAssignFightId(''); setAssignSlot('fighter1') }}
+                      >
+                        <UserPlus className="h-3.5 w-3.5" />
+                      </Button>
                       <Button
                         size="sm"
                         variant="ghost"

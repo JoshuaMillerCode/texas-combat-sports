@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Plus, Edit, Trash2, Eye, Loader2 } from "lucide-react"
+import { Plus, Edit, Trash2, Eye, Loader2, CalendarPlus } from "lucide-react"
 import { useFightsQuery, useCreateFightMutation, useUpdateFightMutation, useDeleteFightMutation, useEventsQuery, useFightersQuery } from "@/hooks/use-queries"
 import { LoadingCard, ErrorCard } from "./loading-card"
 
@@ -27,6 +27,7 @@ export default function FightsSection({ searchTerm }: FightsSectionProps) {
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
   const [selectedFight, setSelectedFight] = useState<any>(null)
   const [eventFilter, setEventFilter] = useState<string>('all')
+  const [assigningEventFightId, setAssigningEventFightId] = useState<string | null>(null)
 
   if (isLoading) return <LoadingCard />
   if (error) return <ErrorCard />
@@ -161,7 +162,40 @@ export default function FightsSection({ searchTerm }: FightsSectionProps) {
                   <td className="py-3 px-4 text-white font-medium">
                     {fight.fighter1?.name || 'TBD'} <span className="text-gray-500 font-normal">vs</span> {fight.fighter2?.name || 'TBD'}
                   </td>
-                  <td className="py-3 px-4 text-gray-300">{fight.event?.title || '—'}</td>
+                  <td className="py-3 px-4">
+                    {assigningEventFightId === fight._id ? (
+                      <Select
+                        onValueChange={(eventId) => {
+                          updateFight({ id: fight._id, event: eventId, fighter1: fight.fighter1?._id, fighter2: fight.fighter2?._id, title: fight.title, rounds: fight.rounds, isMainEvent: fight.isMainEvent } as any)
+                          setAssigningEventFightId(null)
+                        }}
+                        onOpenChange={(open) => { if (!open) setAssigningEventFightId(null) }}
+                        defaultOpen
+                      >
+                        <SelectTrigger className="bg-gray-700 border-gray-600 text-white h-7 text-xs w-44">
+                          <SelectValue placeholder="Pick event…" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-gray-800 border-gray-700">
+                          {(events as any[])
+                            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                            .map((e: any) => (
+                              <SelectItem key={e._id} value={e._id} className="text-white text-xs">{e.title}</SelectItem>
+                            ))}
+                        </SelectContent>
+                      </Select>
+                    ) : fight.event?.title ? (
+                      <span className="text-gray-300">{fight.event.title}</span>
+                    ) : (
+                      <button
+                        onClick={() => setAssigningEventFightId(fight._id)}
+                        className="flex items-center gap-1 text-xs text-gray-500 hover:text-red-400 transition-colors"
+                        title="Assign to event"
+                      >
+                        <CalendarPlus className="h-3.5 w-3.5" />
+                        Assign event
+                      </button>
+                    )}
+                  </td>
                   <td className="py-3 px-4 text-gray-300">{fight.weightClass || '—'}</td>
                   <td className="py-3 px-4 text-gray-300">{fight.rounds || '—'}</td>
                   <td className="py-3 px-4">
