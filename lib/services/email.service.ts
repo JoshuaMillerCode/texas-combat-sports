@@ -147,10 +147,17 @@ export class EmailService {
               </ul>
             </div>
 
+            <div style="text-align:center;margin:28px 0;">
+              <a href="${process.env.NEXT_PUBLIC_DOMAIN}/my-tickets" class="button" style="display:inline-block;padding:14px 28px;background:#e60000;color:white;text-decoration:none;border-radius:6px;font-weight:bold;font-size:15px;">
+                View My Tickets Online
+              </a>
+              <p style="margin-top:10px;font-size:12px;color:#888;">Access your tickets anytime at ${process.env.NEXT_PUBLIC_DOMAIN}/my-tickets</p>
+            </div>
+
             <p>If you have any questions, please contact us at <a href="mailto:support@texascombatsports.com">support@texascombatsports.com</a></p>
-            
+
             <p>We look forward to seeing you at the event!</p>
-            
+
             <p>Best regards,<br>The Texas Combat Sports Team</p>
           </div>
           
@@ -208,7 +215,9 @@ export class EmailService {
             <p><strong>Order ID:</strong> ${transaction.orderId}</p>
             
             <p>You will receive your tickets in a separate email shortly.</p>
-            
+
+            <p>You can also access your tickets anytime at <a href="${process.env.NEXT_PUBLIC_DOMAIN}/my-tickets" style="color:#e60000;font-weight:bold;">${process.env.NEXT_PUBLIC_DOMAIN}/my-tickets</a></p>
+
             <p>If you have any questions, please contact us at <a href="mailto:support@texascombatsports.com">support@texascombatsports.com</a></p>
           </div>
           

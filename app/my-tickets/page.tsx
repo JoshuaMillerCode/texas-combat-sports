@@ -48,17 +48,8 @@ function MyTicketsForm() {
   }
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center px-4 py-16">
+    <div className="min-h-screen bg-black flex items-center justify-center px-4 pt-24 pb-16">
       <div className="w-full max-w-md">
-        {/* Logo / brand */}
-        <div className="text-center mb-8">
-          <Link href="/">
-            <span className="text-white font-black text-2xl tracking-tight uppercase">
-              Texas <span className="text-red-600">Combat</span> Sports
-            </span>
-          </Link>
-          <p className="text-gray-500 text-sm mt-2">Ticket Portal</p>
-        </div>
 
         <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
           <div className="bg-red-600 px-6 py-5">

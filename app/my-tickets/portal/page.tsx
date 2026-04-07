@@ -14,6 +14,19 @@ function fmt(cents: number) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(cents / 100)
 }
 
+function getCountdown(eventDate: string | Date): string {
+  const now = new Date()
+  const event = new Date(eventDate)
+  const diff = event.getTime() - now.getTime()
+  if (diff <= 0) return ""
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+  if (days > 1) return `${days} days away`
+  if (days === 1) return "Tomorrow"
+  if (hours > 0) return `${hours} hour${hours !== 1 ? "s" : ""} away`
+  return "Today!"
+}
+
 function QRCodeImage({ ticketNumber }: { ticketNumber: string }) {
   const [src, setSrc] = useState<string>("")
   const [error, setError] = useState(false)
@@ -57,17 +70,48 @@ function StatusBadge({ status }: { status: string }) {
 
 function OrderCard({ order, showQR }: { order: any; showQR: boolean }) {
   const [expanded, setExpanded] = useState(showQR)
+  const [resending, setResending] = useState(false)
+  const [resendStatus, setResendStatus] = useState<"idle" | "sent" | "error">("idle")
 
   const tickets = (order.ticketItems ?? []).flatMap((item: any) =>
     (item.tickets ?? []).map((t: any) => ({
       ...t,
       tierName: item.tierName,
-      quantity: item.quantity,
     }))
   )
 
+  const countdown = order.event?.date ? getCountdown(order.event.date) : ""
+
+  const handleResend = async () => {
+    setResending(true)
+    setResendStatus("idle")
+    try {
+      const res = await fetch("/api/customer/tickets/resend", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ orderId: order.orderId }),
+      })
+      setResendStatus(res.ok ? "sent" : "error")
+    } catch {
+      setResendStatus("error")
+    } finally {
+      setResending(false)
+      // Reset after 4 seconds
+      setTimeout(() => setResendStatus("idle"), 4000)
+    }
+  }
+
   return (
     <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+      {/* Countdown banner for upcoming events */}
+      {showQR && countdown && (
+        <div className="bg-red-600/10 border-b border-red-600/20 px-5 py-2 flex items-center gap-2">
+          <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse inline-block" />
+          <span className="text-red-400 text-xs font-semibold">{countdown}</span>
+        </div>
+      )}
+
       {/* Order header */}
       <div className="px-5 py-4 flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
@@ -94,22 +138,36 @@ function OrderCard({ order, showQR }: { order: any; showQR: boolean }) {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 flex-shrink-0">
-          <a
-            href={`/api/tickets/${order.orderId}/download`}
-            download
-            className="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white border border-gray-700 px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap"
-          >
-            ↓ PDF
-          </a>
-          {showQR && tickets.length > 0 && (
-            <button
-              onClick={() => setExpanded((p) => !p)}
-              className="text-xs bg-red-600/20 hover:bg-red-600/30 text-red-400 border border-red-600/30 px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap"
+        <div className="flex flex-col items-end gap-2 flex-shrink-0">
+          <div className="flex items-center gap-2">
+            <a
+              href={`/api/tickets/${order.orderId}/download`}
+              download
+              className="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white border border-gray-700 px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap"
             >
-              {expanded ? "Hide QR" : "Show QR"}
-            </button>
-          )}
+              ↓ PDF
+            </a>
+            {showQR && tickets.length > 0 && (
+              <button
+                onClick={() => setExpanded((p) => !p)}
+                className="text-xs bg-red-600/20 hover:bg-red-600/30 text-red-400 border border-red-600/30 px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap"
+              >
+                {expanded ? "Hide QR" : "Show QR"}
+              </button>
+            )}
+          </div>
+
+          {/* Resend tickets */}
+          <button
+            onClick={handleResend}
+            disabled={resending}
+            className="text-xs text-gray-600 hover:text-gray-400 transition-colors disabled:opacity-50 whitespace-nowrap"
+          >
+            {resending ? "Sending…" :
+             resendStatus === "sent" ? "✓ Sent to your email" :
+             resendStatus === "error" ? "Failed — try again" :
+             "Resend tickets to email"}
+          </button>
         </div>
       </div>
 
@@ -141,6 +199,7 @@ export default function PortalPage() {
   const router = useRouter()
   const [data, setData] = useState<{ upcoming: any[]; past: any[]; email: string } | null>(null)
   const [loading, setLoading] = useState(true)
+  const [sessionExpired, setSessionExpired] = useState(false)
   const [signingOut, setSigningOut] = useState(false)
   const [pastExpanded, setPastExpanded] = useState(false)
 
@@ -148,17 +207,18 @@ export default function PortalPage() {
     try {
       const res = await fetch("/api/customer/orders", { credentials: "include" })
       if (res.status === 401) {
-        router.push("/my-tickets")
+        setSessionExpired(true)
+        setLoading(false)
         return
       }
       if (!res.ok) throw new Error("Failed to fetch")
       setData(await res.json())
     } catch {
-      router.push("/my-tickets")
+      setSessionExpired(true)
     } finally {
       setLoading(false)
     }
-  }, [router])
+  }, [])
 
   useEffect(() => { fetchOrders() }, [fetchOrders])
 
@@ -182,19 +242,40 @@ export default function PortalPage() {
     )
   }
 
+  // Session expired — show message instead of silent redirect
+  if (sessionExpired) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center px-4">
+        <div className="w-full max-w-md text-center">
+          <div className="w-12 h-12 bg-yellow-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M12 3a9 9 0 100 18A9 9 0 0012 3z" />
+            </svg>
+          </div>
+          <h2 className="text-white font-bold text-lg mb-2">Your session has expired</h2>
+          <p className="text-gray-400 text-sm mb-6">
+            For your security, ticket access links expire after 24 hours. Enter your email to get a new link.
+          </p>
+          <Link
+            href="/my-tickets"
+            className="inline-block bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-3 rounded-lg text-sm transition-colors"
+          >
+            Get a new link
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-black">
-      {/* Header */}
-      <div className="border-b border-gray-900 bg-gray-950">
-        <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
+      <div className="max-w-3xl mx-auto px-4 pt-24 pb-8 space-y-10">
+        {/* Session info + sign out */}
+        <div className="flex items-center justify-between">
           <div>
-            <Link href="/">
-              <span className="text-white font-black text-lg tracking-tight uppercase">
-                Texas <span className="text-red-600">Combat</span> Sports
-              </span>
-            </Link>
+            <h1 className="text-white font-bold text-xl">My Tickets</h1>
             {data?.email && (
-              <p className="text-gray-600 text-xs mt-0.5">{data.email}</p>
+              <p className="text-gray-500 text-sm mt-0.5">{data.email}</p>
             )}
           </div>
           <button
@@ -205,9 +286,6 @@ export default function PortalPage() {
             {signingOut ? "Signing out…" : "Sign out"}
           </button>
         </div>
-      </div>
-
-      <div className="max-w-3xl mx-auto px-4 py-8 space-y-10">
 
         {/* Upcoming */}
         <section>
