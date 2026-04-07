@@ -526,7 +526,7 @@ export function usePatchFightMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, ...data }: { id: string; [key: string]: any }) => {
+    mutationFn: ({ id, ...data }: Partial<IFight> & { id: string }) => {
       if (!isAuthenticated || !accessToken) throw new Error('Admin authentication required');
       return apiRequest(`/api/fights/${id}`, { method: 'PATCH', body: JSON.stringify(data) }, accessToken);
     },

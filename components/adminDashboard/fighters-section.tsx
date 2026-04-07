@@ -137,7 +137,7 @@ export default function FightersSection({ searchTerm }: FightersSectionProps) {
           <SelectContent className="bg-gray-800 border-gray-700">
             <SelectItem value="all" className="text-white text-xs">All Fighters</SelectItem>
             {(events as any[])
-              .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+              .sort((a, b) => new Date(b.date ?? 0).getTime() - new Date(a.date ?? 0).getTime())
               .map((event: any) => (
                 <SelectItem key={event._id} value={event._id} className="text-white text-xs">
                   {event.title}
@@ -381,7 +381,7 @@ function CreateFighterForm({ onSubmit, isLoading, onClose }: { onSubmit: (data: 
       name: formData.name,
       nickname: formData.nickname,
       record: formData.record,
-      age: parseInt(formData.age),
+      age: parseInt(formData.age, 10) || 0,
       height: formData.height,
       reach: formData.reach,
       weight: formData.weight,
@@ -639,7 +639,7 @@ function EditFighterForm({ fighter, onSubmit, isLoading, onClose }: { fighter: a
       decisions: fighter.stats.decisions,
       winStreak: fighter.stats.winStreak,
     },
-    achievements: fighter.achievements.join('\n')
+    achievements: (fighter.achievements ?? []).join('\n')
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -650,7 +650,7 @@ function EditFighterForm({ fighter, onSubmit, isLoading, onClose }: { fighter: a
       name: formData.name,
       nickname: formData.nickname,
       record: formData.record,
-      age: parseInt(formData.age),
+      age: parseInt(formData.age, 10) || 0,
       height: formData.height,
       reach: formData.reach,
       weight: formData.weight,

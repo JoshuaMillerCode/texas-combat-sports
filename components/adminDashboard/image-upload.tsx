@@ -41,6 +41,7 @@ export function ImageUpload({ label, value, onChange, folder = 'uploads', requir
 
     const signController = new AbortController()
     const signTimeout = setTimeout(() => signController.abort(), 10_000)
+    let uploadTimeout: ReturnType<typeof setTimeout> | undefined
 
     try {
       // Get upload signature from our API
@@ -61,7 +62,7 @@ export function ImageUpload({ label, value, onChange, folder = 'uploads', requir
 
       // Upload directly to Cloudinary
       const uploadController = new AbortController()
-      const uploadTimeout = setTimeout(() => uploadController.abort(), 30_000)
+      uploadTimeout = setTimeout(() => uploadController.abort(), 30_000)
 
       const formData = new FormData()
       formData.append('file', file)
@@ -82,11 +83,12 @@ export function ImageUpload({ label, value, onChange, folder = 'uploads', requir
       if (!data.secure_url) throw new Error('No URL in upload response')
       onChange(data.secure_url)
     } catch (err: any) {
-      clearTimeout(signTimeout)
       const msg = err?.name === 'AbortError' ? 'Upload timed out. Please try again.' : 'Upload failed. Please try again or paste a URL below.'
       setError(msg)
       console.error(err)
     } finally {
+      clearTimeout(signTimeout)
+      clearTimeout(uploadTimeout)
       setIsUploading(false)
       if (fileInputRef.current) fileInputRef.current.value = ''
     }

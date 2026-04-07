@@ -243,8 +243,8 @@ export default function AnalyticsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {revenueByEvent.map((e: any, i: number) => (
-                    <tr key={i} className="border-b border-gray-800 last:border-0 hover:bg-gray-800/40">
+                  {revenueByEvent.map((e: any) => (
+                    <tr key={e._id ?? e.eventTitle} className="border-b border-gray-800 last:border-0 hover:bg-gray-800/40">
                       <td className="py-2.5 px-3 text-white font-medium">{e.eventTitle}</td>
                       <td className="py-2.5 px-3 text-gray-400 text-xs whitespace-nowrap">
                         {e.eventDate ? new Date(e.eventDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}
@@ -329,8 +329,8 @@ export default function AnalyticsPage() {
               <ResponsiveContainer width="100%" height={220}>
                 <PieChart>
                   <Pie data={statusData} cx="50%" cy="50%" innerRadius={55} outerRadius={85} paddingAngle={3} dataKey="value">
-                    {statusData.map((entry: any, i: number) => (
-                      <Cell key={i} fill={entry.color} />
+                    {statusData.map((entry: any) => (
+                      <Cell key={entry.name} fill={entry.color} />
                     ))}
                   </Pie>
                   <Tooltip
@@ -360,10 +360,10 @@ export default function AnalyticsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {mergedTiers.map((tier: any, i: number) => {
+                  {mergedTiers.map((tier: any) => {
                     const max = mergedTiers[0]?.totalSold ?? 1
                     return (
-                      <tr key={i} className="border-b border-gray-800 last:border-0">
+                      <tr key={tier.name} className="border-b border-gray-800 last:border-0">
                         <td className="py-2.5 px-3 text-white">{tier.name}</td>
                         <td className="py-2.5 px-3 text-gray-300 text-right">{tier.totalSold}</td>
                         <td className="py-2.5 px-3 text-gray-300 text-right">{fmt(tier.revenue)}</td>

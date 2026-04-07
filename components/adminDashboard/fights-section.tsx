@@ -126,7 +126,7 @@ export default function FightsSection({ searchTerm }: FightsSectionProps) {
           <SelectContent className="bg-gray-800 border-gray-700">
             <SelectItem value="all" className="text-white text-xs">All Events</SelectItem>
             {(events as any[])
-              .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+              .sort((a, b) => new Date(b.date ?? 0).getTime() - new Date(a.date ?? 0).getTime())
               .map((event: any) => (
                 <SelectItem key={event._id} value={event._id} className="text-white text-xs">
                   {event.title}
@@ -178,7 +178,7 @@ export default function FightsSection({ searchTerm }: FightsSectionProps) {
                         </SelectTrigger>
                         <SelectContent className="bg-gray-800 border-gray-700">
                           {(events as any[])
-                            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                            .sort((a, b) => new Date(b.date ?? 0).getTime() - new Date(a.date ?? 0).getTime())
                             .map((e: any) => (
                               <SelectItem key={e._id} value={e._id} className="text-white text-xs">{e.title}</SelectItem>
                             ))}
@@ -405,12 +405,12 @@ function EditFightForm({ fight, onSubmit, isLoading, onClose }: { fight: any, on
   const { data: events = [] } = useEventsQuery()
   const { data: fighters = [] } = useFightersQuery()
   const [formData, setFormData] = useState({
-    event: fight.event?._id,
-    fighter1: fight.fighter1?._id,
-    fighter2: fight.fighter2?._id,
-    title: fight.title,
-    rounds: fight.rounds,
-    isMainEvent: fight.isMainEvent
+    event: fight.event?._id ?? '',
+    fighter1: fight.fighter1?._id ?? '',
+    fighter2: fight.fighter2?._id ?? '',
+    title: fight.title ?? '',
+    rounds: fight.rounds?.toString() ?? '3',
+    isMainEvent: fight.isMainEvent ?? false,
   })
 
   const handleSubmit = async (e: React.FormEvent) => {

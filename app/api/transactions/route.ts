@@ -36,11 +36,11 @@ export async function GET(req: NextRequest) {
     }
     if (minAmount || maxAmount) {
       query['summary.totalAmount'] = {};
-      if (minAmount) query['summary.totalAmount'].$gte = parseFloat(minAmount) * 100; // convert to cents
-      if (maxAmount) query['summary.totalAmount'].$lte = parseFloat(maxAmount) * 100;
+      if (minAmount) query['summary.totalAmount'].$gte = Math.round(parseFloat(minAmount) * 100);
+      if (maxAmount) query['summary.totalAmount'].$lte = Math.round(parseFloat(maxAmount) * 100);
     }
     if (search && search.trim()) {
-      const escaped = search.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const escaped = search.trim().slice(0, 100).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       const regex = new RegExp(escaped, 'i');
       query.$or = [
         { orderId: regex },

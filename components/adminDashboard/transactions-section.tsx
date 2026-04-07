@@ -46,7 +46,7 @@ function resolvePreset(preset: typeof DATE_PRESETS[number]) {
   }
   const end = new Date()
   const start = new Date()
-  start.setDate(start.getDate() - parseInt(preset.startDate))
+  start.setDate(start.getDate() - parseInt(preset.startDate, 10))
   return { startDate: start.toISOString(), endDate: end.toISOString() }
 }
 
@@ -268,8 +268,8 @@ export default function TransactionsSection({ searchTerm }: { searchTerm: string
       <div className="flex items-center justify-between gap-2 flex-wrap">
         {/* Showing X–Y of Z */}
         <span className="text-xs text-gray-500">
-          {isLoading ? '…' : (() => {
-            const from = total === 0 ? 0 : (page - 1) * 25 + 1
+          {isLoading ? '…' : total === 0 ? 'No orders found' : (() => {
+            const from = (page - 1) * 25 + 1
             const to = Math.min(page * 25, total)
             return `Showing ${from}–${to} of ${total.toLocaleString()}`
           })()}

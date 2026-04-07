@@ -66,10 +66,10 @@ export async function GET(req: NextRequest) {
     } else if (daysParam && daysParam !== 'all') {
       endDate = new Date();
       startDate = new Date();
-      startDate.setDate(startDate.getDate() - parseInt(daysParam));
+      startDate.setDate(startDate.getDate() - parseInt(daysParam, 10));
     }
 
-    const dailyDays = daysParam && daysParam !== 'all' ? parseInt(daysParam) : 30;
+    const dailyDays = daysParam && daysParam !== 'all' ? parseInt(daysParam, 10) : 30;
 
     const [overview, analytics, dailyRevenue, events, revenueByEvent] = await Promise.all([
       TransactionService.getRevenueStats(startDate, endDate),
