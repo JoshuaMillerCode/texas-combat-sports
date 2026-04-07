@@ -1026,3 +1026,22 @@ export function useDeleteFlashSaleMutation() {
     },
   });
 }
+
+
+// ==================== STATS ====================
+
+export function useStatsQuery(days?: number | 'all') {
+  const { accessToken } = useAuth();
+
+  return useQuery({
+    queryKey: ['stats', days ?? 30],
+    queryFn: () => {
+      const params = new URLSearchParams();
+      if (days !== undefined) params.set('days', String(days));
+      const url = `/api/stats${params.toString() ? '?' + params.toString() : ''}`;
+      return apiRequest(url, {}, accessToken);
+    },
+    enabled: !!accessToken,
+    staleTime: 60 * 1000, // 1 minute
+  });
+}

@@ -26,6 +26,7 @@ import TicketTiersSection from "@/components/adminDashboard/ticket-tiers-section
 import FlashSalesSection from "@/components/adminDashboard/flash-sales-section"
 import VideosSection from "@/components/adminDashboard/videos-section"
 import DollsSection from "@/components/adminDashboard/dolls-section"
+import StatsBar from "@/components/adminDashboard/stats-bar"
 
 
 export default function AdminDashboardPage() {
@@ -119,6 +120,9 @@ export default function AdminDashboardPage() {
 
       {/* Main Content */}
       <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
+        {/* Stats Bar */}
+        <StatsBar />
+
         {/* Search Bar */}
         <div className="mb-6 sm:mb-8">
           <div className="relative max-w-md">
