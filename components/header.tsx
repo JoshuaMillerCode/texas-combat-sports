@@ -134,15 +134,6 @@ export default function Header() {
               </Link>
             </div>
 
-            {/* My Tickets */}
-            <Link
-              href="/my-tickets"
-              className={`text-gray-400 ${hoverColor} transition-colors`}
-              title="My Tickets"
-            >
-              <Ticket size={20} />
-            </Link>
-
             {/* Buy Tickets Button */}
             <Button
               size="sm"
@@ -170,6 +161,13 @@ export default function Header() {
             >
               Buy Tickets
             </Button>
+            <Link
+              href="/my-tickets"
+              className={`text-gray-400 ${hoverColor} transition-colors`}
+              title="My Tickets"
+            >
+              <Ticket size={22} />
+            </Link>
             <button className="text-white p-1" onClick={() => setIsMenuOpen(!isMenuOpen)}>
               {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>

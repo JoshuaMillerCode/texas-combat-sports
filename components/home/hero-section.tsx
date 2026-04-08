@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
+import Link from "next/link"
 import HeroParallax from "@/components/hero-parallax"
 import RevealAnimation from "@/components/reveal-animation"
 import { useCurrentEvent } from "@/contexts/current-event-context"
@@ -48,7 +49,7 @@ export default function HeroSection() {
               size="lg"
               className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 text-lg font-bold transition-all duration-300 hover:scale-105 shadow-lg"
               onClick={() => handleTicketPurchase(currentEvent?.slug)}
-            > 
+            >
               Buy Tickets
             </Button>
             <Button
@@ -63,6 +64,15 @@ export default function HeroSection() {
             >
               See Fight Card
             </Button>
+            <Link href="/my-tickets">
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-white/40 text-white hover:bg-white/10 hover:border-white px-8 py-4 text-lg font-bold transition-all duration-300 hover:scale-105 bg-transparent shadow-lg w-full sm:w-auto"
+              >
+                My Tickets
+              </Button>
+            </Link>
           </div>
         </RevealAnimation>
       </div>
