@@ -51,7 +51,8 @@ export class CustomerAuthService {
 
     // Only send the email if they have orders
     if (hasOrders) {
-      const domain = process.env.NEXT_PUBLIC_DOMAIN || 'http://localhost:3000';
+      const domain = process.env.NEXT_PUBLIC_DOMAIN
+        || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
       const magicLinkUrl = `${domain}/api/customer/auth/verify?token=${rawToken}`;
       await CustomerEmailService.sendMagicLink(normalizedEmail, magicLinkUrl);
     }
