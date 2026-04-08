@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { Menu, X, Instagram, Youtube, Facebook } from "lucide-react"
+import { Menu, X, Instagram, Youtube, Facebook, Ticket } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useCurrentEvent } from "@/contexts/current-event-context"
 import { useRouter, usePathname } from "next/navigation"
@@ -45,6 +45,7 @@ export default function Header() {
     { href: "/gallery", label: "Gallery" },
     { href: "/dolls", label: "Dolls" },
     { href: "/contact", label: "Contact" },
+    { href: "/my-tickets", label: "My Tickets" },
   ]
 
   return (
@@ -160,6 +161,13 @@ export default function Header() {
             >
               Buy Tickets
             </Button>
+            <Link
+              href="/my-tickets"
+              className={`text-gray-400 ${hoverColor} transition-colors`}
+              title="My Tickets"
+            >
+              <Ticket size={22} />
+            </Link>
             <button className="text-white p-1" onClick={() => setIsMenuOpen(!isMenuOpen)}>
               {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>

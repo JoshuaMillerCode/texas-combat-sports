@@ -10,6 +10,7 @@ import Transaction from './Transaction';
 import User from './User';
 import FlashSale from './FlashSale';
 import Doll from './Doll';
+import CustomerMagicToken from './CustomerMagicToken';
 
 // Export all models for easy access
 export {
@@ -22,6 +23,7 @@ export {
   User,
   FlashSale,
   Doll,
+  CustomerMagicToken,
 };
 
 // Ensure all models are registered when this file is imported
