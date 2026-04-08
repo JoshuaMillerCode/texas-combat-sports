@@ -57,8 +57,7 @@ export class CustomerAuthService {
       await CustomerEmailService.sendMagicLink(normalizedEmail, magicLinkUrl);
     }
 
-    // Always return success — never reveal whether the email has orders
-    return { success: true };
+    return { success: true, hasOrders: !!hasOrders };
   }
 
   static async verifyMagicToken(rawToken: string): Promise<{ email: string } | null> {

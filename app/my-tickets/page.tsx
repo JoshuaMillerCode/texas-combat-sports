@@ -7,7 +7,7 @@ import Link from "next/link"
 function MyTicketsForm() {
   const searchParams = useSearchParams()
   const [email, setEmail] = useState("")
-  const [status, setStatus] = useState<"idle" | "loading" | "sent" | "error" | "ratelimit">("idle")
+  const [status, setStatus] = useState<"idle" | "loading" | "sent" | "error" | "ratelimit" | "noorders">("idle")
   const [errorMessage, setErrorMessage] = useState("")
 
   useEffect(() => {
@@ -31,6 +31,10 @@ function MyTicketsForm() {
 
       if (res.status === 429) {
         setStatus("ratelimit")
+        return
+      }
+      if (res.status === 404) {
+        setStatus("noorders")
         return
       }
       if (!res.ok) {
@@ -80,11 +84,13 @@ function MyTicketsForm() {
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
-                {(status === "error" || status === "ratelimit") && (
-                  <div className="bg-red-900/30 border border-red-800 rounded-lg px-4 py-3">
-                    <p className="text-red-400 text-sm">
+                {(status === "error" || status === "ratelimit" || status === "noorders") && (
+                  <div className={`border rounded-lg px-4 py-3 ${status === "noorders" ? "bg-yellow-900/20 border-yellow-800" : "bg-red-900/30 border-red-800"}`}>
+                    <p className={`text-sm ${status === "noorders" ? "text-yellow-400" : "text-red-400"}`}>
                       {status === "ratelimit"
                         ? "Too many requests. Please wait an hour before trying again."
+                        : status === "noorders"
+                        ? "We couldn't find any orders associated with that email. Double-check the email you used when purchasing."
                         : errorMessage}
                     </p>
                   </div>

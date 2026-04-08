@@ -21,10 +21,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Generic message — never confirm or deny whether the email has orders
-    return NextResponse.json({
-      message: "If that email has orders with us, you'll receive a link shortly.",
-    });
+    if (!result.hasOrders) {
+      return NextResponse.json(
+        { error: 'No orders found for that email address.' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({ message: "Check your email for a link to access your tickets." });
   } catch (error) {
     console.error('Magic link request error:', error);
     return NextResponse.json({ error: 'Something went wrong. Please try again.' }, { status: 500 });
