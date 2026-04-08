@@ -34,9 +34,8 @@ export async function GET(
     }
 
     // Get the associated event
-    const event = await EventService.getEventById(
-      transaction.event?._id.toString() || ''
-    );
+    const eventId = (transaction.event?._id ?? transaction.event)?.toString() ?? '';
+    const event = await EventService.getEventById(eventId);
 
     if (!event) {
       return NextResponse.json({ error: 'Event not found' }, { status: 404 });
