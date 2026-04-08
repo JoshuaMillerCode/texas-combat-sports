@@ -80,10 +80,10 @@ export default function AnalyticsPage() {
     color: STATUS_COLORS[s._id] ?? '#6b7280',
   }))
 
-  // Merge duplicate tier names (promo deal GA overlap)
+  // Merge any remaining duplicate tier names (e.g. promo deals sharing a tierId with GA)
   const mergedTiers = Object.values(
     (analytics.topTicketTiers ?? []).reduce((acc: any, tier: any) => {
-      const name = tier._id.tierName
+      const name = tier.tierName
       if (acc[name]) {
         acc[name].totalSold += tier.totalSold
         acc[name].revenue += tier.revenue

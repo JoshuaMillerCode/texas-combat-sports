@@ -616,10 +616,8 @@ export class TransactionService {
         { $unwind: '$ticketItems' },
         {
           $group: {
-            _id: {
-              tierId: '$ticketItems.ticketTier',
-              tierName: '$ticketItems.tierName',
-            },
+            _id: '$ticketItems.ticketTier',
+            tierName: { $last: '$ticketItems.tierName' },
             totalSold: { $sum: '$ticketItems.quantity' },
             revenue: {
               $sum: {
