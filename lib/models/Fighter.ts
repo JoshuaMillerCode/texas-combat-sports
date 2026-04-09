@@ -13,6 +13,7 @@ export interface IFighter extends Document {
   weight: string;
   hometown: string;
   image?: string;
+  images?: string[];
   stats: {
     knockouts: number;
     submissions: number;
@@ -69,6 +70,11 @@ const FighterSchema: Schema = new Schema(
     image: {
       type: String,
     },
+    images: [
+      {
+        type: String,
+      },
+    ],
     featured: {
       type: Boolean,
       required: true,

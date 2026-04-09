@@ -13,6 +13,7 @@ import { useFightersQuery, useEventsQuery, useFightsQuery, useUpdateFightMutatio
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { LoadingCard, ErrorCard } from "./loading-card"
 import { ImageUpload } from "./image-upload"
+import { MultiImageUpload } from "./multi-image-upload"
 import Image from "next/image"
 
 interface FightersSectionProps {
@@ -365,6 +366,7 @@ function CreateFighterForm({ onSubmit, isLoading, onClose }: { onSubmit: (data: 
     weight: '',
     hometown: '',
     image: '',
+    images: [] as string[],
     featured: false,
     stats: {
       knockouts: '',
@@ -407,9 +409,11 @@ function CreateFighterForm({ onSubmit, isLoading, onClose }: { onSubmit: (data: 
     if (formData.bio && formData.bio.trim()) {
       submitData.bio = formData.bio.trim()
     }
-    // Only include image if it has a value
     if (formData.image && formData.image.trim()) {
       submitData.image = formData.image.trim()
+    }
+    if (formData.images.length > 0) {
+      submitData.images = formData.images
     }
 
     await onSubmit(submitData)
@@ -633,6 +637,13 @@ function CreateFighterForm({ onSubmit, isLoading, onClose }: { onSubmit: (data: 
         <p className="text-xs text-gray-500">Enter each achievement on a new line</p>
       </div>
 
+      <MultiImageUpload
+        label="Photo Gallery"
+        values={formData.images}
+        onChange={(urls) => setFormData(prev => ({ ...prev, images: urls }))}
+        folder="fighters"
+      />
+
       <div className="flex justify-end gap-2 pt-4">
         <Button type="button" variant="outline" onClick={onClose} className="border-gray-600 text-gray-300">
           Cancel
@@ -665,6 +676,7 @@ function EditFighterForm({ fighter, onSubmit, isLoading, onClose }: { fighter: a
     weight: fighter.weight,
     hometown: fighter.hometown,
     image: fighter.image,
+    images: (fighter.images ?? []) as string[],
     featured: fighter.featured || false,
     stats: {
       knockouts: fighter.stats.knockouts,
@@ -707,10 +719,10 @@ function EditFighterForm({ fighter, onSubmit, isLoading, onClose }: { fighter: a
     if (formData.bio && formData.bio.trim()) {
       submitData.bio = formData.bio.trim()
     }
-    // Only include image if it has a value
     if (formData.image && formData.image.trim()) {
       submitData.image = formData.image.trim()
     }
+    submitData.images = formData.images
 
     await onSubmit(submitData)
     onClose()
@@ -932,6 +944,13 @@ function EditFighterForm({ fighter, onSubmit, isLoading, onClose }: { fighter: a
         />
         <p className="text-xs text-gray-500">Enter each achievement on a new line</p>
       </div>
+
+      <MultiImageUpload
+        label="Photo Gallery"
+        values={formData.images}
+        onChange={(urls) => setFormData(prev => ({ ...prev, images: urls }))}
+        folder="fighters"
+      />
 
       <div className="flex justify-end gap-2 pt-4">
         <Button type="button" variant="outline" onClick={onClose} className="border-gray-600 text-gray-300">

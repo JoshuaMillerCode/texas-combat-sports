@@ -1,15 +1,17 @@
 "use client"
 
 import { useFighterBySlugQuery } from "@/hooks/use-queries"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import Image from "next/image"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
-import { Trophy, Award, MapPin, Calendar, Ruler, ChevronLeft } from "lucide-react"
+import { Trophy, Award, MapPin, Calendar, Ruler, ChevronLeft, X } from "lucide-react"
 import { format } from "date-fns"
+import { useState } from "react"
 
 export default function FighterProfilePage({ params }: { params: { slug: string } }) {
   const { data, isLoading, error } = useFighterBySlugQuery(params.slug)
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
 
   if (isLoading) {
     return (
@@ -306,7 +308,81 @@ export default function FighterProfilePage({ params }: { params: { slug: string 
             </div>
           </section>
         )}
+
+        {/* Photo Gallery */}
+        {fighter.images?.length > 0 && (
+          <section>
+            <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+              <span className="w-1 h-5 bg-red-600 rounded-full" />
+              Photo Gallery
+            </h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+              {fighter.images.map((url: string, i: number) => (
+                <button
+                  key={i}
+                  onClick={() => setLightboxIndex(i)}
+                  className="relative aspect-square rounded-lg overflow-hidden border border-gray-800 group"
+                >
+                  <Image
+                    src={url}
+                    alt={`${fighter.name} photo ${i + 1}`}
+                    fill
+                    className="object-cover transition-transform duration-300 group-hover:scale-105"
+                    sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
+                  />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300" />
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
       </div>
+
+      {/* Lightbox */}
+      <AnimatePresence>
+        {lightboxIndex !== null && (
+          <motion.div
+            className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setLightboxIndex(null)}
+          >
+            <button
+              onClick={() => setLightboxIndex(null)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-white p-2 rounded-full hover:bg-white/10 transition-colors"
+            >
+              <X className="w-6 h-6" />
+            </button>
+            <motion.div
+              className="relative w-full max-w-3xl max-h-[85vh] aspect-square"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Image
+                src={fighter.images[lightboxIndex]}
+                alt={`${fighter.name} photo ${lightboxIndex + 1}`}
+                fill
+                className="object-contain"
+                sizes="85vw"
+              />
+            </motion.div>
+            {fighter.images.length > 1 && (
+              <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-1.5">
+                {fighter.images.map((_: string, i: number) => (
+                  <button
+                    key={i}
+                    onClick={(e) => { e.stopPropagation(); setLightboxIndex(i) }}
+                    className={`w-2 h-2 rounded-full transition-colors ${i === lightboxIndex ? 'bg-white' : 'bg-gray-600 hover:bg-gray-400'}`}
+                  />
+                ))}
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
