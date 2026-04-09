@@ -19,16 +19,16 @@ export class FighterService {
     await dbConnect();
 
     // Auto-generate slug from name if not provided
-    if (!fighterData.slug && fighterData.name) {
-      let slug = generateSlug(fighterData.name);
+    let slug = fighterData.slug;
+    if (!slug && fighterData.name) {
+      slug = generateSlug(fighterData.name);
       const existing = await Fighter.findOne({ slug });
       if (existing) {
         slug = `${slug}-${Date.now().toString(36)}`;
       }
-      fighterData.slug = slug;
     }
 
-    const fighter = new Fighter(fighterData);
+    const fighter = new Fighter({ ...fighterData, ...(slug ? { slug } : {}) });
     return await fighter.save();
   }
 
@@ -167,7 +167,7 @@ export class FighterService {
     })
       .populate('fighter1 fighter2')
       .populate('event')
-      .sort({ 'event.date': -1 });
+      .sort({ createdAt: -1 });
   }
 
   static async getFighterUpcomingFights(fighterId: string) {

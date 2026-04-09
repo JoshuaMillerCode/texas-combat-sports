@@ -42,7 +42,7 @@ export default function FighterProfilePage({ params }: { params: { slug: string 
   }
 
   const { fighter, upcomingFights, pastFights } = data
-  const totalFinishes = fighter.stats.knockouts + fighter.stats.submissions + fighter.stats.decisions
+  const totalWinsByMethod = fighter.stats.knockouts + fighter.stats.submissions + fighter.stats.decisions
   const recordParts = fighter.record.split("-")
   const recordLabels = ["W", "L", "D"]
   const recordColors = ["#4ade80", "#f87171", "#facc15"]
@@ -306,7 +306,7 @@ export default function FighterProfilePage({ params }: { params: { slug: string 
         )}
 
         {/* Finish Breakdown — UFC-style percentage bars */}
-        {totalFinishes > 0 && (
+        {totalWinsByMethod > 0 && (
           <section className="pt-16">
             <Divider />
             <h2 className={`${oswald.className} text-white text-2xl font-bold tracking-widest uppercase mb-8 flex items-center gap-3`}>
@@ -319,7 +319,7 @@ export default function FighterProfilePage({ params }: { params: { slug: string 
                 { label: "Submissions", value: fighter.stats.submissions, color: "#ea580c" },
                 { label: "Decisions", value: fighter.stats.decisions, color: "#4b5563" },
               ].map(({ label, value, color }) => {
-                const pct = totalFinishes > 0 ? Math.round((value / totalFinishes) * 100) : 0
+                const pct = totalWinsByMethod > 0 ? Math.round((value / totalWinsByMethod) * 100) : 0
                 return (
                   <div key={label} className="flex items-center gap-5">
                     <div className={`${oswald.className} text-white text-3xl font-bold w-10 text-right flex-shrink-0`}>{value}</div>
@@ -416,7 +416,7 @@ export default function FighterProfilePage({ params }: { params: { slug: string 
               transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
               onClick={e => e.stopPropagation()}
             >
-              <Image src={fighter.images[lightboxIndex]} alt="" fill className="object-contain" sizes="85vw" />
+              <Image src={fighter.images?.[lightboxIndex as number] ?? ""} alt="" fill className="object-contain" sizes="85vw" />
             </motion.div>
             {fighter.images.length > 1 && (
               <div className="absolute bottom-6 flex justify-center gap-2 left-0 right-0">

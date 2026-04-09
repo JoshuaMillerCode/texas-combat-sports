@@ -3,7 +3,7 @@
 import { useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import { Upload, X, Loader2, Plus } from "lucide-react"
+import { X, Loader2, Plus } from "lucide-react"
 import { useAuth } from "@/contexts/auth-context"
 import Image from "next/image"
 
@@ -37,6 +37,8 @@ export function MultiImageUpload({ label, values, onChange, folder = 'uploads' }
     setIsUploading(true)
 
     try {
+      const signController = new AbortController()
+      const signTimeout = setTimeout(() => signController.abort(), 10000)
       const signRes = await fetch('/api/cloudinary/sign', {
         method: 'POST',
         headers: {
@@ -44,7 +46,9 @@ export function MultiImageUpload({ label, values, onChange, folder = 'uploads' }
           Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify({ folder }),
+        signal: signController.signal,
       })
+      clearTimeout(signTimeout)
 
       if (!signRes.ok) throw new Error('Failed to get upload signature')
 
@@ -57,10 +61,13 @@ export function MultiImageUpload({ label, values, onChange, folder = 'uploads' }
       formData.append('signature', signature)
       formData.append('folder', signedFolder)
 
+      const uploadController = new AbortController()
+      const uploadTimeout = setTimeout(() => uploadController.abort(), 30000)
       const uploadRes = await fetch(
         `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-        { method: 'POST', body: formData }
+        { method: 'POST', body: formData, signal: uploadController.signal }
       )
+      clearTimeout(uploadTimeout)
 
       if (!uploadRes.ok) throw new Error('Upload failed')
 
