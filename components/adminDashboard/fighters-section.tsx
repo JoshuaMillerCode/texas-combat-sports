@@ -356,6 +356,8 @@ function CreateFighterForm({ onSubmit, isLoading, onClose }: { onSubmit: (data: 
   const [formData, setFormData] = useState({
     name: '',
     nickname: '',
+    slug: '',
+    bio: '',
     record: '',
     age: '',
     height: '',
@@ -398,12 +400,18 @@ function CreateFighterForm({ onSubmit, isLoading, onClose }: { onSubmit: (data: 
         .map(achievement => achievement.trim())
         .filter(achievement => achievement.length > 0)
     }
-    
+
+    if (formData.slug && formData.slug.trim()) {
+      submitData.slug = formData.slug.trim().toLowerCase().replace(/\s+/g, '-')
+    }
+    if (formData.bio && formData.bio.trim()) {
+      submitData.bio = formData.bio.trim()
+    }
     // Only include image if it has a value
     if (formData.image && formData.image.trim()) {
       submitData.image = formData.image.trim()
     }
-    
+
     await onSubmit(submitData)
     onClose()
   }
@@ -431,6 +439,29 @@ function CreateFighterForm({ onSubmit, isLoading, onClose }: { onSubmit: (data: 
             required
           />
         </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="create-slug" className="text-gray-300">Profile Slug <span className="text-gray-500 font-normal">(optional — auto-generated from name)</span></Label>
+        <Input
+          id="create-slug"
+          value={formData.slug}
+          onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
+          className="bg-gray-800 border-gray-700 text-white font-mono text-sm"
+          placeholder="e.g. john-smith"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="create-bio" className="text-gray-300">Bio <span className="text-gray-500 font-normal">(optional)</span></Label>
+        <Textarea
+          id="create-bio"
+          value={formData.bio}
+          onChange={(e) => setFormData(prev => ({ ...prev, bio: e.target.value }))}
+          className="bg-gray-800 border-gray-700 text-white"
+          rows={3}
+          placeholder="Short fighter biography shown on their profile page"
+        />
       </div>
       
       <div className="grid grid-cols-3 gap-4">
@@ -625,6 +656,8 @@ function EditFighterForm({ fighter, onSubmit, isLoading, onClose }: { fighter: a
   const [formData, setFormData] = useState({
     name: fighter.name,
     nickname: fighter.nickname,
+    slug: fighter.slug ?? '',
+    bio: fighter.bio ?? '',
     record: fighter.record,
     age: fighter.age,
     height: fighter.height,
@@ -661,18 +694,24 @@ function EditFighterForm({ fighter, onSubmit, isLoading, onClose }: { fighter: a
         submissions: parseInt(formData.stats.submissions) || 0,
         decisions: parseInt(formData.stats.decisions) || 0,
         winStreak: parseInt(formData.stats.winStreak) || 0,
-          },
-    achievements: formData.achievements
-      .split('\n')
-      .map((achievement: string) => achievement.trim())
-      .filter((achievement: string) => achievement.length > 0)
-  }
-    
+      },
+      achievements: formData.achievements
+        .split('\n')
+        .map((achievement: string) => achievement.trim())
+        .filter((achievement: string) => achievement.length > 0)
+    }
+
+    if (formData.slug && formData.slug.trim()) {
+      submitData.slug = formData.slug.trim().toLowerCase().replace(/\s+/g, '-')
+    }
+    if (formData.bio && formData.bio.trim()) {
+      submitData.bio = formData.bio.trim()
+    }
     // Only include image if it has a value
     if (formData.image && formData.image.trim()) {
       submitData.image = formData.image.trim()
     }
-    
+
     await onSubmit(submitData)
     onClose()
   }
@@ -681,9 +720,9 @@ function EditFighterForm({ fighter, onSubmit, isLoading, onClose }: { fighter: a
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="name" className="text-gray-300">Full Name</Label>
+          <Label htmlFor="edit-name" className="text-gray-300">Full Name</Label>
           <Input
-            id="name"
+            id="edit-name"
             value={formData.name}
             onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
             className="bg-gray-800 border-gray-700 text-white"
@@ -691,9 +730,9 @@ function EditFighterForm({ fighter, onSubmit, isLoading, onClose }: { fighter: a
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="nickname" className="text-gray-300">Nickname</Label>
+          <Label htmlFor="edit-nickname" className="text-gray-300">Nickname</Label>
           <Input
-            id="nickname"
+            id="edit-nickname"
             value={formData.nickname}
             onChange={(e) => setFormData(prev => ({ ...prev, nickname: e.target.value }))}
             className="bg-gray-800 border-gray-700 text-white"
@@ -701,7 +740,30 @@ function EditFighterForm({ fighter, onSubmit, isLoading, onClose }: { fighter: a
           />
         </div>
       </div>
-      
+
+      <div className="space-y-2">
+        <Label htmlFor="edit-slug" className="text-gray-300">Profile Slug</Label>
+        <Input
+          id="edit-slug"
+          value={formData.slug}
+          onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
+          className="bg-gray-800 border-gray-700 text-white font-mono text-sm"
+          placeholder="e.g. john-smith"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="edit-bio" className="text-gray-300">Bio <span className="text-gray-500 font-normal">(optional)</span></Label>
+        <Textarea
+          id="edit-bio"
+          value={formData.bio}
+          onChange={(e) => setFormData(prev => ({ ...prev, bio: e.target.value }))}
+          className="bg-gray-800 border-gray-700 text-white"
+          rows={3}
+          placeholder="Short fighter biography shown on their profile page"
+        />
+      </div>
+
       <div className="grid grid-cols-3 gap-4">
         <div className="space-y-2">
           <Label htmlFor="record" className="text-gray-300">Record (W-L-D)</Label>
