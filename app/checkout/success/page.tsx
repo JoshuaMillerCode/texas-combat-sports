@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import RevealAnimation from "@/components/reveal-animation"
 import { CheckCircle, Download, Mail, Calendar, MapPin, Clock } from "lucide-react"
+import { AddToWalletButtons } from "@/components/add-to-wallet-buttons"
 import { formatAmountForDisplay } from "@/lib/stripe"
 import { useTransactionQuery, useDownloadTicketMutation } from "@/hooks/use-queries"
 
@@ -291,7 +292,7 @@ export default function CheckoutSuccessPage() {
 
                 {/* Action Buttons */}
                 <div className="space-y-4">
-                  <Button 
+                  <Button
                     className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3"
                     onClick={handleDownloadTickets}
                     disabled={!orderId || isTransactionLoading || downloadTicketMutation.isPending}
@@ -299,6 +300,9 @@ export default function CheckoutSuccessPage() {
                     <Download className="w-5 h-5 mr-2" />
                     {downloadTicketMutation.isPending ? 'Downloading...' : 'Download Tickets'}
                   </Button>
+                  {orderId && !isTransactionLoading && (
+                    <AddToWalletButtons orderId={orderId} />
+                  )}
                   <Link href="/events" className="block">
                     <Button
                       variant="outline"
