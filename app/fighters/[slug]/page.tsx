@@ -11,111 +11,8 @@ import { useState } from "react"
 
 const oswald = Oswald({ subsets: ["latin"], weight: ["400", "500", "600", "700"] })
 
-// ── Ring graphics ─────────────────────────────────────────
-
-/** Three ropes stretched between two corner posts */
-function RingFrame() {
-  const ropePositions = ["32%", "47%", "62%"]
-  return (
-    <>
-      {/* Left corner post */}
-      <div className="absolute left-5 md:left-10 top-[18%] bottom-[8%] w-[10px] z-10 pointer-events-none rounded-sm hidden md:block"
-        style={{
-          background: "linear-gradient(to right, #78350f 0%, #d97706 20%, #fde68a 50%, #d97706 80%, #78350f 100%)",
-          boxShadow: "0 0 18px rgba(217,119,6,0.5), inset 0 0 6px rgba(0,0,0,0.4)",
-        }}
-      />
-      {/* Left post cap top */}
-      <div className="absolute z-10 pointer-events-none hidden md:block"
-        style={{ left: "calc(40px - 8px)", top: "18%" }}
-      >
-        <div className="w-[26px] h-[26px] rounded-full"
-          style={{ background: "radial-gradient(circle at 35% 35%, #fde68a, #d97706 55%, #78350f)", boxShadow: "0 0 10px rgba(217,119,6,0.6)" }}
-        />
-      </div>
-      {/* Left post cap bottom */}
-      <div className="absolute z-10 pointer-events-none hidden md:block"
-        style={{ left: "calc(40px - 8px)", bottom: "8%" }}
-      >
-        <div className="w-[26px] h-[26px] rounded-full"
-          style={{ background: "radial-gradient(circle at 35% 35%, #fde68a, #d97706 55%, #78350f)", boxShadow: "0 0 10px rgba(217,119,6,0.6)" }}
-        />
-      </div>
-
-      {/* Right corner post */}
-      <div className="absolute right-5 md:right-10 top-[18%] bottom-[8%] w-[10px] z-10 pointer-events-none rounded-sm hidden md:block"
-        style={{
-          background: "linear-gradient(to right, #78350f 0%, #d97706 20%, #fde68a 50%, #d97706 80%, #78350f 100%)",
-          boxShadow: "0 0 18px rgba(217,119,6,0.5), inset 0 0 6px rgba(0,0,0,0.4)",
-        }}
-      />
-      {/* Right post cap top */}
-      <div className="absolute z-10 pointer-events-none hidden md:block"
-        style={{ right: "calc(40px - 8px)", top: "18%" }}
-      >
-        <div className="w-[26px] h-[26px] rounded-full"
-          style={{ background: "radial-gradient(circle at 35% 35%, #fde68a, #d97706 55%, #78350f)", boxShadow: "0 0 10px rgba(217,119,6,0.6)" }}
-        />
-      </div>
-      {/* Right post cap bottom */}
-      <div className="absolute z-10 pointer-events-none hidden md:block"
-        style={{ right: "calc(40px - 8px)", bottom: "8%" }}
-      >
-        <div className="w-[26px] h-[26px] rounded-full"
-          style={{ background: "radial-gradient(circle at 35% 35%, #fde68a, #d97706 55%, #78350f)", boxShadow: "0 0 10px rgba(217,119,6,0.6)" }}
-        />
-      </div>
-
-      {/* The 3 ropes */}
-      {ropePositions.map((top, i) => (
-        <div key={i} className="absolute z-10 pointer-events-none hidden md:block"
-          style={{
-            top,
-            left: "40px",
-            right: "40px",
-            height: "5px",
-            borderRadius: "3px",
-            background: "linear-gradient(to bottom, rgba(255,255,255,0.35) 0%, #dc2626 30%, #991b1b 70%, rgba(0,0,0,0.4) 100%)",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.6), 0 -1px 0 rgba(255,255,255,0.15)",
-            opacity: 1 - i * 0.08,
-          }}
-        >
-          {/* Left turnbuckle */}
-          <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 w-4 h-4 rounded-full"
-            style={{ background: "radial-gradient(circle at 35% 35%, #fde68a, #b45309)", boxShadow: "0 0 6px rgba(217,119,6,0.7)" }}
-          />
-          {/* Right turnbuckle */}
-          <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 w-4 h-4 rounded-full"
-            style={{ background: "radial-gradient(circle at 35% 35%, #fde68a, #b45309)", boxShadow: "0 0 6px rgba(217,119,6,0.7)" }}
-          />
-        </div>
-      ))}
-    </>
-  )
-}
-
-/** Decorative ring-rope section divider */
-function RopeDivider() {
-  return (
-    <div className="flex flex-col gap-2 my-10">
-      {[0, 1, 2].map(i => (
-        <div key={i} className="flex items-center">
-          <div className="w-3 h-3 rounded-full flex-shrink-0"
-            style={{ background: "radial-gradient(circle at 35% 35%, #fde68a, #b45309)", boxShadow: "0 0 5px rgba(217,119,6,0.5)" }}
-          />
-          <div className="flex-1 h-[3px] rounded-full"
-            style={{
-              background: "linear-gradient(to bottom, rgba(255,255,255,0.2) 0%, #dc2626 35%, #991b1b 65%, rgba(0,0,0,0.3) 100%)",
-              boxShadow: "0 1px 4px rgba(0,0,0,0.4)",
-            }}
-          />
-          <div className="w-3 h-3 rounded-full flex-shrink-0"
-            style={{ background: "radial-gradient(circle at 35% 35%, #fde68a, #b45309)", boxShadow: "0 0 5px rgba(217,119,6,0.5)" }}
-          />
-        </div>
-      ))}
-    </div>
-  )
+function Divider() {
+  return <div className="h-px my-12" style={{ background: "linear-gradient(to right, transparent, #1f1f1f 20%, #1f1f1f 80%, transparent)" }} />
 }
 
 // ── Main Page ─────────────────────────────────────────────
@@ -179,9 +76,6 @@ export default function FighterProfilePage({ params }: { params: { slug: string 
         <div className="absolute inset-0 pointer-events-none" style={{
           background: "linear-gradient(to bottom, #050505 0%, transparent 15%, transparent 70%, #050505 100%)",
         }} />
-
-        {/* Ring frame */}
-        <RingFrame />
 
         {/* Back nav */}
         <div className="relative z-20 pt-20 px-6 md:px-20">
@@ -324,7 +218,7 @@ export default function FighterProfilePage({ params }: { params: { slug: string 
         {/* Upcoming Fights */}
         {upcomingFights?.length > 0 && (
           <section className="pt-16">
-            <RopeDivider />
+            <Divider />
             <h2 className={`${oswald.className} text-white text-2xl font-bold tracking-widest uppercase mb-6 flex items-center gap-3`}>
               <span className="w-1 h-7 bg-red-600 rounded-full inline-block" />
               Next Fight
@@ -366,7 +260,7 @@ export default function FighterProfilePage({ params }: { params: { slug: string 
         {/* Fight History */}
         {pastFights?.length > 0 && (
           <section className="pt-16">
-            <RopeDivider />
+            <Divider />
             <h2 className={`${oswald.className} text-white text-2xl font-bold tracking-widest uppercase mb-6 flex items-center gap-3`}>
               <span className="w-1 h-7 bg-gray-600 rounded-full inline-block" />
               TCS Fight History
@@ -414,7 +308,7 @@ export default function FighterProfilePage({ params }: { params: { slug: string 
         {/* Finish Breakdown — UFC-style percentage bars */}
         {totalFinishes > 0 && (
           <section className="pt-16">
-            <RopeDivider />
+            <Divider />
             <h2 className={`${oswald.className} text-white text-2xl font-bold tracking-widest uppercase mb-8 flex items-center gap-3`}>
               <span className="w-1 h-7 bg-red-600 rounded-full inline-block" />
               Finish Breakdown
@@ -453,7 +347,7 @@ export default function FighterProfilePage({ params }: { params: { slug: string 
         {/* Achievements */}
         {fighter.achievements?.length > 0 && (
           <section className="pt-16">
-            <RopeDivider />
+            <Divider />
             <h2 className={`${oswald.className} text-white text-2xl font-bold tracking-widest uppercase mb-6 flex items-center gap-3`}>
               <Trophy className="w-5 h-5 text-amber-400" />
               Achievements
@@ -474,7 +368,7 @@ export default function FighterProfilePage({ params }: { params: { slug: string 
         {/* Photo Gallery */}
         {fighter.images?.length > 0 && (
           <section className="pt-16">
-            <RopeDivider />
+            <Divider />
             <h2 className={`${oswald.className} text-white text-2xl font-bold tracking-widest uppercase mb-6 flex items-center gap-3`}>
               <span className="w-1 h-7 bg-red-600 rounded-full inline-block" />
               Gallery
