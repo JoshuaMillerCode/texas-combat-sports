@@ -4,6 +4,8 @@ export interface IFighter extends Document {
   _id: mongoose.Types.ObjectId;
   name: string;
   nickname: string;
+  slug: string;
+  bio?: string;
   record: string;
   age: number;
   height: string;
@@ -11,6 +13,7 @@ export interface IFighter extends Document {
   weight: string;
   hometown: string;
   image?: string;
+  images?: string[];
   stats: {
     knockouts: number;
     submissions: number;
@@ -31,6 +34,14 @@ const FighterSchema: Schema = new Schema(
     nickname: {
       type: String,
       required: true,
+    },
+    slug: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
+    bio: {
+      type: String,
     },
     record: {
       type: String,
@@ -59,6 +70,11 @@ const FighterSchema: Schema = new Schema(
     image: {
       type: String,
     },
+    images: [
+      {
+        type: String,
+      },
+    ],
     featured: {
       type: Boolean,
       required: true,
@@ -100,6 +116,7 @@ const FighterSchema: Schema = new Schema(
 // Index for efficient queries
 FighterSchema.index({ name: 1 });
 FighterSchema.index({ nickname: 1 });
+FighterSchema.index({ slug: 1 });
 
 const Fighter =
   mongoose.models.Fighter || mongoose.model<IFighter>('Fighter', FighterSchema);

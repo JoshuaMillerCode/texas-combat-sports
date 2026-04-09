@@ -303,6 +303,14 @@ export function useFighterQuery(id: string) {
   });
 }
 
+export function useFighterBySlugQuery(slug: string) {
+  return useQuery({
+    queryKey: ['fighters', 'slug', slug],
+    queryFn: () => apiRequest(`/api/fighters/slug/${slug}`, {}),
+    enabled: !!slug,
+  });
+}
+
 export function useCreateFighterMutation() {
   const { accessToken, isAuthenticated } = useAuth();
   const queryClient = useQueryClient();

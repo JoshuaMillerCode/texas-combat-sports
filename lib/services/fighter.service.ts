@@ -2,19 +2,44 @@ import dbConnect from '@/lib/dbConnect';
 import { Fighter, Fight } from '@/lib/models';
 import { IFighter } from '@/lib/models/Fighter';
 
+function generateSlug(name: string): string {
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-');
+}
+
 export class FighterService {
   // Basic CRUD Operations
   static async createFighter(
     fighterData: Partial<IFighter>
   ): Promise<IFighter> {
     await dbConnect();
-    const fighter = new Fighter(fighterData);
+
+    // Auto-generate slug from name if not provided
+    let slug = fighterData.slug;
+    if (!slug && fighterData.name) {
+      slug = generateSlug(fighterData.name);
+      const existing = await Fighter.findOne({ slug });
+      if (existing) {
+        slug = `${slug}-${Date.now().toString(36)}`;
+      }
+    }
+
+    const fighter = new Fighter({ ...fighterData, ...(slug ? { slug } : {}) });
     return await fighter.save();
   }
 
   static async getFighterById(id: string): Promise<IFighter | null> {
     await dbConnect();
     return await Fighter.findById(id);
+  }
+
+  static async getFighterBySlug(slug: string): Promise<IFighter | null> {
+    await dbConnect();
+    return await Fighter.findOne({ slug });
   }
 
   static async getAllFighters(): Promise<IFighter[]> {
@@ -142,7 +167,7 @@ export class FighterService {
     })
       .populate('fighter1 fighter2')
       .populate('event')
-      .sort({ 'event.date': -1 });
+      .sort({ createdAt: -1 });
   }
 
   static async getFighterUpcomingFights(fighterId: string) {
