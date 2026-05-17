@@ -69,7 +69,7 @@ export default function Header() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 flex-shrink-0 mr-8">
             <Image
-              src="https://res.cloudinary.com/dujmomznj/image/upload/f_auto,q_auto:good,w_40,h_40/v1755476673/helmet_ouwsr5.jpg"
+              src="https://res.cloudinary.com/dujmomznj/image/upload/f_auto,q_auto:good,w_120,h_120/v1755476673/helmet_ouwsr5.jpg"
               alt="Texas Combat Sports Logo"
               width={40}
               height={40}
@@ -192,7 +192,7 @@ export default function Header() {
                 {/* Drawer header */}
                 <div className={cn("flex items-center gap-3 px-6 h-16 border-b", borderColor)}>
                   <Image
-                    src="https://res.cloudinary.com/dujmomznj/image/upload/f_auto,q_auto:good,w_32,h_32/v1755476673/helmet_ouwsr5.jpg"
+                    src="https://res.cloudinary.com/dujmomznj/image/upload/f_auto,q_auto:good,w_96,h_96/v1755476673/helmet_ouwsr5.jpg"
                     alt="Texas Combat Sports Logo"
                     width={32}
                     height={32}
