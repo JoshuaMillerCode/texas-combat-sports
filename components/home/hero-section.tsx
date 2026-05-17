@@ -10,8 +10,7 @@ import { useCurrentEvent } from "@/contexts/current-event-context"
 import { useRouter } from "next/navigation"
 import { useTicketPurchase } from "@/hooks/use-ticket-purchase"
 import ComingSoonModal from "@/components/coming-soon-modal"
-import { Calendar, MapPin, Ticket } from "lucide-react"
-import { format } from "date-fns"
+import { ArrowRight } from "lucide-react"
 
 const DEFAULT_HERO_VIDEO =
   "https://res.cloudinary.com/dujmomznj/video/upload/v1754756997/0809_vaxbkh.mov"
@@ -39,8 +38,7 @@ export default function HeroSection() {
       {hasEvent ? (
         <EventHero
           event={currentEvent}
-          onBuyTickets={() => handleTicketPurchase(currentEvent.slug)}
-          onFightCard={() => router.push(`/events/${currentEvent.slug}`)}
+          onViewEvent={() => router.push(`/events/${currentEvent.slug}`)}
         />
       ) : (
         <BrandHero
@@ -57,12 +55,10 @@ export default function HeroSection() {
 
 function EventHero({
   event,
-  onBuyTickets,
-  onFightCard,
+  onViewEvent,
 }: {
   event: any
-  onBuyTickets: () => void
-  onFightCard: () => void
+  onViewEvent: () => void
 }) {
   return (
     <div className="text-center px-4 max-w-6xl mx-auto relative z-10">
@@ -96,71 +92,34 @@ function EventHero({
       </RevealAnimation>
 
       <RevealAnimation delay={0.25}>
-        <h1 className="text-5xl md:text-7xl lg:text-8xl font-black mb-3 text-white drop-shadow-2xl leading-[0.95]">
+        <h1 className="text-5xl md:text-7xl lg:text-8xl font-black mb-6 text-white drop-shadow-2xl leading-[0.95]">
           {event.title}
         </h1>
       </RevealAnimation>
 
-      {event.subtitle && (
-        <RevealAnimation delay={0.35}>
-          <p className="text-lg md:text-2xl mb-6 text-red-500 font-bold tracking-wide drop-shadow-lg uppercase">
-            {event.subtitle}
-          </p>
-        </RevealAnimation>
-      )}
-
-      <RevealAnimation delay={0.45}>
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 mb-8 text-white/90">
-          {event.date && (
-            <div className="flex items-center gap-2 text-base md:text-lg font-semibold drop-shadow-lg">
-              <Calendar className="w-5 h-5 text-red-500" />
-              {format(new Date(event.date), "EEE, MMM d, yyyy")}
-            </div>
-          )}
-          {event.venue && (
-            <div className="flex items-center gap-2 text-base md:text-lg font-semibold drop-shadow-lg">
-              <MapPin className="w-5 h-5 text-red-500" />
-              {event.venue}
-              {event.city ? `, ${event.city}` : ""}
-            </div>
-          )}
-        </div>
-      </RevealAnimation>
-
       {event.date && (
-        <RevealAnimation delay={0.55}>
+        <RevealAnimation delay={0.4}>
           <div className="max-w-2xl mx-auto mb-8">
             <CountdownTimer targetDate={new Date(event.date).toISOString()} />
           </div>
         </RevealAnimation>
       )}
 
-      <RevealAnimation delay={0.65}>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+      <RevealAnimation delay={0.55}>
+        <div className="flex flex-col items-center gap-4">
           <Button
             size="lg"
-            className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 text-lg font-bold transition-all duration-300 hover:scale-105 shadow-lg"
-            onClick={onBuyTickets}
+            className="bg-red-600 hover:bg-red-700 text-white px-10 py-4 text-lg font-bold transition-all duration-300 hover:scale-105 shadow-lg group"
+            onClick={onViewEvent}
           >
-            <Ticket className="w-5 h-5 mr-2" />
-            Buy Tickets
+            View Event
+            <ArrowRight className="w-5 h-5 ml-2 transition-transform duration-300 group-hover:translate-x-1" />
           </Button>
-          <Button
-            size="lg"
-            variant="outline"
-            className="border-red-600 text-red-600 hover:bg-red-600 hover:text-white px-8 py-4 text-lg font-bold transition-all duration-300 hover:scale-105 bg-white shadow-lg"
-            onClick={onFightCard}
+          <Link
+            href="/my-tickets"
+            className="text-sm font-semibold text-white/70 hover:text-white underline underline-offset-4 transition-colors duration-200"
           >
-            See Fight Card
-          </Button>
-          <Link href="/my-tickets">
-            <Button
-              size="lg"
-              variant="outline"
-              className="border-white/40 text-white hover:bg-white/10 hover:border-white px-8 py-4 text-lg font-bold transition-all duration-300 hover:scale-105 bg-transparent shadow-lg w-full sm:w-auto"
-            >
-              My Tickets
-            </Button>
+            My Tickets
           </Link>
         </div>
       </RevealAnimation>
