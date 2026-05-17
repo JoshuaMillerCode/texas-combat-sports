@@ -8,8 +8,6 @@ import RevealAnimation from "@/components/reveal-animation"
 import CountdownTimer from "@/components/countdown-timer"
 import { useCurrentEvent } from "@/contexts/current-event-context"
 import { useRouter } from "next/navigation"
-import { useTicketPurchase } from "@/hooks/use-ticket-purchase"
-import ComingSoonModal from "@/components/coming-soon-modal"
 import { ArrowRight } from "lucide-react"
 
 const DEFAULT_HERO_VIDEO =
@@ -20,8 +18,6 @@ const BRAND_LOGO =
 export default function HeroSection() {
   const router = useRouter()
   const { currentEvent } = useCurrentEvent()
-  const { handleTicketPurchase, isComingSoonModalOpen, closeComingSoonModal } =
-    useTicketPurchase()
 
   const hasEvent = Boolean(currentEvent)
   const backgroundVideo = currentEvent?.heroVideo || DEFAULT_HERO_VIDEO
@@ -41,14 +37,8 @@ export default function HeroSection() {
           onViewEvent={() => router.push(`/events/${currentEvent.slug}`)}
         />
       ) : (
-        <BrandHero
-          onBuyTickets={() => handleTicketPurchase(undefined)}
-        />
+        <BrandHero />
       )}
-      <ComingSoonModal
-        isOpen={isComingSoonModalOpen}
-        onClose={closeComingSoonModal}
-      />
     </HeroParallax>
   )
 }
@@ -127,7 +117,7 @@ function EventHero({
   )
 }
 
-function BrandHero({ onBuyTickets }: { onBuyTickets: () => void }) {
+function BrandHero() {
   return (
     <div className="text-center px-4 max-w-6xl mx-auto relative z-10">
       <RevealAnimation delay={0.1}>
@@ -160,22 +150,12 @@ function BrandHero({ onBuyTickets }: { onBuyTickets: () => void }) {
       </RevealAnimation>
 
       <RevealAnimation delay={0.6}>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button
-            size="lg"
-            className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 text-lg font-bold transition-all duration-300 hover:scale-105 shadow-lg"
-            onClick={onBuyTickets}
+        <div className="flex justify-center">
+          <Link
+            href="/my-tickets"
+            className="text-sm font-semibold text-white/70 hover:text-white underline underline-offset-4 transition-colors duration-200"
           >
-            Buy Tickets
-          </Button>
-          <Link href="/my-tickets">
-            <Button
-              size="lg"
-              variant="outline"
-              className="border-white/40 text-white hover:bg-white/10 hover:border-white px-8 py-4 text-lg font-bold transition-all duration-300 hover:scale-105 bg-transparent shadow-lg w-full sm:w-auto"
-            >
-              My Tickets
-            </Button>
+            My Tickets
           </Link>
         </div>
       </RevealAnimation>
