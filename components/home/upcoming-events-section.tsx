@@ -36,12 +36,19 @@ export default function UpcomingEventsSection() {
   const router = useRouter()
   const { data: upcomingEvents, isLoading: isLoadingUpcoming } = useUpcomingEventsQuery()
 
+  // The first upcoming event is featured in the hero, so skip it here to avoid duplication.
+  const futureEvents = upcomingEvents ? upcomingEvents.slice(1) : []
+
+  if (!isLoadingUpcoming && futureEvents.length === 0) {
+    return null
+  }
+
   return (
     <SmoothParallax className="py-20 bg-gradient-to-b from-gray-900 to-black" speed={0.3} direction="up">
       <div className="container mx-auto px-4">
         <RevealAnimation>
           <h2 className="text-5xl font-black text-center mb-16 text-white">
-            UPCOMING <span className="text-red-600">EVENTS</span>
+            MORE <span className="text-red-600">EVENTS</span>
           </h2>
         </RevealAnimation>
 
@@ -61,10 +68,10 @@ export default function UpcomingEventsSection() {
               ))}
             </div>
           </div>
-        ) : upcomingEvents && upcomingEvents.length > 0 ? (
+        ) : (
           <div className="flex justify-center">
-            <div className={`grid gap-8 ${upcomingEvents.length === 1 ? 'md:grid-cols-1 max-w-5xl' : 'md:grid-cols-2 max-w-6xl'} w-full`}>
-              {upcomingEvents.map((event: IEvent, index: number) => (
+            <div className={`grid gap-8 ${futureEvents.length === 1 ? 'md:grid-cols-1 max-w-5xl' : 'md:grid-cols-2 max-w-6xl'} w-full`}>
+              {futureEvents.map((event: IEvent, index: number) => (
                 <RevealAnimation key={event._id.toString()} delay={index * 0.2}>
                   <ScrollTriggeredAnimation
                     scaleRange={[0.95, 1]}
@@ -109,14 +116,8 @@ export default function UpcomingEventsSection() {
               ))}
             </div>
           </div>
-        ) : (
-          <div className="flex justify-center">
-            <div className="text-center py-12 max-w-2xl">
-              <p className="text-gray-400 text-lg">No upcoming events at the moment.</p>
-            </div>
-          </div>
         )}
       </div>
     </SmoothParallax>
   )
-} 
+}
