@@ -1,12 +1,19 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { Menu, X, Instagram, Youtube, Facebook, Ticket } from "lucide-react"
+import { Menu, Instagram, Youtube, Facebook } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import {
+  Sheet,
+  SheetContent,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet"
 import { useCurrentEvent } from "@/contexts/current-event-context"
 import { useRouter, usePathname } from "next/navigation"
+import { cn } from "@/lib/utils"
 
 // Simple TikTok SVG icon
 const TikTokIcon = ({ size = 20, className = "" }: { size?: number; className?: string }) => (
@@ -34,6 +41,13 @@ export default function Header() {
   const logoColor = isDollsPage ? 'text-pink-500' : 'text-red-600';
   const hoverColor = isDollsPage ? 'hover:text-pink-500' : 'hover:text-red-500';
   const buttonBg = isDollsPage ? 'bg-pink-600 hover:bg-pink-700' : 'bg-red-600 hover:bg-red-700';
+  const activeColor = isDollsPage ? 'text-pink-500' : 'text-red-500';
+  const activeBg = isDollsPage ? 'bg-pink-500/10' : 'bg-red-500/10';
+
+  // Auto-close mobile nav on route change
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [pathname]);
 
   const navItems = [
     { href: "/", label: "Home" },
@@ -55,7 +69,7 @@ export default function Header() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 flex-shrink-0 mr-8">
             <Image
-              src="https://res.cloudinary.com/dujmomznj/image/upload/f_auto,q_auto:good,w_40,h_40/v1755476673/helmet_ouwsr5.jpg"
+              src="https://res.cloudinary.com/dujmomznj/image/upload/f_auto,q_auto:good,w_120,h_120/v1755476673/helmet_ouwsr5.jpg"
               alt="Texas Combat Sports Logo"
               width={40}
               height={40}
@@ -135,82 +149,139 @@ export default function Header() {
             </div>
 
             {/* Buy Tickets Button */}
-            <Button
-              size="sm"
-              className={`${buttonBg} text-white font-bold px-4`}
-              onClick={() => {
-                if (currentEvent) {
-                  router.push(`/events/${currentEvent.slug}`);
-                }
-              }}
-            >
-              Buy Tickets
-            </Button>
+            {currentEvent && (
+              <Button
+                size="sm"
+                className={`${buttonBg} text-white font-bold px-4`}
+                onClick={() => router.push(`/events/${currentEvent.slug}`)}
+              >
+                Buy Tickets
+              </Button>
+            )}
           </div>
 
-          {/* Mobile Menu Button */}
-          <div className="lg:hidden flex items-center space-x-3 flex-shrink-0 ml-auto">
-            <Button
-              size="sm"
-              className={`${buttonBg} text-white font-bold px-4`}
-              onClick={() => {
-                if (currentEvent) {
-                  router.push(`/events/${currentEvent.slug}`);
-                }
-              }}
-            >
-              Buy Tickets
-            </Button>
-            <Link
-              href="/my-tickets"
-              className={`text-gray-400 ${hoverColor} transition-colors`}
-              title="My Tickets"
-            >
-              <Ticket size={22} />
-            </Link>
-            <button className="text-white p-1" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
+          {/* Mobile Menu Trigger */}
+          <div className="lg:hidden flex items-center space-x-2 flex-shrink-0 ml-auto">
+            {currentEvent && (
+              <Button
+                size="sm"
+                className={`${buttonBg} text-white font-bold px-3`}
+                onClick={() => router.push(`/events/${currentEvent.slug}`)}
+              >
+                Buy Tickets
+              </Button>
+            )}
+            <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+              <SheetTrigger asChild>
+                <button
+                  className="text-white p-2.5 -mr-2"
+                  aria-label="Open menu"
+                >
+                  <Menu size={24} />
+                </button>
+              </SheetTrigger>
+              <SheetContent
+                side="right"
+                className={cn(
+                  "w-[85vw] max-w-sm sm:max-w-sm border-l p-0 gap-0 flex flex-col",
+                  "bg-black/95 backdrop-blur-md",
+                  borderColor
+                )}
+              >
+                <SheetTitle className="sr-only">Navigation menu</SheetTitle>
+                {/* Drawer header */}
+                <div className={cn("flex items-center gap-3 px-6 h-16 border-b", borderColor)}>
+                  <Image
+                    src="https://res.cloudinary.com/dujmomznj/image/upload/f_auto,q_auto:good,w_96,h_96/v1755476673/helmet_ouwsr5.jpg"
+                    alt="Texas Combat Sports Logo"
+                    width={32}
+                    height={32}
+                    className="object-contain"
+                  />
+                  <span className={cn("text-xl font-bold", logoColor)}>TXCS</span>
+                </div>
+
+                {/* Nav links */}
+                <nav className="flex-1 overflow-y-auto py-4">
+                  <ul className="flex flex-col px-3">
+                    {navItems.map((item) => {
+                      const isActive =
+                        item.href === "/"
+                          ? pathname === "/"
+                          : pathname?.startsWith(item.href);
+                      return (
+                        <li key={item.href}>
+                          <Link
+                            href={item.href}
+                            onClick={() => setIsMenuOpen(false)}
+                            className={cn(
+                              "block rounded-md px-3 py-3 text-base font-medium transition-colors",
+                              isActive
+                                ? `${activeColor} ${activeBg}`
+                                : `text-white/90 ${hoverColor} hover:bg-white/5`
+                            )}
+                          >
+                            {item.label}
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </nav>
+
+                {/* Footer: Buy Tickets + social */}
+                <div className={cn("border-t px-6 py-5 space-y-4", borderColor)}>
+                  {currentEvent && (
+                    <Button
+                      className={`${buttonBg} text-white font-bold w-full`}
+                      onClick={() => router.push(`/events/${currentEvent.slug}`)}
+                    >
+                      Buy Tickets
+                    </Button>
+                  )}
+                  <div className="flex items-center justify-center gap-5 pt-1">
+                    <Link
+                      href="https://www.instagram.com/texascombatsports?igsh=OWFnZmlpZWFzdmJw"
+                      className={`text-gray-400 ${hoverColor} transition-colors`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="Instagram"
+                    >
+                      <Instagram size={20} />
+                    </Link>
+                    <Link
+                      href="https://youtube.com/@texascombatsports?si=Kpiup3NV3dD-TySi"
+                      className={`text-gray-400 ${hoverColor} transition-colors`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="YouTube"
+                    >
+                      <Youtube size={20} />
+                    </Link>
+                    <Link
+                      href="https://www.facebook.com/share/1FfXuJtAuq/?mibextid=wwXIfr"
+                      className={`text-gray-400 ${hoverColor} transition-colors`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="Facebook"
+                    >
+                      <Facebook size={20} />
+                    </Link>
+                    <Link
+                      href="https://www.tiktok.com/@texascombatsportshtx"
+                      className={`text-gray-400 ${hoverColor} transition-colors`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="TikTok"
+                    >
+                      <TikTokIcon size={20} />
+                    </Link>
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
-
-        {/* Mobile/Tablet Dropdown Navigation */}
-        {isMenuOpen && (
-          <nav className={`lg:hidden py-4 border-t ${borderColor} bg-black/95`}>
-            <div className="flex flex-col items-center space-y-3">
-              {navItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`text-white ${hoverColor} transition-colors font-medium text-center py-1`}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </div>
-          </nav>
-        )}
-
-        {/* Tablet "More" items dropdown */}
-        {isMenuOpen && (
-          <nav className={`hidden lg:flex xl:hidden py-4 border-t ${borderColor} bg-black/95`}>
-            <div className="flex justify-center w-full">
-              <div className="flex items-center space-x-6">
-                {navItems.slice(6).map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`text-white ${hoverColor} transition-colors font-medium`}
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    {item.label}
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </nav>
-        )}
       </div>
     </header>
   )

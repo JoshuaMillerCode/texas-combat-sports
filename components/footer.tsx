@@ -34,7 +34,7 @@ export default function Footer() {
           <div className="mb-4 md:mb-0 flex flex-col items-center md:items-start">
             <div className="flex items-center gap-3 mb-2">
               <Image
-                src="https://res.cloudinary.com/dujmomznj/image/upload/f_auto,q_auto:good,w_40,h_40/v1755476673/helmet_ouwsr5.jpg"
+                src="https://res.cloudinary.com/dujmomznj/image/upload/f_auto,q_auto:good,w_120,h_120/v1755476673/helmet_ouwsr5.jpg"
                 alt="Texas Combat Sports Logo"
                 width={40}
                 height={40}
